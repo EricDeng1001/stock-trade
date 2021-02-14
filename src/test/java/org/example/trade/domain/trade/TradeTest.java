@@ -4,7 +4,7 @@ import engineering.ericdeng.architecture.domain.model.DomainEventBus;
 import org.example.trade.domain.market.Price;
 import org.example.trade.domain.market.RegularizedShares;
 import org.example.trade.domain.market.StockCode;
-import org.example.trade.infrastructure.broker.BrokerAgentBrokerCallbackService;
+import org.example.trade.infrastructure.broker.BrokerAgent;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +12,7 @@ class TradeTest {
 
     MockBroker mockBroker = new MockBroker();
 
-    TradeService tradeService = new BrokerAgentBrokerCallbackService(mockBroker, mockBroker);
+    TradeService tradeService = new BrokerAgent(mockBroker, mockBroker);
 
     LogBrokerCallbackHandler brokerCallbackHandler = new LogBrokerCallbackHandler();
 
