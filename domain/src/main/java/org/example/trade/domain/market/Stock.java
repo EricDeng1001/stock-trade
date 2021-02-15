@@ -49,4 +49,16 @@ public class Stock {
         return tradeVolume;
     }
 
+    @Override
+    public String toString() {
+        return "Stock{" +
+            "stockCode=" + stockCode +
+            ", currentPrice=" + currentPrice +
+            ", todayOpenPrice=" + todayOpenPrice +
+            ", yesterdayClosePrice=" + yesterdayClosePrice +
+            ", fiveLevelPrice=" + fiveLevelPrice +
+            ", tradeVolume=" + tradeVolume +
+            '}';
+    }
+
 }

@@ -29,7 +29,7 @@ public class Deal {
 
     @Override
     public String toString() {
-        return "TradeUnit{" +
+        return "Deal{" +
             "shares=" + shares +
             ", price=" + price +
             '}';

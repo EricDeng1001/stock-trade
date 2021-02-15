@@ -20,6 +20,14 @@ public class Account {
         return id.broker;
     }
 
+    @Override
+    public String toString() {
+        return "Account{" +
+            "id=" + id +
+            ", asset=" + asset +
+            '}';
+    }
+
     public static class Id {
 
         private final Broker broker;
@@ -37,6 +45,14 @@ public class Account {
 
         public String brokerId() {
             return brokerId;
+        }
+
+        @Override
+        public String toString() {
+            return "Id{" +
+                "broker=" + broker +
+                ", brokerId='" + brokerId + '\'' +
+                '}';
         }
 
     }

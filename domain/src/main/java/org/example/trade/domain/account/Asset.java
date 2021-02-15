@@ -15,7 +15,7 @@ public class Asset {
     private Money usableCash;
 
     private Money lockedCash;
-    // TODO
+    // TODO 完善持仓部分
 
     public Asset(Id id, Money lockedCash,
                  Map<StockCode, Position> positions, Money usableCash) {

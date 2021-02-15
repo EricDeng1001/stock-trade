@@ -8,6 +8,14 @@ public final class Trade {
 
     private final Deal deal;
 
+    @Override
+    public String toString() {
+        return "Trade{" +
+            "id=" + id +
+            ", deal=" + deal +
+            '}';
+    }
+
     public Trade(Id id, Deal deal) {
         this.id = id;
         this.deal = deal;
@@ -52,7 +60,7 @@ public final class Trade {
         public String toString() {
             return "Id{" +
                 "orderId=" + orderId +
-                ", idByBroker='" + index + '\'' +
+                ", index=" + index +
                 '}';
         }
 

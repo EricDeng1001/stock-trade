@@ -67,7 +67,7 @@ public class Shares implements Comparable<Shares> {
     @Override
     public String toString() {
         return "Shares{" +
-            "value=" + value +
+            value +
             '}';
     }
 

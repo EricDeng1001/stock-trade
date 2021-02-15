@@ -57,7 +57,7 @@ public class Money implements Comparable<Money> {
     @Override
     public String toString() {
         return "Money{" +
-            "v=" + v +
+            v +
             '}';
     }
 

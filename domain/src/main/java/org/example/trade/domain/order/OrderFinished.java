@@ -20,4 +20,11 @@ public final class OrderFinished extends TradeEvent {
         return orderStatus;
     }
 
+    @Override
+    public String toString() {
+        return "OrderFinished{" +
+            "orderStatus=" + orderStatus +
+            '}';
+    }
+
 }

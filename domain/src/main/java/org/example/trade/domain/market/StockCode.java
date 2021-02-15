@@ -2,14 +2,21 @@ package org.example.trade.domain.market;
 
 public class StockCode {
 
-    private final String str;
+    private final String string;
 
-    public StockCode(String str) {
-        this.str = str;
+    public StockCode(String string) {
+        this.string = string;
     }
 
-    public String getStr() {
-        return str;
+    @Override
+    public String toString() {
+        return "StockCode{" +
+            string +
+            '}';
+    }
+
+    public String string() {
+        return string;
     }
 
 }

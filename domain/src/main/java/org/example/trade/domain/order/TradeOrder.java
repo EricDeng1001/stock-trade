@@ -25,6 +25,7 @@ public final class TradeOrder implements DomainEventPublisher<OrderTraded> {
 
     private OrderStatus orderStatus;
 
+    // TODO 优化算法
     private transient Shares traded;
 
     @Rebuild
@@ -99,7 +100,10 @@ public final class TradeOrder implements DomainEventPublisher<OrderTraded> {
         return "TradeOrder{" +
             "id=" + id +
             ", request=" + request +
-            ", tradeResults=" + trades +
+            ", trades=" + trades +
+            ", account=" + account +
+            ", orderStatus=" + orderStatus +
+            ", traded=" + traded +
             '}';
     }
 

@@ -17,4 +17,11 @@ public class TradeEvent extends DomainEvent {
         return orderId;
     }
 
+    @Override
+    public String toString() {
+        return "TradeEvent{" +
+            "orderId=" + orderId +
+            "} " + super.toString();
+    }
+
 }

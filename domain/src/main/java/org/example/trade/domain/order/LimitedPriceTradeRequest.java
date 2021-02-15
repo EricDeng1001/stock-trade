@@ -18,4 +18,11 @@ public final class LimitedPriceTradeRequest extends TradeRequest {
         return targetPrice;
     }
 
+    @Override
+    public String toString() {
+        return "LimitedPriceTradeRequest{" +
+            "targetPrice=" + targetPrice +
+            '}';
+    }
+
 }
