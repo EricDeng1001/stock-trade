@@ -1,6 +1,8 @@
 package org.example.trade.interfaces.input;
 
-public class TradeRequest {
+import java.math.BigDecimal;
+
+public class Order {
 
     private String stockCode;
 
@@ -10,10 +12,9 @@ public class TradeRequest {
 
     private String priceType;
 
-    public TradeRequest() {
-    }
+    private BigDecimal price;
 
-    public TradeRequest(String stockCode, long shares, String tradeSide, String priceType) {
+    public Order(String stockCode, long shares, String tradeSide, String priceType) {
         this.stockCode = stockCode;
         this.shares = shares;
         this.tradeSide = tradeSide;
