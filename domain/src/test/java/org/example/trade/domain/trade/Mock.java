@@ -28,7 +28,7 @@ class Mock extends TradeService implements TradeOrderRepository, MarketInfoServi
     private final Semaphore scheduledTask = new Semaphore(2000);
 
     @Override
-    public boolean applyOrder(TradeOrder o) {
+    public boolean startTrade(TradeOrder o) {
         scheduledTask.acquireUninterruptibly();
         orderMap.put(o.id(), o);
         mockTrading(o);

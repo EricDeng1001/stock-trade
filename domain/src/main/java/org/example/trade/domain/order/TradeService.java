@@ -17,12 +17,18 @@ public abstract class TradeService {
         // TODO 风险控制
         String internalId = UUID.randomUUID().toString();
         TradeOrder order = new TradeOrder(account.id(), internalId, tradeRequest);
-        if (applyOrder(order)) {
+        if (startTrade(order)) {
             order.startTrading();
         }
         return order;
     }
 
-    protected abstract boolean applyOrder(TradeOrder order);
+    /**
+     * 开始交易订单，这一步可能会失败，失败时返回false
+     *
+     * @param order 要交易的订单
+     * @return 是否开始
+     */
+    protected abstract boolean startTrade(TradeOrder order);
 
 }
