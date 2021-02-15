@@ -12,6 +12,7 @@ import org.example.trade.domain.market.Shares;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
 @Entity
 public final class TradeOrder implements DomainEventPublisher<OrderTraded> {
@@ -26,8 +27,9 @@ public final class TradeOrder implements DomainEventPublisher<OrderTraded> {
 
     private OrderStatus orderStatus;
 
-    // TODO 优化算法
     private transient Shares traded;
+
+    private final transient int iterIndex;
 
     @Rebuild
     public TradeOrder(Account.Id account, String id, boolean signedByBroker, OrderStatus orderStatus,
@@ -38,6 +40,8 @@ public final class TradeOrder implements DomainEventPublisher<OrderTraded> {
         this.id = new Id(account.broker(), id, signedByBroker);
         this.request = request;
         this.trades = trades;
+        traded = Shares.ZERO;
+        iterIndex = 0;
     }
 
     @New
@@ -46,27 +50,11 @@ public final class TradeOrder implements DomainEventPublisher<OrderTraded> {
     }
 
     public Shares traded() {
-        Shares traded = Shares.ZERO;
-        for (Trade r : trades) {
-            traded = traded.add(r.shares());
+        ListIterator<Trade> iterator = trades.listIterator(iterIndex);
+        while (iterator.hasNext()) {
+            traded = traded.add(iterator.next().shares());
         }
         return traded;
-    }
-
-    public Id id() {
-        return id;
-    }
-
-    public TradeRequest tradeRequest() {
-        return request;
-    }
-
-    public Shares unTrade() {
-        return request.shares().subtract(traded());
-    }
-
-    public List<Trade> trades() {
-        return trades;
     }
 
     public void startTrading() {
@@ -99,6 +87,22 @@ public final class TradeOrder implements DomainEventPublisher<OrderTraded> {
             new OrderTraded(id, deal, dealtOn)
         );
 
+    }
+
+    public Id id() {
+        return id;
+    }
+
+    public TradeRequest tradeRequest() {
+        return request;
+    }
+
+    public Shares unTrade() {
+        return request.shares().subtract(traded());
+    }
+
+    public List<Trade> trades() {
+        return trades;
     }
 
     @Override
