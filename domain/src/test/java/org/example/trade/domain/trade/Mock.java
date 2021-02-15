@@ -1,10 +1,10 @@
 package org.example.trade.domain.trade;
 
 import org.example.trade.domain.market.*;
-import org.example.trade.domain.order.Deal;
-import org.example.trade.domain.order.TradeOrder;
-import org.example.trade.domain.order.TradeOrderRepository;
-import org.example.trade.domain.order.TradeService;
+import org.example.trade.domain.tradeorder.Deal;
+import org.example.trade.domain.tradeorder.TradeOrder;
+import org.example.trade.domain.tradeorder.TradeOrderRepository;
+import org.example.trade.domain.tradeorder.TradeService;
 
 import java.time.Instant;
 import java.util.Map;

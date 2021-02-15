@@ -3,10 +3,10 @@ package org.example.trade.infrastructure.broker;
 import org.example.trade.domain.market.Broker;
 import org.example.trade.domain.market.Price;
 import org.example.trade.domain.market.Shares;
-import org.example.trade.domain.order.Deal;
-import org.example.trade.domain.order.TradeOrder;
-import org.example.trade.domain.order.TradeOrderRepository;
-import org.example.trade.domain.order.TradeService;
+import org.example.trade.domain.tradeorder.Deal;
+import org.example.trade.domain.tradeorder.TradeOrder;
+import org.example.trade.domain.tradeorder.TradeOrderRepository;
+import org.example.trade.domain.tradeorder.TradeService;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

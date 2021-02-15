@@ -1,4 +1,4 @@
-package org.example.trade.domain.order;
+package org.example.trade.domain.tradeorder;
 
 import java.time.Instant;
 

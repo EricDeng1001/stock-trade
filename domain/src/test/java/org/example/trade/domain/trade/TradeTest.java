@@ -5,7 +5,7 @@ import org.example.trade.domain.account.Account;
 import org.example.trade.domain.market.Price;
 import org.example.trade.domain.market.RegularizedShares;
 import org.example.trade.domain.market.StockCode;
-import org.example.trade.domain.order.*;
+import org.example.trade.domain.tradeorder.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
