@@ -1,6 +1,7 @@
 package org.example.trade.domain.trade;
 
 import org.example.trade.domain.market.*;
+import org.example.trade.domain.order.*;
 import org.example.trade.infrastructure.broker.BrokerCallbackHandler;
 import org.example.trade.infrastructure.broker.BrokerService;
 
@@ -10,13 +11,11 @@ import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
-class MockBroker implements BrokerService, TradeOrderRepository, MarketInfoService {
+class MockBroker extends Broker implements BrokerService, TradeOrderRepository, MarketInfoService {
 
     private static final AtomicLong i = new AtomicLong(0);
 
     private final Map<TradeOrder.Id, TradeOrder> orderMap = new ConcurrentHashMap<>();
-
-    private final Broker mockBroker = new Broker("mock broker");
 
     private final Map<StockCode, Stock> stockMap = new ConcurrentHashMap<>();
 
@@ -28,10 +27,14 @@ class MockBroker implements BrokerService, TradeOrderRepository, MarketInfoServi
 
     private final Semaphore scheduledTask = new Semaphore(2000);
 
+    public MockBroker() {
+        super("mock broker");
+    }
+
     @Override
     public TradeOrder trade(TradeRequest tradeRequest) {
         scheduledTask.acquireUninterruptibly();
-        TradeOrder o = new TradeOrder(mockBroker.id(), String.valueOf(i.getAndIncrement()), tradeRequest);
+        TradeOrder o = new TradeOrder(this, String.valueOf(i.getAndIncrement()), tradeRequest, tradeRequest.account());
         orderMap.put(o.id(), o);
         mockTrading(o);
         return o;

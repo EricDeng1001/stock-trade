@@ -1,6 +1,7 @@
 package org.example.trade.domain.trade;
 
 import engineering.ericdeng.architecture.domain.model.DomainEventSubscriber;
+import org.example.trade.domain.order.OrderTraded;
 
 class LogBrokerCallbackHandler extends DomainEventSubscriber<OrderTraded> {
 

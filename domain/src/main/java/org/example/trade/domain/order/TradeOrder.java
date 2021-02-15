@@ -1,5 +1,6 @@
-package org.example.trade.domain.trade;
+package org.example.trade.domain.order;
 
+import org.example.trade.domain.account.Account;
 import org.example.trade.domain.market.Broker;
 import org.example.trade.domain.market.Shares;
 
@@ -14,20 +15,25 @@ public class TradeOrder {
 
     private final Set<OrderTraded> tradeResults;
 
+    private final Account account;
+
     private OrderStatus orderStatus;
 
     private transient Shares traded;
 
-    public TradeOrder(Broker.Id broker, String brokerId, TradeRequest request,
-                      OrderStatus orderStatus, Set<OrderTraded> tradeResults) {
+    public TradeOrder(Broker broker, String brokerId, TradeRequest request,
+                      OrderStatus orderStatus, Set<OrderTraded> tradeResults,
+                      Account account) {
         this.orderStatus = orderStatus;
+        this.account = account;
         this.id = new Id(broker, brokerId);
         this.request = request;
         this.tradeResults = tradeResults;
     }
 
-    public TradeOrder(Broker.Id broker, String brokerId, TradeRequest request) {
-        this(broker, brokerId, request, OrderStatus.pending, new HashSet<>(8));
+    public TradeOrder(Broker broker, String brokerId, TradeRequest request,
+                      Account account) {
+        this(broker, brokerId, request, OrderStatus.pending, new HashSet<>(8), account);
     }
 
     public Shares traded() {
@@ -84,13 +90,17 @@ public class TradeOrder {
             '}';
     }
 
+    public Account account() {
+        return account;
+    }
+
     public static class Id {
 
-        private final Broker.Id broker;
+        private final Broker broker;
 
         private final String idByBroker;
 
-        public Id(Broker.Id broker, String idByBroker) {
+        public Id(Broker broker, String idByBroker) {
             this.broker = broker;
             this.idByBroker = idByBroker;
         }
@@ -99,7 +109,7 @@ public class TradeOrder {
             return idByBroker;
         }
 
-        public Broker.Id broker() {
+        public Broker broker() {
             return broker;
         }
 

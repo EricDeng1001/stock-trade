@@ -1,7 +1,7 @@
 package org.example.trade.infrastructure.broker;
 
 import engineering.ericdeng.architecture.domain.model.DomainEventBus;
-import org.example.trade.domain.trade.*;
+import org.example.trade.domain.order.*;
 
 public class BrokerAgent implements TradeService, BrokerCallbackHandler {
 

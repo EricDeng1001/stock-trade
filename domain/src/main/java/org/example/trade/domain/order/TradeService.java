@@ -1,4 +1,4 @@
-package org.example.trade.domain.trade;
+package org.example.trade.domain.order;
 
 import engineering.ericdeng.architecture.domain.model.DomainEventPublisher;
 

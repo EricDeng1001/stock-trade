@@ -1,7 +1,7 @@
 package org.example.trade.infrastructure.broker;
 
-import org.example.trade.domain.trade.TradeOrder;
-import org.example.trade.domain.trade.TradeRequest;
+import org.example.trade.domain.order.TradeOrder;
+import org.example.trade.domain.order.TradeRequest;
 
 public interface BrokerService {
 
