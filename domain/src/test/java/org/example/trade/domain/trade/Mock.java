@@ -1,17 +1,18 @@
 package org.example.trade.domain.trade;
 
 import org.example.trade.domain.market.*;
-import org.example.trade.domain.order.*;
-import org.example.trade.infrastructure.broker.BrokerCallbackHandler;
-import org.example.trade.infrastructure.broker.BrokerService;
+import org.example.trade.domain.order.BrokerAgentRouter;
+import org.example.trade.domain.order.Deal;
+import org.example.trade.domain.order.TradeOrder;
+import org.example.trade.domain.order.TradeOrderRepository;
+import org.example.trade.infrastructure.broker.BrokerAgent;
 
 import java.util.Map;
-import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
-class MockBroker extends Broker implements BrokerService, TradeOrderRepository, MarketInfoService {
+class Mock extends Broker implements BrokerAgent, TradeOrderRepository, MarketInfoService, BrokerAgentRouter {
 
     private static final AtomicLong i = new AtomicLong(0);
 
@@ -21,28 +22,21 @@ class MockBroker extends Broker implements BrokerService, TradeOrderRepository, 
 
     private final ThreadLocalRandom random = ThreadLocalRandom.current();
 
-    private final Queue<BrokerCallbackHandler> brokerCallbackHandlers = new ConcurrentLinkedQueue<>();
-
     private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
 
     private final Semaphore scheduledTask = new Semaphore(2000);
 
-    public MockBroker() {
+    public Mock() {
         super("mock broker");
     }
 
     @Override
-    public TradeOrder trade(TradeRequest tradeRequest) {
+    public boolean sendOrder(TradeOrder o) {
         scheduledTask.acquireUninterruptibly();
-        TradeOrder o = new TradeOrder(this, String.valueOf(i.getAndIncrement()), tradeRequest, tradeRequest.account());
         orderMap.put(o.id(), o);
         mockTrading(o);
-        return o;
-    }
-
-    @Override
-    public void register(BrokerCallbackHandler brokerCallbackHandler) {
-        brokerCallbackHandlers.add(brokerCallbackHandler);
+        o.id().signBrokerId(UUID.randomUUID().toString());
+        return true;
     }
 
     @Override
@@ -88,22 +82,21 @@ class MockBroker extends Broker implements BrokerService, TradeOrderRepository, 
         scheduledTask.acquireUninterruptibly(2000);
     }
 
+    @Override
+    public BrokerAgent get(Broker broker) {
+        return this;
+    }
+
     private void mockTrading(TradeOrder o) {
         scheduledExecutorService.schedule(() -> {
-            for (BrokerCallbackHandler h : brokerCallbackHandlers) {
-                Shares unTrade = o.unTrade();
-                Shares mockTrade = randomTake(unTrade);
-                OrderTraded orderTraded = new OrderTraded(o.id(), UUID.randomUUID().toString(),
-                                                          new Deal(mockTrade,
-                                                                   queryStock(o.tradeRequest().stockCode())
-                                                                       .currentPrice()));
-                h.onTrade(orderTraded);
-                if (!mockTrade.equals(unTrade)) {
-                    scheduledTask.acquireUninterruptibly();
-                    mockTrading(o);
-                }
-                scheduledTask.release();
+            Shares unTrade = o.unTrade();
+            Shares mockTrade = randomTake(unTrade);
+            o.makeDeal(new Deal(mockTrade, queryStock(o.tradeRequest().stockCode()).currentPrice()));
+            if (!mockTrade.equals(unTrade)) {
+                scheduledTask.acquireUninterruptibly();
+                mockTrading(o);
             }
+            scheduledTask.release();
         }, random.nextLong(10, 1000), TimeUnit.MILLISECONDS);
     }
 

@@ -12,9 +12,12 @@ public class Account {
         this.id = new Id(broker, brokerId);
     }
 
-
     public Id id() {
         return id;
+    }
+
+    public Broker broker() {
+        return id.broker;
     }
 
     public static class Id {

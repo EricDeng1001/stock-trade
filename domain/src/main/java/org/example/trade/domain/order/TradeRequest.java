@@ -1,6 +1,5 @@
 package org.example.trade.domain.order;
 
-import org.example.trade.domain.account.Account;
 import org.example.trade.domain.market.RegularizedShares;
 import org.example.trade.domain.market.StockCode;
 
@@ -14,15 +13,12 @@ public class TradeRequest {
 
     private final PriceType priceType;
 
-    private final Account account;
-
     protected TradeRequest(StockCode stockCode, RegularizedShares shares, TradeSide tradeSide,
-                           PriceType priceType, Account account) {
+                           PriceType priceType) {
         this.stockCode = stockCode;
         this.shares = shares;
         this.tradeSide = tradeSide;
         this.priceType = priceType;
-        this.account = account;
     }
 
     public StockCode stockCode() {
@@ -49,10 +45,6 @@ public class TradeRequest {
             ", tradeSide=" + tradeSide +
             ", priceType=" + priceType +
             '}';
-    }
-
-    public Account account() {
-        return account;
     }
 
 }

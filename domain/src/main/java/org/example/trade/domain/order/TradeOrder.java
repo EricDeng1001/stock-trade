@@ -1,45 +1,52 @@
 package org.example.trade.domain.order;
 
+import engineering.ericdeng.architecture.domain.model.DomainEventBus;
+import engineering.ericdeng.architecture.domain.model.DomainEventPublisher;
+import engineering.ericdeng.architecture.domain.model.annotation.Entity;
+import engineering.ericdeng.architecture.domain.model.annotation.New;
+import engineering.ericdeng.architecture.domain.model.annotation.Rebuild;
 import org.example.trade.domain.account.Account;
 import org.example.trade.domain.market.Broker;
 import org.example.trade.domain.market.Shares;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
-public class TradeOrder {
+@Entity
+public final class TradeOrder implements DomainEventPublisher<OrderTraded> {
 
     private final Id id;
 
     private final TradeRequest request;
 
-    private final Set<OrderTraded> tradeResults;
+    private final List<Trade> trades;
 
-    private final Account account;
+    private final Account.Id account;
 
     private OrderStatus orderStatus;
 
     private transient Shares traded;
 
-    public TradeOrder(Broker broker, String brokerId, TradeRequest request,
-                      OrderStatus orderStatus, Set<OrderTraded> tradeResults,
-                      Account account) {
+    @Rebuild
+    public TradeOrder(Account.Id account, String id, boolean signedByBroker, OrderStatus orderStatus,
+                      List<Trade> trades,
+                      TradeRequest request) {
         this.orderStatus = orderStatus;
         this.account = account;
-        this.id = new Id(broker, brokerId);
+        this.id = new Id(account.broker(), id, signedByBroker);
         this.request = request;
-        this.tradeResults = tradeResults;
+        this.trades = trades;
     }
 
-    public TradeOrder(Broker broker, String brokerId, TradeRequest request,
-                      Account account) {
-        this(broker, brokerId, request, OrderStatus.pending, new HashSet<>(8), account);
+    @New
+    public TradeOrder(Account.Id account, String brokerId, TradeRequest request) {
+        this(account, brokerId, false, OrderStatus.pending, new ArrayList<>(8), request);
     }
 
     public Shares traded() {
         Shares traded = Shares.ZERO;
-        for (OrderTraded r : tradeResults) {
-            traded = traded.add(r.deal().shares());
+        for (Trade r : trades) {
+            traded = traded.add(r.shares());
         }
         return traded;
     }
@@ -56,8 +63,8 @@ public class TradeOrder {
         return request.shares().subtract(traded());
     }
 
-    public Set<OrderTraded> tradeResults() {
-        return tradeResults;
+    public List<Trade> trades() {
+        return trades;
     }
 
     /**
@@ -72,13 +79,19 @@ public class TradeOrder {
         } else {
             orderStatus = OrderStatus.overflow;
         }
+        DomainEventBus.instance().publish(new OrderFinished(id, orderStatus));
     }
 
-    public void attachTrade(OrderTraded orderTraded) {
+    public void makeDeal(Deal deal) {
         if (orderStatus != OrderStatus.pending) {
-            throw new IllegalStateException("Can't attach trade to an order which is not in pending state");
+            throw new IllegalStateException("Can't make new deal to an order which is not in pending state");
         }
-        tradeResults.add(orderTraded);
+        Trade trade = new Trade(id, trades.size(), deal);
+        trades.add(trade);
+        DomainEventBus.instance().publish(
+            new OrderTraded(id, deal)
+        );
+
     }
 
     @Override
@@ -86,38 +99,50 @@ public class TradeOrder {
         return "TradeOrder{" +
             "id=" + id +
             ", request=" + request +
-            ", tradeResults=" + tradeResults +
+            ", tradeResults=" + trades +
             '}';
     }
 
-    public Account account() {
+    public Account.Id account() {
         return account;
     }
 
     public static class Id {
 
+        // TODO 添加交易日
         private final Broker broker;
 
-        private final String idByBroker;
+        private String id;
 
-        public Id(Broker broker, String idByBroker) {
+        private boolean signedByBroker;
+
+        public Id(Broker broker, String id, boolean signedByBroker) {
             this.broker = broker;
-            this.idByBroker = idByBroker;
+            this.id = id;
+            this.signedByBroker = signedByBroker;
         }
 
         public String brokerId() {
-            return idByBroker;
+            return id;
         }
 
         public Broker broker() {
             return broker;
         }
 
+        public void signBrokerId(String id) {
+            if (signedByBroker) {
+                throw new IllegalStateException("order already be signed a broker id!");
+            }
+            signedByBroker = true;
+            this.id = id;
+        }
+
         @Override
         public String toString() {
             return "Id{" +
                 "broker=" + broker +
-                ", idByBroker='" + idByBroker + '\'' +
+                ", idByBroker='" + id + '\'' +
                 '}';
         }
 

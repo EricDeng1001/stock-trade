@@ -2,10 +2,22 @@ package org.example.trade.domain.order;
 
 import java.time.Instant;
 
-public class OrderFinished extends TradeEvent {
+public final class OrderFinished extends TradeEvent {
 
-    protected OrderFinished(Instant occurredOn, TradeOrder.Id id, String idByBroker) {
-        super(occurredOn, id, idByBroker);
+    private final OrderStatus orderStatus;
+
+    protected OrderFinished(Instant occurredOn, TradeOrder.Id id,
+                            OrderStatus orderStatus) {
+        super(occurredOn, id);
+        this.orderStatus = orderStatus;
+    }
+
+    public OrderFinished(TradeOrder.Id id, OrderStatus orderStatus) {
+        this(Instant.now(), id, orderStatus);
+    }
+
+    public OrderStatus orderStatus() {
+        return orderStatus;
     }
 
 }

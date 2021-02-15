@@ -6,21 +6,20 @@ import org.example.trade.domain.market.Price;
 import org.example.trade.domain.market.RegularizedShares;
 import org.example.trade.domain.market.StockCode;
 import org.example.trade.domain.order.*;
-import org.example.trade.infrastructure.broker.BrokerAgent;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class TradeTest {
 
-    MockBroker mockBroker = new MockBroker();
+    Mock mock = new Mock();
 
-    TradeService tradeService = new BrokerAgent(mockBroker, mockBroker);
+    TradeService tradeService = new TradeService(mock);
 
     LogBrokerCallbackHandler brokerCallbackHandler = new LogBrokerCallbackHandler();
 
     TradeRequest tradeRequest;
 
-    Account testAccount = new Account(mockBroker, "testAccount");
+    Account testAccount = new Account(mock, "testAccount");
 
     @Test
     @DisplayName("交易领域模型接口联通性测试")
@@ -30,9 +29,9 @@ class TradeTest {
             new StockCode("000001.SZ"),
             new RegularizedShares(1000),
             TradeSide.BUY,
-            new Price(1), testAccount);
-        TradeOrder x = tradeService.trade(tradeRequest);
-        mockBroker.shutdown();
+            new Price(1));
+        TradeOrder x = tradeService.applyTo(tradeRequest, testAccount);
+        mock.shutdown();
         System.out.println(x);
     }
 
