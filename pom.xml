@@ -44,4 +44,20 @@
     </dependency>
   </dependencies>
 
+  <repositories>
+    <repository>
+      <id>techfin-infrastructure-group</id>
+      <url>http://maven.techfin.ai/repository/techfin-infrastructure-group/</url>
+    </repository>
+  </repositories>
+  <distributionManagement>
+    <snapshotRepository>
+      <id>techfin-infrastructure-snapshots</id>
+      <url>http://maven.techfin.ai/repository/techfin-infrastructure-snapshots/</url>
+    </snapshotRepository>
+    <repository>
+      <id>techfin-infrastructure-releases</id>
+      <url>http://maven.techfin.ai/repository/techfin-infrastructure-releases/</url>
+    </repository>
+  </distributionManagement>
 </project>
