@@ -31,5 +31,4 @@ class TradeTest {
         mockBroker.shutdown();
         System.out.println(x);
     }
-
 }

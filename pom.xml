@@ -8,6 +8,11 @@
   <artifactId>trade</artifactId>
   <packaging>pom</packaging>
   <version>1.0-SNAPSHOT</version>
+  <modules>
+    <module>domain</module>
+    <module>application</module>
+    <module>interface</module>
+  </modules>
 
   <properties>
     <maven.compiler.target>15</maven.compiler.target>
