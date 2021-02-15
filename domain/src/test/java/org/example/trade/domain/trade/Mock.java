@@ -6,6 +6,7 @@ import org.example.trade.domain.order.TradeOrder;
 import org.example.trade.domain.order.TradeOrderRepository;
 import org.example.trade.domain.order.TradeService;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.*;
@@ -87,7 +88,7 @@ class Mock extends TradeService implements TradeOrderRepository, MarketInfoServi
         scheduledExecutorService.schedule(() -> {
             Shares unTrade = o.unTrade();
             Shares mockTrade = randomTake(unTrade);
-            o.makeDeal(new Deal(mockTrade, queryStock(o.tradeRequest().stockCode()).currentPrice()));
+            o.makeDeal(new Deal(mockTrade, queryStock(o.tradeRequest().stockCode()).currentPrice()), Instant.now());
             if (!mockTrade.equals(unTrade)) {
                 scheduledTask.acquireUninterruptibly();
                 mockTrading(o);

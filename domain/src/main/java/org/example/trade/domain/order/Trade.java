@@ -2,11 +2,25 @@ package org.example.trade.domain.order;
 
 import org.example.trade.domain.market.Shares;
 
+import java.time.Instant;
+
 public final class Trade {
 
     private final Id id;
 
     private final Deal deal;
+
+    private final Instant dealtOn;
+
+    public Trade(Id id, Deal deal, Instant dealtOn) {
+        this.id = id;
+        this.deal = deal;
+        this.dealtOn = dealtOn;
+    }
+
+    public Trade(TradeOrder.Id id, int index, Deal deal, Instant dealtOn) {
+        this(new Id(id, index), deal, dealtOn);
+    }
 
     @Override
     public String toString() {
@@ -14,15 +28,6 @@ public final class Trade {
             "id=" + id +
             ", deal=" + deal +
             '}';
-    }
-
-    public Trade(Id id, Deal deal) {
-        this.id = id;
-        this.deal = deal;
-    }
-
-    public Trade(TradeOrder.Id id, int index, Deal deal) {
-        this(new Id(id, index), deal);
     }
 
     public Id id() {

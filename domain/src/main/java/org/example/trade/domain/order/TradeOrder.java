@@ -9,6 +9,7 @@ import org.example.trade.domain.account.Account;
 import org.example.trade.domain.market.Broker;
 import org.example.trade.domain.market.Shares;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,14 +89,14 @@ public final class TradeOrder implements DomainEventPublisher<OrderTraded> {
         DomainEventBus.instance().publish(new OrderFinished(id, orderStatus));
     }
 
-    public void makeDeal(Deal deal) {
+    public void makeDeal(Deal deal, Instant dealtOn) {
         if (orderStatus != OrderStatus.pending) {
             throw new IllegalStateException("Can't make new deal to an order which is not in pending state");
         }
-        Trade trade = new Trade(id, trades.size(), deal);
+        Trade trade = new Trade(id, trades.size(), deal, dealtOn);
         trades.add(trade);
         DomainEventBus.instance().publish(
-            new OrderTraded(id, deal)
+            new OrderTraded(id, deal, dealtOn)
         );
 
     }
