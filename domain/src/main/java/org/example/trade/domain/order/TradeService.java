@@ -17,8 +17,9 @@ public abstract class TradeService {
         // TODO 风险控制
         String internalId = UUID.randomUUID().toString();
         TradeOrder order = new TradeOrder(account.id(), internalId, tradeRequest);
-        // TODO 增加下单失败策略
-        applyOrder(order);
+        if (applyOrder(order)) {
+            order.startTrading();
+        }
         return order;
     }
 

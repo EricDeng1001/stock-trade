@@ -41,7 +41,7 @@ public final class TradeOrder implements DomainEventPublisher<OrderTraded> {
 
     @New
     public TradeOrder(Account.Id account, String brokerId, TradeRequest request) {
-        this(account, brokerId, false, OrderStatus.pending, new ArrayList<>(8), request);
+        this(account, brokerId, false, OrderStatus.created, new ArrayList<>(8), request);
     }
 
     public Shares traded() {
@@ -66,6 +66,11 @@ public final class TradeOrder implements DomainEventPublisher<OrderTraded> {
 
     public List<Trade> trades() {
         return trades;
+    }
+
+    public void startTrading() {
+        if (orderStatus != OrderStatus.created) { throw new IllegalStateException("只有从未挂单的订单可以开始交易"); }
+        orderStatus = OrderStatus.pending;
     }
 
     /**
