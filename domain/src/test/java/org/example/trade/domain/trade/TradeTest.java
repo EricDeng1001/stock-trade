@@ -13,13 +13,13 @@ class TradeTest {
 
     Mock mock = new Mock();
 
-    TradeService tradeService = new TradeService(mock);
+    TradeService tradeService = mock;
 
     LogBrokerCallbackHandler brokerCallbackHandler = new LogBrokerCallbackHandler();
 
     TradeRequest tradeRequest;
 
-    Account testAccount = new Account(mock, "testAccount");
+    Account testAccount = new Account(mock.broker(), "testAccount");
 
     @Test
     @DisplayName("交易领域模型接口联通性测试")

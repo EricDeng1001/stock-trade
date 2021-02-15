@@ -1,20 +1,21 @@
 package org.example.trade.domain.trade;
 
 import org.example.trade.domain.market.*;
-import org.example.trade.domain.order.BrokerAgentRouter;
 import org.example.trade.domain.order.Deal;
 import org.example.trade.domain.order.TradeOrder;
 import org.example.trade.domain.order.TradeOrderRepository;
-import org.example.trade.infrastructure.broker.BrokerAgent;
+import org.example.trade.domain.order.TradeService;
 
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
-class Mock extends Broker implements BrokerAgent, TradeOrderRepository, MarketInfoService, BrokerAgentRouter {
+class Mock extends TradeService implements TradeOrderRepository, MarketInfoService {
 
     private static final AtomicLong i = new AtomicLong(0);
+
+    private final Broker broker = new Broker("mock broker");
 
     private final Map<TradeOrder.Id, TradeOrder> orderMap = new ConcurrentHashMap<>();
 
@@ -26,12 +27,8 @@ class Mock extends Broker implements BrokerAgent, TradeOrderRepository, MarketIn
 
     private final Semaphore scheduledTask = new Semaphore(2000);
 
-    public Mock() {
-        super("mock broker");
-    }
-
     @Override
-    public boolean sendOrder(TradeOrder o) {
+    public boolean applyOrder(TradeOrder o) {
         scheduledTask.acquireUninterruptibly();
         orderMap.put(o.id(), o);
         mockTrading(o);
@@ -82,9 +79,8 @@ class Mock extends Broker implements BrokerAgent, TradeOrderRepository, MarketIn
         scheduledTask.acquireUninterruptibly(2000);
     }
 
-    @Override
-    public BrokerAgent get(Broker broker) {
-        return this;
+    public Broker broker() {
+        return broker;
     }
 
     private void mockTrading(TradeOrder o) {
