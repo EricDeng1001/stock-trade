@@ -23,7 +23,7 @@ public class Deal {
         return price;
     }
 
-    public Money tradeValue() {
+    public Money value() {
         return price.multiply(shares);
     }
 

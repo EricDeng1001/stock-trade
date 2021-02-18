@@ -5,13 +5,13 @@ import org.example.trade.domain.market.StockCode;
 
 public class TradeRequest {
 
-    private final StockCode stockCode;
+    protected final StockCode stockCode;
 
-    private final RegularizedShares shares;
+    protected final RegularizedShares shares;
 
-    private final TradeSide tradeSide;
+    protected final TradeSide tradeSide;
 
-    private final PriceType priceType;
+    protected final PriceType priceType;
 
     protected TradeRequest(StockCode stockCode, RegularizedShares shares, TradeSide tradeSide,
                            PriceType priceType) {

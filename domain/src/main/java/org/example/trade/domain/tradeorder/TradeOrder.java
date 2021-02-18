@@ -6,6 +6,7 @@ import engineering.ericdeng.architecture.domain.model.annotation.Entity;
 import engineering.ericdeng.architecture.domain.model.annotation.New;
 import engineering.ericdeng.architecture.domain.model.annotation.Rebuild;
 import org.example.trade.domain.account.Account;
+import org.example.trade.domain.account.AssetLocker;
 import org.example.trade.domain.market.Broker;
 import org.example.trade.domain.market.Shares;
 
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 @Entity
-public final class TradeOrder implements DomainEventPublisher<OrderTraded> {
+public final class TradeOrder extends AssetLocker implements DomainEventPublisher<OrderTraded> {
 
     private final Id id;
 
@@ -120,6 +121,11 @@ public final class TradeOrder implements DomainEventPublisher<OrderTraded> {
 
     public Account.Id account() {
         return account;
+    }
+
+    @Override
+    protected String assetLockerTrackId() {
+        return id.toString();
     }
 
     public static class Id {

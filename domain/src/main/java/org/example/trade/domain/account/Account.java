@@ -1,6 +1,7 @@
 package org.example.trade.domain.account;
 
 import org.example.trade.domain.market.Broker;
+import org.example.trade.domain.tradeorder.TradeOrder;
 
 public class Account {
 
@@ -42,6 +43,14 @@ public class Account {
 
     public void changePassword(String password) {
         this.password = password;
+    }
+
+    public Asset.CashLock getCashLock(TradeOrder tradeOrder) {
+        return asset.getCashLock(tradeOrder);
+    }
+
+    public Asset.SharesLock getSharesLock(TradeOrder tradeOrder) {
+        return asset.getSharesLock(tradeOrder);
     }
 
     public static class Id {
