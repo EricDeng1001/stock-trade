@@ -6,10 +6,22 @@ public class Account {
 
     private final Id id;
 
-    private Asset asset;
+    private final Asset asset;
 
-    public Account(Broker broker, String brokerId) {
+    private String password;
+
+    public Account(Broker broker, String brokerId, String password, Asset.Builder builder) {
         this.id = new Id(broker, brokerId);
+        this.asset = builder.withId(id).build();
+        this.password = password;
+    }
+
+    public String password() {
+        return password;
+    }
+
+    public Asset asset() {
+        return asset;
     }
 
     public Id id() {
@@ -26,6 +38,10 @@ public class Account {
             "id=" + id +
             ", asset=" + asset +
             '}';
+    }
+
+    public void changePassword(String password) {
+        this.password = password;
     }
 
     public static class Id {

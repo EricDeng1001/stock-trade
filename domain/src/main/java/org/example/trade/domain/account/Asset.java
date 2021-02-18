@@ -1,24 +1,23 @@
 package org.example.trade.domain.account;
 
 import org.example.trade.domain.market.Money;
+import org.example.trade.domain.market.Shares;
 import org.example.trade.domain.market.StockCode;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
 public class Asset {
 
-    private final Id id;
+    private final Account.Id id;
 
-    private final Map<StockCode, Position> positions;
+    private final Map<StockCode, Shares> positions;
 
     private Money usableCash;
 
     private Money lockedCash;
-    // TODO 完善持仓部分
 
-    public Asset(Id id, Money lockedCash,
-                 Map<StockCode, Position> positions, Money usableCash) {
+    Asset(Account.Id id, Money lockedCash,
+          Map<StockCode, Shares> positions, Money usableCash) {
         this.id = id;
         this.lockedCash = lockedCash;
         this.positions = positions;
@@ -46,37 +45,49 @@ public class Asset {
         return true;
     }
 
-    public Map<StockCode, Position> positions() {
+    public Map<StockCode, Shares> positions() {
         return positions;
     }
 
-    public Id id() {
+    public Account.Id id() {
         return id;
     }
 
-    public Account account() {
-        return id.account;
-    }
+    public static final class Builder {
 
-    public static class Id {
+        private Account.Id id;
 
-        private final Account account;
+        private Map<StockCode, Shares> positions;
 
-        public Id(@NotNull Account account) {
-            this.account = account;
+        private Money usableCash;
+
+        private Money lockedCash;
+
+        private Builder() {}
+
+        public static Builder anAsset() { return new Builder(); }
+
+        public Builder withId(Account.Id id) {
+            this.id = id;
+            return this;
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) { return true; }
-            if (o == null || getClass() != o.getClass()) { return false; }
-            return account.equals(((Id) o).account);
+        public Builder withPositions(Map<StockCode, Shares> positions) {
+            this.positions = positions;
+            return this;
         }
 
-        @Override
-        public int hashCode() {
-            return account.hashCode();
+        public Builder withUsableCash(Money usableCash) {
+            this.usableCash = usableCash;
+            return this;
         }
+
+        public Builder withLockedCash(Money lockedCash) {
+            this.lockedCash = lockedCash;
+            return this;
+        }
+
+        public Asset build() { return new Asset(id, lockedCash, positions, usableCash); }
 
     }
 
