@@ -54,26 +54,26 @@ class Mock extends TradeService implements TradeOrderRepository, MarketInfoServi
                              stockCode1 ->
                                  new Stock(
                                      stockCode1,
-                                     new Price(random.nextInt()),
-                                     new Price(random.nextInt()),
-                                     new Price(random.nextInt()),
+                                     new Price("2.2"),
+                                     new Price("2.2"),
+                                     new Price("2.2"),
                                      new FiveLevelPrice(
                                          new Price[]{
-                                             new Price(random.nextInt()),
-                                             new Price(random.nextInt()),
-                                             new Price(random.nextInt()),
-                                             new Price(random.nextInt()),
-                                             new Price(random.nextInt())
+                                             new Price("2.0"),
+                                             new Price("1.5"),
+                                             new Price("1.2"),
+                                             new Price("1.0"),
+                                             new Price("0.5")
                                          },
                                          new Price[]{
-                                             new Price(random.nextInt()),
-                                             new Price(random.nextInt()),
-                                             new Price(random.nextInt()),
-                                             new Price(random.nextInt()),
-                                             new Price(random.nextInt())
+                                             new Price("2.5"),
+                                             new Price("3.0"),
+                                             new Price("3.5"),
+                                             new Price("4.0"),
+                                             new Price("5.0")
                                          }
                                      ),
-                                     new Shares(random.nextInt())));
+                                     new Shares(30000000)));
     }
 
     public void shutdown() {
@@ -103,8 +103,7 @@ class Mock extends TradeService implements TradeOrderRepository, MarketInfoServi
         if (bound < 100) {
             x = bound;
         } else {
-            x = random.nextInt(RegularizedShares.RS100.value().intValue(),
-                               bound);
+            x = random.nextInt(RegularizedShares.RS100.value().intValue(), bound);
         }
         return new Shares(x);
     }
