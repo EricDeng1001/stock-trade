@@ -29,7 +29,7 @@ public final class TradeOrder implements DomainEventPublisher<OrderTraded> {
 
     private transient Shares traded;
 
-    private final transient int iterIndex;
+    private transient int iterIndex;
 
     @Rebuild
     public TradeOrder(Account.Id account, String id, boolean signedByBroker, OrderStatus orderStatus,
@@ -54,6 +54,7 @@ public final class TradeOrder implements DomainEventPublisher<OrderTraded> {
         while (iterator.hasNext()) {
             traded = traded.add(iterator.next().shares());
         }
+        iterIndex = iterator.nextIndex();
         return traded;
     }
 
