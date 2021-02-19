@@ -2,35 +2,35 @@ package org.example.trade.domain.market;
 
 public class Stock {
 
-    private final StockCode stockCode;
+    private final SecurityCode securityCode;
 
-    private final Price currentPrice;
+    private final Price lastPrice;
 
     private final Price todayOpenPrice;
 
-    private final Price yesterdayClosePrice;
+    private final Price lastClosePrice;
 
-    private final FiveLevelPrice fiveLevelPrice;
+    private final LevelPrice levelPrice;
 
     private final Shares tradeVolume;
 
-    public Stock(StockCode stockCode, Price currentPrice, Price todayOpenPrice,
-                 Price yesterdayClosePrice, FiveLevelPrice fiveLevelPrice,
+    public Stock(SecurityCode securityCode, Price lastPrice, Price todayOpenPrice,
+                 Price lastClosePrice, LevelPrice levelPrice,
                  Shares tradeVolume) {
-        this.stockCode = stockCode;
-        this.currentPrice = currentPrice;
+        this.securityCode = securityCode;
+        this.lastPrice = lastPrice;
         this.todayOpenPrice = todayOpenPrice;
-        this.yesterdayClosePrice = yesterdayClosePrice;
-        this.fiveLevelPrice = fiveLevelPrice;
+        this.lastClosePrice = lastClosePrice;
+        this.levelPrice = levelPrice;
         this.tradeVolume = tradeVolume;
     }
 
-    public StockCode stockCode() {
-        return stockCode;
+    public SecurityCode stockCode() {
+        return securityCode;
     }
 
     public Price currentPrice() {
-        return currentPrice;
+        return lastPrice;
     }
 
     public Price todayOpenPrice() {
@@ -38,11 +38,11 @@ public class Stock {
     }
 
     public Price yesterdayClosePrice() {
-        return yesterdayClosePrice;
+        return lastClosePrice;
     }
 
-    public FiveLevelPrice fiveLevelPrice() {
-        return fiveLevelPrice;
+    public LevelPrice fiveLevelPrice() {
+        return levelPrice;
     }
 
     public Shares tradeVolume() {
@@ -52,11 +52,11 @@ public class Stock {
     @Override
     public String toString() {
         return "Stock{" +
-            "stockCode=" + stockCode +
-            ", currentPrice=" + currentPrice +
+            "stockCode=" + securityCode +
+            ", currentPrice=" + lastPrice +
             ", todayOpenPrice=" + todayOpenPrice +
-            ", yesterdayClosePrice=" + yesterdayClosePrice +
-            ", fiveLevelPrice=" + fiveLevelPrice +
+            ", yesterdayClosePrice=" + lastClosePrice +
+            ", fiveLevelPrice=" + levelPrice +
             ", tradeVolume=" + tradeVolume +
             '}';
     }

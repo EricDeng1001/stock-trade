@@ -1,10 +1,10 @@
 package org.example.trade.domain.market;
 
-public class StockCode {
+public class SecurityCode {
 
     private final String string;
 
-    public StockCode(String string) {
+    public SecurityCode(String string) {
         this.string = string;
     }
 

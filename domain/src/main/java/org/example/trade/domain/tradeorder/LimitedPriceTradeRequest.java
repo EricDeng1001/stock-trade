@@ -3,15 +3,15 @@ package org.example.trade.domain.tradeorder;
 import org.example.trade.domain.market.Money;
 import org.example.trade.domain.market.Price;
 import org.example.trade.domain.market.RegularizedShares;
-import org.example.trade.domain.market.StockCode;
+import org.example.trade.domain.market.SecurityCode;
 
 public final class LimitedPriceTradeRequest extends TradeRequest {
 
     private final Price targetPrice;
 
-    public LimitedPriceTradeRequest(StockCode stockCode,
+    public LimitedPriceTradeRequest(SecurityCode securityCode,
                                     RegularizedShares shares, TradeSide tradeSide, Price targetPrice) {
-        super(stockCode, shares, tradeSide, PriceType.LIMITED);
+        super(securityCode, shares, tradeSide, PriceType.LIMITED);
         this.targetPrice = targetPrice;
     }
 

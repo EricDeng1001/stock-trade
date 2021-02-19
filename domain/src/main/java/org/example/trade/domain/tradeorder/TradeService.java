@@ -1,14 +1,14 @@
 package org.example.trade.domain.tradeorder;
 
-import engineering.ericdeng.architecture.domain.model.DomainEventSubscriber;
 import org.example.trade.domain.account.Account;
 import org.example.trade.domain.account.AccountRepository;
 import org.example.trade.domain.account.Asset;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Instant;
 import java.util.UUID;
 
-public abstract class TradeService extends DomainEventSubscriber<TradeEvent> {
+public abstract class TradeService {
 
     protected final TradeOrderRepository tradeOrderRepository;
 
@@ -46,37 +46,37 @@ public abstract class TradeService extends DomainEventSubscriber<TradeEvent> {
                 return makeOrderAndRun(tradeRequest, account);
             }
         } else {
-            if (asset.cantLock(tradeRequest.stockCode, tradeRequest.shares)) {
+            if (asset.cantLock(tradeRequest.securityCode, tradeRequest.shares)) {
                 throw new TradeCantNotBeDoneException("该账户下没有足够的股票满足卖出请求");
             }
             TradeOrder order = makeOrderAndRun(tradeRequest, account);
-            asset.lockShares(tradeRequest.stockCode, tradeRequest.shares, order);
+            asset.lockShares(tradeRequest.securityCode, tradeRequest.shares, order);
             return order;
         }
     }
 
-    @Override
-    public void handle(TradeEvent tradeEvent) {
-        TradeOrder.Id orderId = tradeEvent.orderId();
-        TradeOrder tradeOrder = tradeOrderRepository.findById(orderId);
+    public void makeDeal(TradeOrder tradeOrder, Deal deal, Instant time) {
         Account account = accountRepository.findById(tradeOrder.account());
-        if (tradeEvent instanceof OrderTraded) {
-            if (tradeOrder.tradeRequest().tradeSide() == TradeSide.BUY) {
-                Asset.CashLock cashLock = account.getCashLock(tradeOrder);
-                cashLock.consume(((OrderTraded) tradeEvent).deal().value());
-            } else {
-                Asset.SharesLock sharesLock = account.getSharesLock(tradeOrder);
-                sharesLock.consume(((OrderTraded) tradeEvent).deal().shares());
-            }
-        } else if (tradeEvent instanceof OrderFinished) {
-            if (tradeOrder.tradeRequest().tradeSide() == TradeSide.BUY) {
-                Asset.CashLock cashLock = account.getCashLock(tradeOrder);
-                cashLock.dispose();
-            } else {
-                Asset.SharesLock sharesLock = account.getSharesLock(tradeOrder);
-                sharesLock.dispose();
-            }
+        if (tradeOrder.tradeRequest().tradeSide() == TradeSide.BUY) {
+            Asset.CashLock cashLock = account.getCashLock(tradeOrder);
+            cashLock.consume(deal.value());
+        } else {
+            Asset.SharesLock sharesLock = account.getSharesLock(tradeOrder);
+            sharesLock.consume(deal.shares());
         }
+        tradeOrder.makeDeal(deal, time);
+    }
+
+    public void finishOrder(TradeOrder tradeOrder) {
+        Account account = accountRepository.findById(tradeOrder.account());
+        if (tradeOrder.tradeRequest().tradeSide() == TradeSide.BUY) {
+            Asset.CashLock cashLock = account.getCashLock(tradeOrder);
+            cashLock.dispose();
+        } else {
+            Asset.SharesLock sharesLock = account.getSharesLock(tradeOrder);
+            sharesLock.dispose();
+        }
+        tradeOrder.finish();
     }
 
     /**

@@ -2,8 +2,8 @@ package org.example.trade.domain.account;
 
 import org.example.trade.domain.market.Money;
 import org.example.trade.domain.market.RegularizedShares;
+import org.example.trade.domain.market.SecurityCode;
 import org.example.trade.domain.market.Shares;
-import org.example.trade.domain.market.StockCode;
 import org.example.trade.domain.tradeorder.TradeOrder;
 
 import java.util.Map;
@@ -14,9 +14,9 @@ public class Asset {
 
     private final Account.Id id;
 
-    private final Map<StockCode, Shares> usablePositions;
+    private final Map<SecurityCode, Shares> usablePositions;
 
-    private final Map<StockCode, Shares> lockedPositions;
+    private final Map<SecurityCode, Shares> lockedPositions;
 
     private final Map<AssetLocker, CashLock> cashLocks;
 
@@ -27,8 +27,8 @@ public class Asset {
     private Money lockedCash;
 
     private Asset(Account.Id id,
-                  Map<StockCode, Shares> usablePositions,
-                  Map<StockCode, Shares> lockedPositions,
+                  Map<SecurityCode, Shares> usablePositions,
+                  Map<SecurityCode, Shares> lockedPositions,
                   Map<AssetLocker, CashLock> cashLocks,
                   Map<AssetLocker, SharesLock> sharesLocks,
                   Money usableCash, Money lockedCash) {
@@ -41,11 +41,11 @@ public class Asset {
         this.lockedCash = Optional.ofNullable(lockedCash).orElse(Money.ZERO);
     }
 
-    public Map<StockCode, Shares> usablePositions() {
+    public Map<SecurityCode, Shares> usablePositions() {
         return usablePositions;
     }
 
-    public Map<StockCode, Shares> lockedPositions() {
+    public Map<SecurityCode, Shares> lockedPositions() {
         return lockedPositions;
     }
 
@@ -65,8 +65,8 @@ public class Asset {
         return usableCash.compareTo(amount) < 0;
     }
 
-    public synchronized boolean cantLock(StockCode stockCode, Shares amount) {
-        Shares usableShares = usablePositions.get(stockCode);
+    public synchronized boolean cantLock(SecurityCode securityCode, Shares amount) {
+        Shares usableShares = usablePositions.get(securityCode);
         return usableShares == null || usableShares.compareTo(amount) < 0;
     }
 
@@ -83,9 +83,10 @@ public class Asset {
         return cashLock;
     }
 
-    public synchronized SharesLock lockShares(StockCode stockCode, RegularizedShares shares, AssetLocker assetLocker) {
-        if (cantLock(stockCode, shares)) { return null; }
-        SharesLock sharesLock = new SharesLock(stockCode, shares);
+    public synchronized SharesLock lockShares(SecurityCode securityCode, RegularizedShares shares,
+                                              AssetLocker assetLocker) {
+        if (cantLock(securityCode, shares)) { return null; }
+        SharesLock sharesLock = new SharesLock(securityCode, shares);
         sharesLocks.put(assetLocker, sharesLock);
         return sharesLock;
     }
@@ -132,17 +133,17 @@ public class Asset {
 
     public final class SharesLock {
 
-        private final StockCode stockCode;
+        private final SecurityCode securityCode;
 
         private Shares amount;
 
         private boolean disposed;
 
-        private SharesLock(StockCode stockCode, RegularizedShares amount) {
-            this.stockCode = stockCode;
+        private SharesLock(SecurityCode securityCode, RegularizedShares amount) {
+            this.securityCode = securityCode;
             this.amount = amount;
-            lockedPositions.merge(stockCode, amount, (s, v) -> v.add(amount));
-            usablePositions.computeIfPresent(stockCode, (s, v) -> v.subtract(amount));
+            lockedPositions.merge(securityCode, amount, (s, v) -> v.add(amount));
+            usablePositions.computeIfPresent(securityCode, (s, v) -> v.subtract(amount));
         }
 
         public Shares amount() {
@@ -152,14 +153,14 @@ public class Asset {
         public synchronized void consume(Shares amount) {
             if (amount.compareTo(this.amount) > 0) { throw new IllegalStateException(); }
             this.amount = this.amount.subtract(amount);
-            lockedPositions.computeIfPresent(stockCode, (s, v) -> v.subtract(amount));
+            lockedPositions.computeIfPresent(securityCode, (s, v) -> v.subtract(amount));
         }
 
         public synchronized void dispose() {
             if (disposed) { throw new IllegalStateException(); }
             disposed = true;
-            lockedPositions.computeIfPresent(stockCode, (s, v) -> v.subtract(amount));
-            usablePositions.computeIfPresent(stockCode, (s, v) -> v.add(amount));
+            lockedPositions.computeIfPresent(securityCode, (s, v) -> v.subtract(amount));
+            usablePositions.computeIfPresent(securityCode, (s, v) -> v.add(amount));
         }
 
     }
@@ -168,9 +169,9 @@ public class Asset {
 
         private Account.Id id;
 
-        private Map<StockCode, Shares> usablePositions;
+        private Map<SecurityCode, Shares> usablePositions;
 
-        private Map<StockCode, Shares> lockedPositions;
+        private Map<SecurityCode, Shares> lockedPositions;
 
         private Map<AssetLocker, CashLock> cashLocks;
 
@@ -189,12 +190,12 @@ public class Asset {
             return this;
         }
 
-        public Builder withUsablePositions(Map<StockCode, Shares> usablePositions) {
+        public Builder withUsablePositions(Map<SecurityCode, Shares> usablePositions) {
             this.usablePositions = usablePositions;
             return this;
         }
 
-        public Builder withLockedPositions(Map<StockCode, Shares> lockedPositions) {
+        public Builder withLockedPositions(Map<SecurityCode, Shares> lockedPositions) {
             this.lockedPositions = lockedPositions;
             return this;
         }

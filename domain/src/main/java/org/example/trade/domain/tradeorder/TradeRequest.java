@@ -1,11 +1,11 @@
 package org.example.trade.domain.tradeorder;
 
 import org.example.trade.domain.market.RegularizedShares;
-import org.example.trade.domain.market.StockCode;
+import org.example.trade.domain.market.SecurityCode;
 
 public class TradeRequest {
 
-    protected final StockCode stockCode;
+    protected final SecurityCode securityCode;
 
     protected final RegularizedShares shares;
 
@@ -13,16 +13,16 @@ public class TradeRequest {
 
     protected final PriceType priceType;
 
-    protected TradeRequest(StockCode stockCode, RegularizedShares shares, TradeSide tradeSide,
+    protected TradeRequest(SecurityCode securityCode, RegularizedShares shares, TradeSide tradeSide,
                            PriceType priceType) {
-        this.stockCode = stockCode;
+        this.securityCode = securityCode;
         this.shares = shares;
         this.tradeSide = tradeSide;
         this.priceType = priceType;
     }
 
-    public StockCode stockCode() {
-        return stockCode;
+    public SecurityCode stockCode() {
+        return securityCode;
     }
 
     public RegularizedShares shares() {
@@ -40,7 +40,7 @@ public class TradeRequest {
     @Override
     public String toString() {
         return "TradeRequest{" +
-            "stockCode=" + stockCode +
+            "stockCode=" + securityCode +
             ", shares=" + shares +
             ", tradeSide=" + tradeSide +
             ", priceType=" + priceType +
