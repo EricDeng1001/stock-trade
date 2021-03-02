@@ -45,11 +45,11 @@ public class Account {
         this.password = password;
     }
 
-    public Asset.CashLock getCashLock(TradeOrder tradeOrder) {
+    public Asset.CashResource getCashLock(TradeOrder tradeOrder) {
         return asset.getCashLock(tradeOrder);
     }
 
-    public Asset.SharesLock getSharesLock(TradeOrder tradeOrder) {
+    public Asset.SharesResource getSharesLock(TradeOrder tradeOrder) {
         return asset.getSharesLock(tradeOrder);
     }
 
