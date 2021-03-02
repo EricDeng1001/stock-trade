@@ -3,9 +3,7 @@ package org.example.trade.domain.tradeorder;
 import org.example.trade.domain.account.Account;
 import org.example.trade.domain.account.AccountRepository;
 import org.example.trade.domain.account.Asset;
-import org.jetbrains.annotations.NotNull;
 
-import java.time.Instant;
 import java.util.UUID;
 
 public abstract class TradeService {
@@ -46,7 +44,7 @@ public abstract class TradeService {
                 return makeOrderAndRun(tradeRequest, account);
             }
         } else {
-            if (asset.cantLock(tradeRequest.securityCode, tradeRequest.shares)) {
+            if (asset.cantLock(tradeRequest.securityCode(), tradeRequest.shares())) {
                 throw new TradeCantNotBeDoneException("该账户下没有足够的股票满足卖出请求");
             }
             TradeOrder order = makeOrderAndRun(tradeRequest, account);
@@ -55,29 +53,6 @@ public abstract class TradeService {
         }
     }
 
-    public void makeDeal(TradeOrder tradeOrder, Deal deal, Instant time) {
-        Account account = accountRepository.findById(tradeOrder.account());
-        if (tradeOrder.tradeRequest().tradeSide() == TradeSide.BUY) {
-            Asset.CashLock cashLock = account.getCashLock(tradeOrder);
-            cashLock.consume(deal.value());
-        } else {
-            Asset.SharesLock sharesLock = account.getSharesLock(tradeOrder);
-            sharesLock.consume(deal.shares());
-        }
-        tradeOrder.makeDeal(deal, time);
-    }
-
-    public void finishOrder(TradeOrder tradeOrder) {
-        Account account = accountRepository.findById(tradeOrder.account());
-        if (tradeOrder.tradeRequest().tradeSide() == TradeSide.BUY) {
-            Asset.CashLock cashLock = account.getCashLock(tradeOrder);
-            cashLock.dispose();
-        } else {
-            Asset.SharesLock sharesLock = account.getSharesLock(tradeOrder);
-            sharesLock.dispose();
-        }
-        tradeOrder.finish();
-    }
 
     /**
      * 开始交易订单
@@ -86,7 +61,6 @@ public abstract class TradeService {
      */
     protected abstract void startTrade(TradeOrder order);
 
-    @NotNull
     private TradeOrder makeOrderAndRun(TradeRequest tradeRequest, Account account) {
         TradeOrder order;
         String internalId = UUID.randomUUID().toString();

@@ -1,7 +1,6 @@
 package org.example.trade.domain.account;
 
-import org.example.trade.domain.market.Money;
-import org.example.trade.domain.market.RegularizedShares;
+import org.example.finance.domain.Money;
 import org.example.trade.domain.market.SecurityCode;
 import org.example.trade.domain.market.Shares;
 import org.example.trade.domain.tradeorder.TradeOrder;
@@ -18,9 +17,9 @@ public class Asset {
 
     private final Map<SecurityCode, Shares> lockedPositions;
 
-    private final Map<AssetLocker, CashLock> cashLocks;
+    private final Map<AssetLocker, CashResource> cashLocks;
 
-    private final Map<AssetLocker, SharesLock> sharesLocks;
+    private final Map<AssetLocker, SharesResource> sharesLocks;
 
     private Money usableCash;
 
@@ -29,8 +28,8 @@ public class Asset {
     private Asset(Account.Id id,
                   Map<SecurityCode, Shares> usablePositions,
                   Map<SecurityCode, Shares> lockedPositions,
-                  Map<AssetLocker, CashLock> cashLocks,
-                  Map<AssetLocker, SharesLock> sharesLocks,
+                  Map<AssetLocker, CashResource> cashLocks,
+                  Map<AssetLocker, SharesResource> sharesLocks,
                   Money usableCash, Money lockedCash) {
         this.id = id;
         this.usablePositions = Optional.ofNullable(usablePositions).orElse(new ConcurrentHashMap<>());
@@ -76,70 +75,82 @@ public class Asset {
      * @param amount 要锁定的数量
      * @return 包含此处分配资金的CashLocker对象，如果需要的数量小于可用的现金，则可以锁定，反之返回null
      */
-    public synchronized CashLock lockCash(Money amount, AssetLocker assetLocker) {
+    public CashResource lockCash(Money amount, AssetLocker assetLocker) {
         if (cantLock(amount)) { return null; }
-        CashLock cashLock = new CashLock(amount);
-        cashLocks.put(assetLocker, cashLock);
-        return cashLock;
+        CashResource cashResource = new CashResource(amount);
+        cashLocks.put(assetLocker, cashResource);
+        return cashResource;
     }
 
-    public synchronized SharesLock lockShares(SecurityCode securityCode, RegularizedShares shares,
-                                              AssetLocker assetLocker) {
+    public SharesResource lockShares(SecurityCode securityCode, Shares shares,
+                                     AssetLocker assetLocker) {
         if (cantLock(securityCode, shares)) { return null; }
-        SharesLock sharesLock = new SharesLock(securityCode, shares);
-        sharesLocks.put(assetLocker, sharesLock);
-        return sharesLock;
+        SharesResource sharesResource = new SharesResource(securityCode, shares);
+        sharesLocks.put(assetLocker, sharesResource);
+        return sharesResource;
     }
 
-    public CashLock getCashLock(TradeOrder tradeOrder) {
+    public void gainCash(Money amount) {
+        usableCash = usableCash.add(amount);
+    }
+
+    public void gainShares(SecurityCode securityCode, Shares shares) {
+        usablePositions.computeIfPresent(securityCode, (s, v) -> v.add(shares));
+    }
+
+    public CashResource getCashLock(TradeOrder tradeOrder) {
         return cashLocks.get(tradeOrder);
     }
 
-    public SharesLock getSharesLock(TradeOrder tradeOrder) {
+    public SharesResource getSharesLock(TradeOrder tradeOrder) {
         return sharesLocks.get(tradeOrder);
     }
 
-    public final class CashLock {
+    public void deleteEmptyResource() {
+
+    }
+
+    public final class CashResource {
 
         private Money amount;
 
-        private boolean disposed;
+        private boolean isEmpty;
 
-        private CashLock(Money amount) {
+        private CashResource(Money amount) {
             this.amount = amount;
             lockedCash = lockedCash.add(amount);
             usableCash = usableCash.subtract(amount);
-            disposed = false;
+            isEmpty = false;
         }
 
         public Money amount() {
             return amount;
         }
 
-        public synchronized void consume(Money amount) {
+        public void consume(Money amount) {
             if (amount.compareTo(this.amount) > 0) { throw new IllegalStateException(); }
             this.amount = this.amount.subtract(amount);
             lockedCash = lockedCash.subtract(amount);
         }
 
-        public synchronized void dispose() {
-            if (disposed) { throw new IllegalStateException(); }
-            disposed = true;
+        public void clear() {
+            if (isEmpty) { throw new IllegalStateException(); }
+            isEmpty = true;
             lockedCash = lockedCash.subtract(amount);
             usableCash = usableCash.add(amount);
         }
 
     }
 
-    public final class SharesLock {
+    public final class SharesResource {
 
         private final SecurityCode securityCode;
 
         private Shares amount;
 
-        private boolean disposed;
+        private boolean isEmpty;
 
-        private SharesLock(SecurityCode securityCode, RegularizedShares amount) {
+        private SharesResource(SecurityCode securityCode, Shares amount) {
             this.securityCode = securityCode;
             this.amount = amount;
             lockedPositions.merge(securityCode, amount, (s, v) -> v.add(amount));
@@ -150,15 +161,15 @@ public class Asset {
             return amount;
         }
 
-        public synchronized void consume(Shares amount) {
+        public void consume(Shares amount) {
             if (amount.compareTo(this.amount) > 0) { throw new IllegalStateException(); }
             this.amount = this.amount.subtract(amount);
             lockedPositions.computeIfPresent(securityCode, (s, v) -> v.subtract(amount));
         }
 
-        public synchronized void dispose() {
-            if (disposed) { throw new IllegalStateException(); }
-            disposed = true;
+        public void clear() {
+            if (isEmpty) { throw new IllegalStateException(); }
+            isEmpty = true;
             lockedPositions.computeIfPresent(securityCode, (s, v) -> v.subtract(amount));
             usablePositions.computeIfPresent(securityCode, (s, v) -> v.add(amount));
         }
@@ -173,9 +184,9 @@ public class Asset {
 
         private Map<SecurityCode, Shares> lockedPositions;
 
-        private Map<AssetLocker, CashLock> cashLocks;
+        private Map<AssetLocker, CashResource> cashLocks;
 
-        private Map<AssetLocker, SharesLock> sharesLocks;
+        private Map<AssetLocker, SharesResource> sharesLocks;
 
         private Money usableCash;
 
@@ -200,12 +211,12 @@ public class Asset {
             return this;
         }
 
-        public Builder withCashLocks(Map<AssetLocker, CashLock> cashLocks) {
+        public Builder withCashLocks(Map<AssetLocker, CashResource> cashLocks) {
             this.cashLocks = cashLocks;
             return this;
         }
 
-        public Builder withSharesLocks(Map<AssetLocker, SharesLock> sharesLocks) {
+        public Builder withSharesLocks(Map<AssetLocker, SharesResource> sharesLocks) {
             this.sharesLocks = sharesLocks;
             return this;
         }

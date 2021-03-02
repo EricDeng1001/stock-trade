@@ -1,19 +1,19 @@
 package org.example.trade.domain.tradeorder;
 
-import org.example.trade.domain.market.RegularizedShares;
 import org.example.trade.domain.market.SecurityCode;
+import org.example.trade.domain.market.Shares;
 
 public class TradeRequest {
 
     protected final SecurityCode securityCode;
 
-    protected final RegularizedShares shares;
+    protected final Shares shares;
 
     protected final TradeSide tradeSide;
 
     protected final PriceType priceType;
 
-    protected TradeRequest(SecurityCode securityCode, RegularizedShares shares, TradeSide tradeSide,
+    protected TradeRequest(SecurityCode securityCode, Shares shares, TradeSide tradeSide,
                            PriceType priceType) {
         this.securityCode = securityCode;
         this.shares = shares;
@@ -21,11 +21,11 @@ public class TradeRequest {
         this.priceType = priceType;
     }
 
-    public SecurityCode stockCode() {
+    public SecurityCode securityCode() {
         return securityCode;
     }
 
-    public RegularizedShares shares() {
+    public Shares shares() {
         return shares;
     }
 

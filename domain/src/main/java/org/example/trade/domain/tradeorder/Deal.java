@@ -1,7 +1,7 @@
 package org.example.trade.domain.tradeorder;
 
-import org.example.trade.domain.market.Money;
-import org.example.trade.domain.market.Price;
+import org.example.finance.domain.Money;
+import org.example.finance.domain.Price;
 import org.example.trade.domain.market.Shares;
 
 public class Deal {

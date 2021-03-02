@@ -1,5 +1,7 @@
 package org.example.trade.domain.market;
 
+import org.example.finance.domain.Price;
+
 public abstract class LevelPrice {
 
     private final int levels;

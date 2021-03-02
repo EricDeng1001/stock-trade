@@ -4,4 +4,5 @@ public interface AccountRepository {
 
     Account findById(Account.Id id);
 
+    void save(Account account);
 }

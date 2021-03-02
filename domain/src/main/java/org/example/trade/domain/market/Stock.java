@@ -1,5 +1,7 @@
 package org.example.trade.domain.market;
 
+import org.example.finance.domain.Price;
+
 public class Stock {
 
     private final SecurityCode securityCode;

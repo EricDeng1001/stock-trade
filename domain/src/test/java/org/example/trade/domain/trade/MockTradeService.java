@@ -1,5 +1,7 @@
 package org.example.trade.domain.trade;
 
+import org.example.finance.domain.Price;
+import org.example.trade.domain.account.AccountRepository;
 import org.example.trade.domain.market.*;
 import org.example.trade.domain.tradeorder.Deal;
 import org.example.trade.domain.tradeorder.TradeOrder;
@@ -12,15 +14,13 @@ import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
-class Mock extends TradeService implements TradeOrderRepository, MarketInfoService {
+class MockTradeService extends TradeService implements MarketInfoService {
 
     private static final AtomicLong i = new AtomicLong(0);
 
     private final Broker broker = new Broker("mock broker");
 
-    private final Map<TradeOrder.Id, TradeOrder> orderMap = new ConcurrentHashMap<>();
-
-    private final Map<StockCode, Stock> stockMap = new ConcurrentHashMap<>();
+    private final Map<SecurityCode, Stock> stockMap = new ConcurrentHashMap<>();
 
     private final ThreadLocalRandom random = ThreadLocalRandom.current();
 
@@ -28,29 +28,23 @@ class Mock extends TradeService implements TradeOrderRepository, MarketInfoServi
 
     private final Semaphore scheduledTask = new Semaphore(2000);
 
+    public MockTradeService(TradeOrderRepository tradeOrderRepository,
+                            AccountRepository accountRepository) {
+        super(tradeOrderRepository, accountRepository);
+    }
+
     @Override
-    public boolean startTrade(TradeOrder o) {
+    public void startTrade(TradeOrder o) {
         scheduledTask.acquireUninterruptibly();
-        orderMap.put(o.id(), o);
+        tradeOrderRepository.save(o);
         mockTrading(o);
         o.id().signBrokerId(UUID.randomUUID().toString());
-        return true;
     }
 
     @Override
-    public TradeOrder findById(TradeOrder.Id id) {
-        return orderMap.get(id);
-    }
-
-    @Override
-    public void save(TradeOrder order) {
-        orderMap.put(order.id(), order);
-    }
-
-    @Override
-    public Stock queryStock(StockCode stockCode) {
+    public Stock queryStock(SecurityCode securityCode) {
         return stockMap
-            .computeIfAbsent(stockCode,
+            .computeIfAbsent(securityCode,
                              stockCode1 ->
                                  new Stock(
                                      stockCode1,
@@ -88,7 +82,7 @@ class Mock extends TradeService implements TradeOrderRepository, MarketInfoServi
         scheduledExecutorService.schedule(() -> {
             Shares unTrade = o.unTrade();
             Shares mockTrade = randomTake(unTrade);
-            o.makeDeal(new Deal(mockTrade, queryStock(o.tradeRequest().stockCode()).currentPrice()), Instant.now());
+            o.makeDeal(new Deal(mockTrade, queryStock(o.tradeRequest().securityCode()).currentPrice()), Instant.now());
             if (!mockTrade.equals(unTrade)) {
                 scheduledTask.acquireUninterruptibly();
                 mockTrading(o);
@@ -103,7 +97,7 @@ class Mock extends TradeService implements TradeOrderRepository, MarketInfoServi
         if (bound < 100) {
             x = bound;
         } else {
-            x = random.nextInt(RegularizedShares.RS100.value().intValue(), bound);
+            x = random.nextInt(100, bound);
         }
         return new Shares(x);
     }
