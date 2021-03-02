@@ -22,6 +22,10 @@ public final class Trade {
         this(new Id(id, index), deal, dealtOn);
     }
 
+    public Instant dealtOn() {
+        return dealtOn;
+    }
+
     @Override
     public String toString() {
         return "Trade{" +
