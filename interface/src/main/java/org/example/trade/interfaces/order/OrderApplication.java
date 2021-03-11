@@ -1,6 +1,6 @@
 package org.example.trade.interfaces.order;
 
-public interface OrderService {
+public interface OrderApplication {
 
     OrderIdDTO createOrder(CreateOrderCommand command);
 
