@@ -9,8 +9,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.example.trade</groupId>
-  <artifactId>domain</artifactId>
+  <artifactId>trade.domain</artifactId>
 
   <properties>
     <maven.compiler.source>15</maven.compiler.source>
