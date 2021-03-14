@@ -3,10 +3,10 @@ package org.example.trade.domain.trade;
 import org.example.finance.domain.Price;
 import org.example.trade.domain.account.AccountRepository;
 import org.example.trade.domain.market.*;
-import org.example.trade.domain.tradeorder.Deal;
-import org.example.trade.domain.tradeorder.TradeOrder;
-import org.example.trade.domain.tradeorder.TradeOrderRepository;
-import org.example.trade.domain.tradeorder.TradeService;
+import org.example.trade.domain.order.Deal;
+import org.example.trade.domain.order.Order;
+import org.example.trade.domain.order.OrderFactory;
+import org.example.trade.domain.order.OrderRepository;
 
 import java.time.Instant;
 import java.util.Map;
@@ -14,7 +14,7 @@ import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
-class MockTradeService extends TradeService implements MarketInfoService {
+class MockTradeService extends OrderFactory implements MarketInfoService {
 
     private static final AtomicLong i = new AtomicLong(0);
 
@@ -28,15 +28,15 @@ class MockTradeService extends TradeService implements MarketInfoService {
 
     private final Semaphore scheduledTask = new Semaphore(2000);
 
-    public MockTradeService(TradeOrderRepository tradeOrderRepository,
+    public MockTradeService(OrderRepository orderRepository,
                             AccountRepository accountRepository) {
-        super(tradeOrderRepository, accountRepository);
+        super(orderRepository, accountRepository);
     }
 
     @Override
-    public void startTrade(TradeOrder o) {
+    public void startTrade(Order o) {
         scheduledTask.acquireUninterruptibly();
-        tradeOrderRepository.save(o);
+        orderRepository.save(o);
         mockTrading(o);
         o.id().signBrokerId(UUID.randomUUID().toString());
     }
@@ -78,7 +78,7 @@ class MockTradeService extends TradeService implements MarketInfoService {
         return broker;
     }
 
-    private void mockTrading(TradeOrder o) {
+    private void mockTrading(Order o) {
         scheduledExecutorService.schedule(() -> {
             Shares unTrade = o.unTrade();
             Shares mockTrade = randomTake(unTrade);

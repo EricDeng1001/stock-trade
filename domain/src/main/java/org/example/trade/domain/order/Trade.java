@@ -1,4 +1,4 @@
-package org.example.trade.domain.tradeorder;
+package org.example.trade.domain.order;
 
 import org.example.trade.domain.market.Shares;
 
@@ -18,7 +18,7 @@ public final class Trade {
         this.dealtOn = dealtOn;
     }
 
-    public Trade(TradeOrder.Id id, int index, Deal deal, Instant dealtOn) {
+    public Trade(Order.Id id, int index, Deal deal, Instant dealtOn) {
         this(new Id(id, index), deal, dealtOn);
     }
 
@@ -48,16 +48,16 @@ public final class Trade {
 
     public static class Id {
 
-        private final TradeOrder.Id orderId;
+        private final Order.Id orderId;
 
         private final int index;
 
-        public Id(TradeOrder.Id orderId, int index) {
+        public Id(Order.Id orderId, int index) {
             this.orderId = orderId;
             this.index = index;
         }
 
-        public TradeOrder.Id orderId() {
+        public Order.Id orderId() {
             return orderId;
         }
 

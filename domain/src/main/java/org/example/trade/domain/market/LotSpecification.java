@@ -1,7 +1,7 @@
 package org.example.trade.domain.market;
 
-import org.example.trade.domain.tradeorder.TradeRequest;
-import org.example.trade.domain.tradeorder.TradeSide;
+import org.example.trade.domain.order.TradeRequest;
+import org.example.trade.domain.order.TradeSide;
 
 public class LotSpecification {
 

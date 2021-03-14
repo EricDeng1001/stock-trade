@@ -1,4 +1,4 @@
-package org.example.trade.domain.tradeorder;
+package org.example.trade.domain.order;
 
 import org.example.trade.domain.account.Account;
 import org.example.trade.domain.account.AccountRepository;
@@ -6,15 +6,15 @@ import org.example.trade.domain.account.Asset;
 
 import java.util.UUID;
 
-public abstract class TradeService {
+public class OrderFactory {
 
-    protected final TradeOrderRepository tradeOrderRepository;
+    protected final OrderRepository orderRepository;
 
     protected final AccountRepository accountRepository;
 
-    public TradeService(TradeOrderRepository tradeOrderRepository,
+    public OrderFactory(OrderRepository orderRepository,
                         AccountRepository accountRepository) {
-        this.tradeOrderRepository = tradeOrderRepository;
+        this.orderRepository = orderRepository;
         this.accountRepository = accountRepository;
     }
 
@@ -26,7 +26,7 @@ public abstract class TradeService {
      * @return a new TradeOrder from TradeRequest with no TradeResult and pending state
      * @throws TradeCantNotBeDoneException 当请求在要求的账户下无法完成时抛出
      */
-    public TradeOrder applyTo(TradeRequest tradeRequest, Account account) throws TradeCantNotBeDoneException {
+    public Order applyTo(TradeRequest tradeRequest, Account account) throws TradeCantNotBeDoneException {
         // TODO 风险控制，已完成数量可行性控制
         Asset asset = account.asset();
 
@@ -36,7 +36,7 @@ public abstract class TradeService {
                 if (asset.cantLock(l.netValue())) {
                     throw new TradeCantNotBeDoneException("该账户下没有足够的可用资金满足买入请求");
                 }
-                TradeOrder order = makeOrderAndRun(tradeRequest, account);
+                Order order = makeOrderAndRun(tradeRequest, account);
                 asset.lockCash(l.netValue(), order);
                 return order;
             } else {
@@ -47,27 +47,18 @@ public abstract class TradeService {
             if (asset.cantLock(tradeRequest.securityCode(), tradeRequest.shares())) {
                 throw new TradeCantNotBeDoneException("该账户下没有足够的股票满足卖出请求");
             }
-            TradeOrder order = makeOrderAndRun(tradeRequest, account);
+            Order order = makeOrderAndRun(tradeRequest, account);
             asset.lockShares(tradeRequest.securityCode, tradeRequest.shares, order);
             return order;
         }
     }
 
-
-    /**
-     * 开始交易订单
-     *
-     * @param order 要交易的订单
-     */
-    protected abstract void startTrade(TradeOrder order);
-
-    private TradeOrder makeOrderAndRun(TradeRequest tradeRequest, Account account) {
-        TradeOrder order;
+    private Order makeOrderAndRun(TradeRequest tradeRequest, Account account) {
+        Order order;
         String internalId = UUID.randomUUID().toString();
-        order = new TradeOrder(account.id(), internalId, tradeRequest);
-        startTrade(order);
+        order = new Order(account.id(), internalId, tradeRequest);
         order.startTrading();
-        tradeOrderRepository.save(order);
+        orderRepository.save(order);
         return order;
     }
 

@@ -13,6 +13,7 @@
     <module>application</module>
     <module>interface</module>
     <module>infrastructure</module>
+    <module>adapter</module>
   </modules>
 
   <properties>

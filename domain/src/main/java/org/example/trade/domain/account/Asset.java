@@ -3,7 +3,7 @@ package org.example.trade.domain.account;
 import org.example.finance.domain.Money;
 import org.example.trade.domain.market.SecurityCode;
 import org.example.trade.domain.market.Shares;
-import org.example.trade.domain.tradeorder.TradeOrder;
+import org.example.trade.domain.order.Order;
 
 import java.util.Map;
 import java.util.Optional;
@@ -98,12 +98,12 @@ public class Asset {
         usablePositions.computeIfPresent(securityCode, (s, v) -> v.add(shares));
     }
 
-    public CashResource getCashLock(TradeOrder tradeOrder) {
-        return cashLocks.get(tradeOrder);
+    public CashResource getCashLock(Order order) {
+        return cashLocks.get(order);
     }
 
-    public SharesResource getSharesLock(TradeOrder tradeOrder) {
-        return sharesLocks.get(tradeOrder);
+    public SharesResource getSharesLock(Order order) {
+        return sharesLocks.get(order);
     }
 
     public void deleteEmptyResource() {

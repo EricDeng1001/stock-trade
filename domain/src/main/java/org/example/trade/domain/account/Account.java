@@ -1,7 +1,8 @@
 package org.example.trade.domain.account;
 
 import org.example.trade.domain.market.Broker;
-import org.example.trade.domain.tradeorder.TradeOrder;
+import org.example.trade.domain.order.Deal;
+import org.example.trade.domain.order.Order;
 
 public class Account {
 
@@ -45,12 +46,24 @@ public class Account {
         this.password = password;
     }
 
-    public Asset.CashResource getCashLock(TradeOrder tradeOrder) {
-        return asset.getCashLock(tradeOrder);
+    public Asset.CashResource getCashLock(Order order) {
+        return asset.getCashLock(order);
     }
 
-    public Asset.SharesResource getSharesLock(TradeOrder tradeOrder) {
-        return asset.getSharesLock(tradeOrder);
+    public Asset.SharesResource getSharesLock(Order order) {
+        return asset.getSharesLock(order);
+    }
+
+    public void exchange(Order.Id order, Deal deal) {
+
+    }
+
+    public void unFreeze(Order.Id id) {
+
+    }
+
+    public void finishOrder(Order.Id id) {
+
     }
 
     public static class Id {

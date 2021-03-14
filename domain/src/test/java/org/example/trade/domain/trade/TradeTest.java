@@ -7,7 +7,7 @@ import org.example.trade.domain.account.Account;
 import org.example.trade.domain.account.Asset;
 import org.example.trade.domain.market.SecurityCode;
 import org.example.trade.domain.market.Shares;
-import org.example.trade.domain.tradeorder.*;
+import org.example.trade.domain.order.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +18,7 @@ class TradeTest {
 
     MockTradeService mockTradeService = new MockTradeService(new TOR(), new AR());
 
-    TradeService tradeService = mockTradeService;
+    OrderFactory tradeService = mockTradeService;
 
     LogBrokerCallbackHandler brokerCallbackHandler = new LogBrokerCallbackHandler();
 
@@ -43,7 +43,7 @@ class TradeTest {
             shares,
             TradeSide.BUY,
             new Price(1));
-        TradeOrder x = tradeService.applyTo(tradeRequest, testAccount);
+        Order x = tradeService.applyTo(tradeRequest, testAccount);
         mockTradeService.shutdown();
         System.out.println(x);
     }

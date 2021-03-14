@@ -1,4 +1,4 @@
-package org.example.trade.domain.tradeorder;
+package org.example.trade.domain.order;
 
 import org.example.finance.domain.Money;
 import org.example.finance.domain.Price;

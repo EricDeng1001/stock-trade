@@ -1,4 +1,4 @@
-package org.example.trade.domain.tradeorder;
+package org.example.trade.domain.order;
 
 import java.time.Instant;
 
@@ -6,12 +6,12 @@ public final class OrderTraded extends TradeEvent {
 
     private final Deal deal;
 
-    public OrderTraded(TradeOrder.Id id, Deal deal, Instant occurredOn) {
+    public OrderTraded(Order.Id id, Deal deal, Instant occurredOn) {
         super(occurredOn, id);
         this.deal = deal;
     }
 
-    public OrderTraded(TradeOrder.Id id, Deal deal) {
+    public OrderTraded(Order.Id id, Deal deal) {
         this(id, deal, Instant.now());
     }
 

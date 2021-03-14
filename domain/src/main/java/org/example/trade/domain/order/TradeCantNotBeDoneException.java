@@ -1,4 +1,4 @@
-package org.example.trade.domain.tradeorder;
+package org.example.trade.domain.order;
 
 public class TradeCantNotBeDoneException extends Exception {
 

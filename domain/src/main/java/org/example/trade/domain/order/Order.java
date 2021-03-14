@@ -1,4 +1,4 @@
-package org.example.trade.domain.tradeorder;
+package org.example.trade.domain.order;
 
 import engineering.ericdeng.architecture.domain.model.DomainEventBus;
 import engineering.ericdeng.architecture.domain.model.DomainEventPublisher;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 @Entity
-public final class TradeOrder extends AssetLocker implements DomainEventPublisher<OrderTraded> {
+public final class Order extends AssetLocker implements DomainEventPublisher<OrderTraded> {
 
     private final Id id;
 
@@ -33,9 +33,9 @@ public final class TradeOrder extends AssetLocker implements DomainEventPublishe
     private transient int iterIndex;
 
     @Rebuild
-    public TradeOrder(Account.Id account, String id, boolean signedByBroker, OrderStatus orderStatus,
-                      List<Trade> trades,
-                      TradeRequest request) {
+    public Order(Account.Id account, String id, boolean signedByBroker, OrderStatus orderStatus,
+                 List<Trade> trades,
+                 TradeRequest request) {
         this.orderStatus = orderStatus;
         this.account = account;
         this.id = new Id(account.broker(), id, signedByBroker);
@@ -46,7 +46,7 @@ public final class TradeOrder extends AssetLocker implements DomainEventPublishe
     }
 
     @New
-    public TradeOrder(Account.Id account, String brokerId, TradeRequest request) {
+    public Order(Account.Id account, String brokerId, TradeRequest request) {
         this(account, brokerId, false, OrderStatus.created, new ArrayList<>(8), request);
     }
 
@@ -66,8 +66,10 @@ public final class TradeOrder extends AssetLocker implements DomainEventPublishe
 
     /**
      * finish this order so it can no longer be traded
+     *
+     * @param time
      */
-    public void finish() {
+    public void finish(Instant time) {
         int i = traded().compareTo(request.shares());
         if (i == 0) {
             orderStatus = OrderStatus.fulfilled;

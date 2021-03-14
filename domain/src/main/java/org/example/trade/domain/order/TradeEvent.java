@@ -1,4 +1,4 @@
-package org.example.trade.domain.tradeorder;
+package org.example.trade.domain.order;
 
 import engineering.ericdeng.architecture.domain.model.DomainEvent;
 
@@ -6,14 +6,14 @@ import java.time.Instant;
 
 public class TradeEvent extends DomainEvent {
 
-    private final TradeOrder.Id orderId;
+    private final Order.Id orderId;
 
-    protected TradeEvent(Instant occurredOn, TradeOrder.Id id) {
+    protected TradeEvent(Instant occurredOn, Order.Id id) {
         super(occurredOn);
         this.orderId = id;
     }
 
-    public TradeOrder.Id orderId() {
+    public Order.Id orderId() {
         return orderId;
     }
 
