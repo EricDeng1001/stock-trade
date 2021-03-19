@@ -10,6 +10,10 @@ public class Broker extends Identity {
         this.id = id;
     }
 
+    public static Broker valueOf(String x) {
+        return new Broker(x);
+    }
+
     public String id() {
         return id;
     }
