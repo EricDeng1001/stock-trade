@@ -2,16 +2,16 @@ package org.example.trade.domain.order;
 
 import java.time.Instant;
 
-public final class OrderTraded extends TradeEvent {
+public final class OrderTraded extends OrderUpdated {
 
     private final Deal deal;
 
-    public OrderTraded(Order.Id id, Deal deal, Instant occurredOn) {
+    public OrderTraded(OrderId id, Deal deal, Instant occurredOn) {
         super(occurredOn, id);
         this.deal = deal;
     }
 
-    public OrderTraded(Order.Id id, Deal deal) {
+    public OrderTraded(OrderId id, Deal deal) {
         this(id, deal, Instant.now());
     }
 
@@ -21,8 +21,11 @@ public final class OrderTraded extends TradeEvent {
 
     @Override
     public String toString() {
+
         return "OrderTraded{" +
-            "deal=" + deal +
+            "orderId=" + orderId +
+            ", deal=" + deal +
+            ", occurredOn=" + occurredOn +
             '}';
     }
 

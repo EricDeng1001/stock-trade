@@ -58,6 +58,11 @@
         <version>${project.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.example</groupId>
+        <artifactId>trade.application</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
         <version>1.7.30</version>
@@ -68,17 +73,17 @@
   <repositories>
     <repository>
       <id>techfin-infrastructure-group</id>
-      <url>http://maven.techfin.ai/repository/techfin-infrastructure-group/</url>
+      <url>http://124.251.74.84:38081/repository/techfin-infrastructure-group</url>
     </repository>
   </repositories>
   <distributionManagement>
     <snapshotRepository>
       <id>techfin-infrastructure-snapshots</id>
-      <url>http://maven.techfin.ai/repository/techfin-infrastructure-snapshots/</url>
+      <url>http://124.251.74.84:38081/repository/techfin-infrastructure-snapshots</url>
     </snapshotRepository>
     <repository>
       <id>techfin-infrastructure-releases</id>
-      <url>http://maven.techfin.ai/repository/techfin-infrastructure-releases/</url>
+      <url>http://124.251.74.84:38081/repository/techfin-infrastructure-releases</url>
     </repository>
   </distributionManagement>
 </project>

@@ -2,12 +2,12 @@ package org.example.trade.interfaces.order;
 
 public interface OrderApplication {
 
-    OrderIdDTO createOrder(CreateOrderCommand command);
+    String createOrder(CreateOrderCommand command);
 
-    OrderDTO queryOrder(OrderIdDTO orderIdDTO);
+    OrderDTO queryOrder(String orderIdDTO);
 
-    void enqueueOrder(OrderIdDTO orderIdDTO);
+    void enqueueOrder(String orderIdDTO);
 
-    void dequeueOrder(OrderIdDTO orderIdDTO);
+    void dequeueOrder(String orderIdDTO);
 
 }

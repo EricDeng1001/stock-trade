@@ -1,25 +1,23 @@
 package org.example.trade.interfaces.order;
 
-import java.math.BigDecimal;
-
 public class OrderDTO {
 
-    private final OrderIdDTO orderId;
+    private final String orderId;
 
     private final String stockCode;
 
-    private final long shares;
+    private final String shares;
 
-    private final BigDecimal price;
+    private final String price;
 
-    public OrderDTO(OrderIdDTO orderId, String stockCode, long shares, BigDecimal price) {
+    public OrderDTO(String orderId, String stockCode, String shares, String price) {
         this.orderId = orderId;
         this.stockCode = stockCode;
         this.shares = shares;
         this.price = price;
     }
 
-    public OrderIdDTO orderId() {
+    public String orderId() {
         return orderId;
     }
 
@@ -27,11 +25,11 @@ public class OrderDTO {
         return stockCode;
     }
 
-    public long shares() {
+    public String shares() {
         return shares;
     }
 
-    public BigDecimal price() {
+    public String price() {
         return price;
     }
 

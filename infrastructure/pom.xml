@@ -11,6 +11,16 @@
 
   <artifactId>trade.infrastructure</artifactId>
 
+  <dependencies>
+    <dependency>
+      <groupId>org.example</groupId>
+      <artifactId>trade.domain</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.example</groupId>
+      <artifactId>trade.application</artifactId>
+    </dependency>
+  </dependencies>
   <properties>
     <maven.compiler.source>15</maven.compiler.source>
     <maven.compiler.target>15</maven.compiler.target>

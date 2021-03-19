@@ -18,7 +18,7 @@ public final class Trade {
         this.dealtOn = dealtOn;
     }
 
-    public Trade(Order.Id id, int index, Deal deal, Instant dealtOn) {
+    public Trade(OrderId id, int index, Deal deal, Instant dealtOn) {
         this(new Id(id, index), deal, dealtOn);
     }
 
@@ -48,16 +48,16 @@ public final class Trade {
 
     public static class Id {
 
-        private final Order.Id orderId;
+        private final OrderId orderId;
 
         private final int index;
 
-        public Id(Order.Id orderId, int index) {
+        public Id(OrderId orderId, int index) {
             this.orderId = orderId;
             this.index = index;
         }
 
-        public Order.Id orderId() {
+        public OrderId orderId() {
             return orderId;
         }
 

@@ -2,75 +2,89 @@ package org.example.trade.domain.order;
 
 import engineering.ericdeng.architecture.domain.model.DomainEventBus;
 import engineering.ericdeng.architecture.domain.model.DomainEventPublisher;
-import engineering.ericdeng.architecture.domain.model.annotation.Entity;
+import engineering.ericdeng.architecture.domain.model.annotation.AggregateRoot;
 import engineering.ericdeng.architecture.domain.model.annotation.New;
 import engineering.ericdeng.architecture.domain.model.annotation.Rebuild;
-import org.example.trade.domain.account.Account;
-import org.example.trade.domain.account.AssetLocker;
-import org.example.trade.domain.market.Broker;
+import org.example.trade.domain.account.AccountId;
 import org.example.trade.domain.market.Shares;
+import org.example.trade.domain.order.request.TradeRequest;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
+import java.util.Objects;
 
-@Entity
-public final class Order extends AssetLocker implements DomainEventPublisher<OrderTraded> {
+@AggregateRoot
+public final class Order implements DomainEventPublisher<OrderTraded> {
 
-    private final Id id;
+    private final OrderId id;
 
-    private final TradeRequest request;
+    private final TradeRequest requirement;
 
     private final List<Trade> trades;
 
-    private final Account.Id account;
+    private String brokerId;
 
     private OrderStatus orderStatus;
 
-    private transient Shares traded;
-
-    private transient int iterIndex;
-
     @Rebuild
-    public Order(Account.Id account, String id, boolean signedByBroker, OrderStatus orderStatus,
-                 List<Trade> trades,
-                 TradeRequest request) {
+    public Order(OrderId orderId, TradeRequest requirement, OrderStatus orderStatus,
+                 List<Trade> trades) {
         this.orderStatus = orderStatus;
-        this.account = account;
-        this.id = new Id(account.broker(), id, signedByBroker);
-        this.request = request;
+        this.id = orderId;
+        this.requirement = requirement;
         this.trades = trades;
-        traded = Shares.ZERO;
-        iterIndex = 0;
     }
 
     @New
-    public Order(Account.Id account, String brokerId, TradeRequest request) {
-        this(account, brokerId, false, OrderStatus.created, new ArrayList<>(8), request);
+    public Order(AccountId account, int id, @NotNull TradeRequest requirement) {
+        this(new OrderId(account, LocalDate.now(), id), requirement, OrderStatus.created,
+             new ArrayList<>(4));
+    }
+
+    public String brokerId() {
+        return brokerId;
+    }
+
+    public OrderStatus orderStatus() {
+        return orderStatus;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) { return true; }
+        if (o == null || getClass() != o.getClass()) { return false; }
+        Order order = (Order) o;
+        return Objects.equals(id, order.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
     public Shares traded() {
-        ListIterator<Trade> iterator = trades.listIterator(iterIndex);
-        while (iterator.hasNext()) {
-            traded = traded.add(iterator.next().shares());
+        Shares traded = Shares.ZERO;
+        for (Trade trade : trades) {
+            traded = traded.add(trade.shares());
         }
-        iterIndex = iterator.nextIndex();
         return traded;
     }
 
-    public void startTrading() {
-        if (orderStatus != OrderStatus.created) { throw new IllegalStateException("只有从未挂单的订单可以开始交易"); }
-        orderStatus = OrderStatus.pending;
+    public void trading(String brokerId) {
+        this.brokerId = brokerId;
+        orderStatus = OrderStatus.trading;
     }
 
     /**
      * finish this order so it can no longer be traded
      *
-     * @param time
+     * @param time closed time
      */
-    public void finish(Instant time) {
-        int i = traded().compareTo(request.shares());
+    public void close(Instant time) {
+        int i = traded().compareTo(requirement.shares());
         if (i == 0) {
             orderStatus = OrderStatus.fulfilled;
         } else if (i < 0) {
@@ -78,31 +92,25 @@ public final class Order extends AssetLocker implements DomainEventPublisher<Ord
         } else {
             orderStatus = OrderStatus.overflow;
         }
-        DomainEventBus.instance().publish(new OrderFinished(id, orderStatus));
+        DomainEventBus.instance().publish(new OrderFinished(time, id, orderStatus));
     }
 
     public void makeDeal(Deal deal, Instant dealtOn) {
-        if (orderStatus != OrderStatus.pending) {
-            throw new IllegalStateException("Can't make new deal to an order which is not in pending state");
-        }
         Trade trade = new Trade(id, trades.size(), deal, dealtOn);
         trades.add(trade);
         DomainEventBus.instance().publish(
             new OrderTraded(id, deal, dealtOn)
         );
-
     }
 
-    public Id id() {
-        return id;
-    }
+    public OrderId id() { return id; }
 
-    public TradeRequest tradeRequest() {
-        return request;
+    public TradeRequest requirement() {
+        return requirement;
     }
 
     public Shares unTrade() {
-        return request.shares().subtract(traded());
+        return requirement.shares().subtract(traded());
     }
 
     public List<Trade> trades() {
@@ -111,64 +119,25 @@ public final class Order extends AssetLocker implements DomainEventPublisher<Ord
 
     @Override
     public String toString() {
-        return "TradeOrder{" +
+        return "Order{" +
             "id=" + id +
-            ", request=" + request +
+            ", request=" + requirement +
             ", trades=" + trades +
-            ", account=" + account +
             ", orderStatus=" + orderStatus +
-            ", traded=" + traded +
+            ", traded=" + traded() +
             '}';
     }
 
-    public Account.Id account() {
-        return account;
+    public AccountId account() {
+        return id.accountId();
     }
 
-    @Override
-    protected String assetLockerTrackId() {
-        return id.toString();
+    public OrderStatus status() {
+        return orderStatus;
     }
 
-    public static class Id {
-
-        // TODO 添加交易日
-        private final Broker broker;
-
-        private String id;
-
-        private boolean signedByBroker;
-
-        public Id(Broker broker, String id, boolean signedByBroker) {
-            this.broker = broker;
-            this.id = id;
-            this.signedByBroker = signedByBroker;
-        }
-
-        public String brokerId() {
-            return id;
-        }
-
-        public Broker broker() {
-            return broker;
-        }
-
-        public void signBrokerId(String id) {
-            if (signedByBroker) {
-                throw new IllegalStateException("order already be signed a broker id!");
-            }
-            signedByBroker = true;
-            this.id = id;
-        }
-
-        @Override
-        public String toString() {
-            return "Id{" +
-                "broker=" + broker +
-                ", idByBroker='" + id + '\'' +
-                '}';
-        }
-
+    public boolean isTrading() {
+        return orderStatus == OrderStatus.trading;
     }
 
 }

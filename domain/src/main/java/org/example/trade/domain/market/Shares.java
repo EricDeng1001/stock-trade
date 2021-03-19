@@ -24,6 +24,10 @@ public class Shares implements Comparable<Shares>, ChargeUnit {
         this(BigInteger.valueOf(value));
     }
 
+    public static Shares valueOf(int i) {
+        return new Shares(1000);
+    }
+
     public Shares add(Shares x) {
         return new Shares(value.add(x.value));
     }
@@ -41,11 +45,11 @@ public class Shares implements Comparable<Shares>, ChargeUnit {
     }
 
     public Shares divide(BigDecimal x) {
-        return new Shares(x.divide(new BigDecimal(value), RoundingMode.CEILING).toBigInteger());
+        return new Shares(new BigDecimal(value).divide(x, RoundingMode.CEILING).toBigInteger());
     }
 
     public Shares divideExact(BigDecimal x) {
-        return new Shares(x.divide(new BigDecimal(value), RoundingMode.UNNECESSARY).toBigInteger());
+        return new Shares(new BigDecimal(value).divide(x, RoundingMode.UNNECESSARY).toBigInteger());
     }
 
     public Shares regularize(int lotValue) {
@@ -58,6 +62,19 @@ public class Shares implements Comparable<Shares>, ChargeUnit {
 
     public Money multiply(Price price) {
         return price.unitValue().multiply(value);
+    }
+
+    public Shares[] allocate(int n) {
+        BigInteger val = BigInteger.valueOf(n);
+        BigInteger x = value.divide(val);
+        BigInteger r = value.remainder(val);
+        Shares[] c = new Shares[n];
+        int last = n - 1;
+        for (int i = 0; i < last; i++) {
+            c[i] = new Shares(x);
+        }
+        c[last] = new Shares(x.add(r));
+        return c;
     }
 
     @Override
