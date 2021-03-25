@@ -8,15 +8,22 @@ public class Account {
 
     private final AccountId id;
 
-    private String password;
+    private String config;
 
-    public Account(Broker broker, String brokerId, String password) {
-        this.id = new AccountId(broker, brokerId);
-        this.password = password;
+    private boolean activated;
+
+    public Account(AccountId id, String config, boolean activated) {
+        this.id = id;
+        this.config = config;
+        this.activated = activated;
     }
 
-    public String password() {
-        return password;
+    public Account(AccountId id, String config) {
+        this(id, config, false);
+    }
+
+    public String config() {
+        return config;
     }
 
     public AccountId id() {
@@ -34,8 +41,20 @@ public class Account {
             '}';
     }
 
-    public void changePassword(String password) {
-        this.password = password;
+    public void changeConfig(String config) {
+        this.config = config;
+    }
+
+    public void activate() {
+        activated = true;
+    }
+
+    public void deactivate() {
+        activated = false;
+    }
+
+    public boolean isActivated() {
+        return activated;
     }
 
 }

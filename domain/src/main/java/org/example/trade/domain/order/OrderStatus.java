@@ -2,16 +2,16 @@ package org.example.trade.domain.order;
 
 public enum OrderStatus {
     created(false),
-    trading(true),
-    withdrawn(false),
-    overflow(false),
-    fulfilled(false);
+    trading(false),
+    withdrawn(true),
+    overflow(true),
+    fulfilled(true);
 
-    private final boolean canTrade;
+    private final boolean isClosed;
 
-    OrderStatus(boolean canTrade) {this.canTrade = canTrade;}
+    OrderStatus(boolean isClosed) {this.isClosed = isClosed;}
 
-    public boolean canTrade() {
-        return canTrade;
+    public boolean isClosed() {
+        return isClosed;
     }
 }

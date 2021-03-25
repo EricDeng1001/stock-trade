@@ -24,8 +24,12 @@ public class Shares implements Comparable<Shares>, ChargeUnit {
         this(BigInteger.valueOf(value));
     }
 
-    public static Shares valueOf(int i) {
-        return new Shares(1000);
+    public static Shares valueOf(long i) {
+        return new Shares(i);
+    }
+
+    public static Shares valueOf(BigInteger shares) {
+        return new Shares(shares);
     }
 
     public Shares add(Shares x) {
@@ -95,9 +99,7 @@ public class Shares implements Comparable<Shares>, ChargeUnit {
 
     @Override
     public String toString() {
-        return "Shares{" +
-            value +
-            '}';
+        return value.toString();
     }
 
     @Override

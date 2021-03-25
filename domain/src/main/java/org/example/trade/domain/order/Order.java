@@ -1,7 +1,7 @@
 package org.example.trade.domain.order;
 
 import engineering.ericdeng.architecture.domain.model.DomainEventBus;
-import engineering.ericdeng.architecture.domain.model.DomainEventPublisher;
+import engineering.ericdeng.architecture.domain.model.DomainEventSource;
 import engineering.ericdeng.architecture.domain.model.annotation.AggregateRoot;
 import engineering.ericdeng.architecture.domain.model.annotation.New;
 import engineering.ericdeng.architecture.domain.model.annotation.Rebuild;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Objects;
 
 @AggregateRoot
-public final class Order implements DomainEventPublisher<OrderTraded> {
+public final class Order extends DomainEventSource<OrderEvent> {
 
     private final OrderId id;
 
@@ -25,23 +25,45 @@ public final class Order implements DomainEventPublisher<OrderTraded> {
 
     private final List<Trade> trades;
 
+    private final Instant createdAt;
+
     private String brokerId;
 
     private OrderStatus orderStatus;
 
+    private Instant submittedAt;
+
+    private Instant closedAt;
+
     @Rebuild
     public Order(OrderId orderId, TradeRequest requirement, OrderStatus orderStatus,
-                 List<Trade> trades) {
+                 List<Trade> trades, String brokerId, Instant createdAt, Instant submittedAt, Instant closedAt) {
         this.orderStatus = orderStatus;
         this.id = orderId;
         this.requirement = requirement;
         this.trades = trades;
+        this.brokerId = brokerId;
+        this.createdAt = createdAt;
+        this.submittedAt = submittedAt;
+        this.closedAt = closedAt;
     }
 
     @New
     public Order(AccountId account, int id, @NotNull TradeRequest requirement) {
         this(new OrderId(account, LocalDate.now(), id), requirement, OrderStatus.created,
-             new ArrayList<>(4));
+             new ArrayList<>(4), null, Instant.now(), null, null);
+    }
+
+    public Instant createdAt() {
+        return createdAt;
+    }
+
+    public Instant submittedAt() {
+        return submittedAt;
+    }
+
+    public Instant closedAt() {
+        return closedAt;
     }
 
     public String brokerId() {
@@ -73,18 +95,20 @@ public final class Order implements DomainEventPublisher<OrderTraded> {
         return traded;
     }
 
-    public void trading(String brokerId) {
+    public void submitted(String brokerId) {
+        if (submittedAt != null) { return; }
         this.brokerId = brokerId;
         orderStatus = OrderStatus.trading;
+        submittedAt = Instant.now();
     }
 
     /**
      * finish this order so it can no longer be traded
-     *
-     * @param time closed time
      */
-    public void close(Instant time) {
+    public void close() {
+        if (closedAt != null) { return; }
         int i = traded().compareTo(requirement.shares());
+        closedAt = Instant.now();
         if (i == 0) {
             orderStatus = OrderStatus.fulfilled;
         } else if (i < 0) {
@@ -92,13 +116,14 @@ public final class Order implements DomainEventPublisher<OrderTraded> {
         } else {
             orderStatus = OrderStatus.overflow;
         }
-        DomainEventBus.instance().publish(new OrderFinished(time, id, orderStatus));
+        raise(new OrderFinished(closedAt, id, orderStatus));
     }
 
-    public void makeDeal(Deal deal, Instant dealtOn) {
-        Trade trade = new Trade(id, trades.size(), deal, dealtOn);
+    public void makeDeal(Deal deal, String brokerId) {
+        Instant dealtOn = Instant.now();
+        Trade trade = new Trade(brokerId, deal, dealtOn);
         trades.add(trade);
-        DomainEventBus.instance().publish(
+        raise(
             new OrderTraded(id, deal, dealtOn)
         );
     }

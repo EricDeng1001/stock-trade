@@ -1,25 +1,23 @@
 package org.example.trade.domain.order;
 
+import engineering.ericdeng.architecture.domain.model.annotation.ValueObject;
 import org.example.trade.domain.market.Shares;
 
 import java.time.Instant;
 
+@ValueObject
 public final class Trade {
 
-    private final Id id;
+    private final String brokerId;
 
     private final Deal deal;
 
     private final Instant dealtOn;
 
-    public Trade(Id id, Deal deal, Instant dealtOn) {
-        this.id = id;
+    public Trade(String brokerId, Deal deal, Instant dealtOn) {
+        this.brokerId = brokerId;
         this.deal = deal;
         this.dealtOn = dealtOn;
-    }
-
-    public Trade(OrderId id, int index, Deal deal, Instant dealtOn) {
-        this(new Id(id, index), deal, dealtOn);
     }
 
     public Instant dealtOn() {
@@ -29,13 +27,13 @@ public final class Trade {
     @Override
     public String toString() {
         return "Trade{" +
-            "id=" + id +
+            "id=" + brokerId +
             ", deal=" + deal +
             '}';
     }
 
-    public Id id() {
-        return id;
+    public String brokerId() {
+        return brokerId;
     }
 
     public Deal deal() {
@@ -44,35 +42,6 @@ public final class Trade {
 
     public Shares shares() {
         return deal.shares();
-    }
-
-    public static class Id {
-
-        private final OrderId orderId;
-
-        private final int index;
-
-        public Id(OrderId orderId, int index) {
-            this.orderId = orderId;
-            this.index = index;
-        }
-
-        public OrderId orderId() {
-            return orderId;
-        }
-
-        public int idByBroker() {
-            return index;
-        }
-
-        @Override
-        public String toString() {
-            return "Id{" +
-                "orderId=" + orderId +
-                ", index=" + index +
-                '}';
-        }
-
     }
 
 }

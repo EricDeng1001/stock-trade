@@ -9,28 +9,14 @@ import org.example.trade.domain.order.TradeSide;
 
 public final class MarketTradeRequest extends TradeRequest {
 
-    private final Price low;
-
-    private final Price high;
-
     public MarketTradeRequest(SecurityCode securityCode,
-                              Shares shares, TradeSide tradeSide, Price low, Price high) {
+                              Shares shares, TradeSide tradeSide) {
         super(securityCode, shares, tradeSide, PriceType.MARKET);
-        this.low = low;
-        this.high = high;
     }
 
     @Override
     public Money value() {
-        return switch (tradeSide) {
-            case BUY -> high.multiply(shares);
-            case SELL -> low.multiply(shares);
-        };
-    }
-
-    @Override
-    public Price price() {
-        return null;
+        return Money.ZERO;
     }
 
 }

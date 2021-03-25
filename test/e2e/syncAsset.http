@@ -1,0 +1,4 @@
+POST localhost:8080/assets/sync
+Content-Type: application/text
+
+mock user@mock broker

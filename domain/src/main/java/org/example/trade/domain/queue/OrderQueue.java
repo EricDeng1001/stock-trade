@@ -1,6 +1,7 @@
 package org.example.trade.domain.queue;
 
 import engineering.ericdeng.architecture.domain.model.annotation.AggregateRoot;
+import org.example.trade.domain.account.Account;
 import org.example.trade.domain.account.AccountId;
 import org.example.trade.domain.order.Order;
 import org.example.trade.domain.order.TradeSide;
@@ -25,6 +26,10 @@ public class OrderQueue {
         this.account = account;
         this.sells = sells;
         this.buys = buys;
+    }
+
+    public OrderQueue(AccountId account) {
+        this(account, new ConcurrentLinkedDeque<>(), new ConcurrentLinkedDeque<>());
     }
 
     public void enqueue(Order order) {

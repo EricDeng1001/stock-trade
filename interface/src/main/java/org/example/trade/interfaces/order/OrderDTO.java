@@ -1,36 +1,68 @@
 package org.example.trade.interfaces.order;
 
+import java.util.List;
+
 public class OrderDTO {
 
-    private final String orderId;
+    private String orderId;
 
-    private final String stockCode;
+    private String stockCode;
 
-    private final String shares;
+    private String shares;
 
-    private final String price;
+    private String price;
 
-    public OrderDTO(String orderId, String stockCode, String shares, String price) {
+    private List<TradeDTO> trades;
+
+    public List<TradeDTO> getTrades() {
+        return trades;
+    }
+
+    public void setTrades(List<TradeDTO> trades) {
+        this.trades = trades;
+    }
+
+    public OrderDTO() {
+    }
+
+    public OrderDTO(String orderId, String stockCode, String shares, String price, List<TradeDTO> dtos) {
         this.orderId = orderId;
         this.stockCode = stockCode;
         this.shares = shares;
         this.price = price;
+        this.trades = dtos;
     }
 
-    public String orderId() {
+    public String getOrderId() {
         return orderId;
     }
 
-    public String stockCode() {
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
+    }
+
+    public String getStockCode() {
         return stockCode;
     }
 
-    public String shares() {
+    public void setStockCode(String stockCode) {
+        this.stockCode = stockCode;
+    }
+
+    public String getShares() {
         return shares;
     }
 
-    public String price() {
+    public void setShares(String shares) {
+        this.shares = shares;
+    }
+
+    public String getPrice() {
         return price;
+    }
+
+    public void setPrice(String price) {
+        this.price = price;
     }
 
 }

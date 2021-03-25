@@ -12,8 +12,10 @@
     <module>domain</module>
     <module>application</module>
     <module>interface</module>
-    <module>infrastructure</module>
+    <module>persistence</module>
     <module>adapter</module>
+    <module>xtp-integration</module>
+    <module>mock-broker-integration</module>
   </modules>
 
   <properties>
@@ -33,15 +35,26 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <version>2.3.0.RELEASE</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+      <version>2.3.0.RELEASE</version>
+    </dependency>
+    <dependency>
       <groupId>org.jetbrains</groupId>
       <artifactId>annotations</artifactId>
       <version>20.1.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.example</groupId>
-      <artifactId>money</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-devtools</artifactId>
+      <version>2.3.0.RELEASE</version>
     </dependency>
   </dependencies>
 
@@ -63,9 +76,49 @@
         <version>${project.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.example</groupId>
+        <artifactId>trade.adapter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.example</groupId>
+        <artifactId>trade.persistence</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
         <version>1.7.30</version>
+      </dependency>
+      <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId>
+        <version>1.2.3</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+        <version>2.3.0.RELEASE</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-jpa</artifactId>
+        <version>2.3.0.RELEASE</version>
+      </dependency>
+      <dependency>
+        <groupId>com.h2database</groupId>
+        <artifactId>h2</artifactId>
+        <version>1.4.200</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.protobuf</groupId>
+        <artifactId>protobuf-java</artifactId>
+        <version>3.6.1</version>
+      </dependency>
+      <dependency>
+        <groupId>com.googlecode.protobuf-java-format</groupId>
+        <artifactId>protobuf-java-format</artifactId>
+        <version>1.2</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

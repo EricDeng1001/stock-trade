@@ -43,8 +43,6 @@ public abstract class TradeRequest {
 
     public abstract Money value();
 
-    public abstract Price price();
-
     @Override
     public String toString() {
         return "TradeRequest{" +

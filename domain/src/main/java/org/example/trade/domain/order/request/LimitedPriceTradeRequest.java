@@ -35,9 +35,4 @@ public final class LimitedPriceTradeRequest extends TradeRequest {
         return targetPrice.multiply(shares);
     }
 
-    @Override
-    public Price price() {
-        return targetPrice;
-    }
-
 }

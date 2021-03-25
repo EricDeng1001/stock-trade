@@ -3,6 +3,7 @@ package org.example.trade.domain.order;
 import org.example.trade.domain.account.AccountId;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class OrderId {
 
@@ -16,6 +17,10 @@ public class OrderId {
         this.accountId = accountId;
         this.tradeDay = tradeDay;
         this.uid = uid;
+    }
+
+    public static OrderId valueOf(AccountId accountId, LocalDate tradeDay, int uid) {
+        return new OrderId(accountId, tradeDay, uid);
     }
 
     public LocalDate tradeDay() {
@@ -37,6 +42,19 @@ public class OrderId {
             ", tradeDay=" + tradeDay +
             ", id='" + uid + '\'' +
             '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) { return true; }
+        if (o == null || getClass() != o.getClass()) { return false; }
+        OrderId orderId = (OrderId) o;
+        return uid == orderId.uid && accountId.equals(orderId.accountId) && tradeDay.equals(orderId.tradeDay);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(accountId, tradeDay, uid);
     }
 
 }

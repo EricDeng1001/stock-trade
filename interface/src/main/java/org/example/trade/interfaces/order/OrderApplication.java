@@ -6,8 +6,12 @@ public interface OrderApplication {
 
     OrderDTO queryOrder(String orderIdDTO);
 
-    void enqueueOrder(String orderIdDTO);
+    boolean enqueueOrder(String orderIdDTO);
 
-    void dequeueOrder(String orderIdDTO);
+    boolean enqueueAll(String accountId);
+
+    boolean dequeueOrder(String orderIdDTO);
+
+    Iterable<OrderDTO> getAll();
 
 }

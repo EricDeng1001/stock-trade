@@ -1,31 +1,45 @@
 package org.example.trade.interfaces.order;
 
-import java.math.BigDecimal;
-
 public class CreateOrderCommand {
 
-    private final String stockCode;
+    private String stockCode;
 
-    private final long shares;
+    private long shares;
 
-    private final BigDecimal price;
+    private String price;
 
-    public CreateOrderCommand(String stockCode, long shares, BigDecimal price) {
-        this.stockCode = stockCode;
-        this.shares = shares;
-        this.price = price;
-    }
+    private String accountId;
 
-    public String stockCode() {
+    public String getStockCode() {
         return stockCode;
     }
 
-    public long shares() {
+    public long getShares() {
         return shares;
     }
 
-    public BigDecimal price() {
+    public String getPrice() {
         return price;
+    }
+
+    public String getAccountId() {
+        return accountId;
+    }
+
+    public void setStockCode(String stockCode) {
+        this.stockCode = stockCode;
+    }
+
+    public void setShares(long shares) {
+        this.shares = shares;
+    }
+
+    public void setPrice(String price) {
+        this.price = price;
+    }
+
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
     }
 
 }
