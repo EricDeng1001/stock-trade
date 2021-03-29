@@ -38,10 +38,10 @@ public class AccountId {
 
     @Override
     public String toString() {
-        return "Id{" +
-            "broker=" + broker +
-            ", brokerId='" + brokerId + '\'' +
-            '}';
+        return "AccountId" +
+            "(" + broker +
+            ", '" + brokerId + '\'' +
+            ')';
     }
 
 }

@@ -13,8 +13,8 @@ import com.zts.xtp.trade.spi.TradeSpi;
 import org.example.finance.domain.Price;
 import org.example.trade.application.DealService;
 import org.example.trade.application.RegisterService;
-import org.example.trade.domain.account.*;
-import org.example.trade.domain.account.asset.Asset;
+import org.example.trade.domain.account.AccountId;
+import org.example.trade.domain.account.XTPAccount;
 import org.example.trade.domain.account.asset.AssetInfo;
 import org.example.trade.domain.market.Broker;
 import org.example.trade.domain.market.Shares;
@@ -32,12 +32,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component("xtp-single")
-public class XTPSingleAccountSingleAccountBrokerServiceAdapter extends SingleAccountBrokerService
+public class XTPSingleAccountSingleServiceAdapter extends SingleAccountBrokerService
     implements TradeSpi {
 
     private static final Broker broker = Broker.valueOf("xtp");
 
-    private static final Logger log = LoggerFactory.getLogger(XTPSingleAccountSingleAccountBrokerServiceAdapter.class);
+    private static final Logger log = LoggerFactory.getLogger(XTPSingleAccountSingleServiceAdapter.class);
 
     private final Map<OrderId, String> idMap = new ConcurrentHashMap<>();
 
@@ -52,7 +52,7 @@ public class XTPSingleAccountSingleAccountBrokerServiceAdapter extends SingleAcc
     private volatile String sessionId;
 
     @Autowired
-    public XTPSingleAccountSingleAccountBrokerServiceAdapter(
+    public XTPSingleAccountSingleServiceAdapter(
         RegisterService registerService,
         DealService dealService,
         NodeConfig nodeConfig) {
@@ -82,12 +82,12 @@ public class XTPSingleAccountSingleAccountBrokerServiceAdapter extends SingleAcc
     }
 
     @Override
-    protected AssetInfo queryAssetImpl() {
+    public AssetInfo queryAsset() {
         return null;
     }
 
     @Override
-    public void submitImpl(Order order) {
+    public void submit(Order order) {
         OrderInsertRequest orderInsertRequest = new OrderInsertRequest();
         String s = this.tradeApi.insertOrder(orderInsertRequest, sessionId);
         if (s.equals("0")) {
@@ -100,7 +100,7 @@ public class XTPSingleAccountSingleAccountBrokerServiceAdapter extends SingleAcc
     }
 
     @Override
-    public void withdrawImpl(OrderId id) {
+    public void withdraw(OrderId id) {
         String s = this.tradeApi.cancelOrder(idMap.get(id), sessionId);
         if (s.equals("0")) {
             log.error("order {} withdraw failed, reason={}", s, tradeApi.getApiLastError());

@@ -11,6 +11,7 @@ import java.util.Map;
 public class AssetTranslator {
 
     public static AssetDTO from(Asset asset) {
+        if (asset == null) return null;
         AssetDTO dto = new AssetDTO();
         dto.setUsableCash(asset.usableCash().toString());
         HashMap<String, String> positions = new HashMap<>();

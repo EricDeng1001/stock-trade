@@ -42,6 +42,7 @@ public class AccountApplicationAdapter implements AccountApplication {
     }
 
     @Override
+    @PatchMapping("/")
     public AccountDTO changeConfig(String accountId, String config) {
         return null;
     }

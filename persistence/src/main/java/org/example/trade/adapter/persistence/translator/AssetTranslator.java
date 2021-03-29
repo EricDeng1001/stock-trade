@@ -5,7 +5,6 @@ import org.example.trade.adapter.persistence.model.account.asset.Asset;
 import org.example.trade.adapter.persistence.model.account.asset.CashResource;
 import org.example.trade.adapter.persistence.model.account.asset.PositionResource;
 import org.example.trade.adapter.persistence.model.account.asset.Resource;
-import org.example.trade.adapter.persistence.model.order.OrderId;
 import org.example.trade.domain.market.SecurityCode;
 import org.example.trade.domain.market.Shares;
 

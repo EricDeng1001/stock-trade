@@ -29,10 +29,10 @@ public class Deal {
 
     @Override
     public String toString() {
-        return "Deal{" +
-            "shares=" + shares +
-            ", price=" + price +
-            '}';
+        return "Deal" +
+            "(" + shares +
+            ", " + price +
+            ')';
     }
 
 }

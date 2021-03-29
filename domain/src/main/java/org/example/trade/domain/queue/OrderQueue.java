@@ -1,12 +1,12 @@
 package org.example.trade.domain.queue;
 
 import engineering.ericdeng.architecture.domain.model.annotation.AggregateRoot;
-import org.example.trade.domain.account.Account;
 import org.example.trade.domain.account.AccountId;
+import org.example.trade.domain.market.SecurityCode;
 import org.example.trade.domain.order.Order;
-import org.example.trade.domain.order.TradeSide;
 
-import java.util.Queue;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
@@ -17,32 +17,48 @@ public class OrderQueue {
 
     private final AccountId account;
 
-    private final Queue<Order> sells;
+    private final Map<SecurityCode, ConcurrentLinkedDeque<Order>> sells;
 
-    private final Queue<Order> buys;
+    private final ConcurrentLinkedDeque<Order> buys;
 
     public OrderQueue(AccountId account,
-                      ConcurrentLinkedDeque<Order> sells, ConcurrentLinkedDeque<Order> buys) {
+                      ConcurrentHashMap<SecurityCode, ConcurrentLinkedDeque<Order>> sells,
+                      ConcurrentLinkedDeque<Order> buys) {
         this.account = account;
         this.sells = sells;
         this.buys = buys;
     }
 
     public OrderQueue(AccountId account) {
-        this(account, new ConcurrentLinkedDeque<>(), new ConcurrentLinkedDeque<>());
+        this(account, new ConcurrentHashMap<>(), new ConcurrentLinkedDeque<>());
     }
 
     public void enqueue(Order order) {
         switch (order.requirement().tradeSide()) {
             case BUY -> buys.add(order);
-            case SELL -> sells.add(order);
+            case SELL -> {
+                SecurityCode key = order.requirement().securityCode();
+                ConcurrentLinkedDeque<Order> deque = sells.get(key);
+                if (deque == null) {
+                    deque = new ConcurrentLinkedDeque<>();
+                    sells.put(key, deque);
+                }
+                deque.add(order);
+            }
         }
     }
 
     public boolean dequeue(Order order) {
         return switch (order.requirement().tradeSide()) {
             case BUY -> buys.remove(order);
-            case SELL -> sells.remove(order);
+            case SELL -> {
+                SecurityCode key = order.requirement().securityCode();
+                ConcurrentLinkedDeque<Order> deque = sells.get(key);
+                if (deque == null) {
+                    yield false;
+                }
+                yield deque.remove(order);
+            }
         };
     }
 
@@ -50,18 +66,28 @@ public class OrderQueue {
         return account;
     }
 
-    public boolean isEmpty(TradeSide tradeSide) {
-        return switch (tradeSide) {
-            case BUY -> buys.isEmpty();
-            case SELL -> sells.isEmpty();
-        };
+    public Order peek() {
+        return buys.peek();
     }
 
-    public Order peek(TradeSide tradeSide) {
-        return switch (tradeSide) {
-            case BUY -> buys.peek();
-            case SELL -> sells.peek();
-        };
+    public Order peek(SecurityCode securityCode) {
+        ConcurrentLinkedDeque<Order> deque = sells.get(securityCode);
+        if (deque == null) {
+            return null;
+        }
+        return deque.peek();
+    }
+
+    public boolean isEmpty(SecurityCode securityCode) {
+        ConcurrentLinkedDeque<Order> deque = sells.get(securityCode);
+        if (deque == null) {
+            return true;
+        }
+        return deque.isEmpty();
+    }
+
+    public boolean isEmpty() {
+        return buys.isEmpty();
     }
 
 }

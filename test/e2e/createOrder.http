@@ -15,7 +15,7 @@ Content-Type: application/json
 {
   "stockCode": "stock 1",
   "shares": 10,
-  "price": "1.900",
+  "price": "2.000",
   "accountId": "mock user@mock broker"
 }
 
@@ -30,18 +30,18 @@ Content-Type: application/json
   "accountId": "mock user@mock broker"
 }
 
-####
+#####
 POST localhost:8080/orders/
 Content-Type: application/json
 
 {
   "stockCode": "stock 2",
   "shares": 10,
-  "price": "1.900",
+  "price": "2.000",
   "accountId": "mock user@mock broker"
 }
 
-###
+####
 POST localhost:8080/orders/
 Content-Type: application/json
 
@@ -59,7 +59,7 @@ Content-Type: application/json
 {
   "stockCode": "stock 3",
   "shares": 10,
-  "price": "1.900",
+  "price": "2.000",
   "accountId": "mock user@mock broker"
 }
 ###
@@ -80,7 +80,7 @@ Content-Type: application/json
 {
   "stockCode": "stock 4",
   "shares": 10,
-  "price": "1.900",
+  "price": "2.000",
   "accountId": "mock user@mock broker"
 }
 ###
@@ -101,7 +101,7 @@ Content-Type: application/json
 {
   "stockCode": "stock 5",
   "shares": 10,
-  "price": "1.900",
+  "price": "2.000",
   "accountId": "mock user@mock broker"
 }
 ###
@@ -122,6 +122,6 @@ Content-Type: application/json
 {
   "stockCode": "stock 6",
   "shares": 10,
-  "price": "1.900",
+  "price": "2.000",
   "accountId": "mock user@mock broker"
 }

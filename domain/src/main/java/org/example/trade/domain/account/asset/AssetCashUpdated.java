@@ -12,9 +12,7 @@ public class AssetCashUpdated extends AssetUpdated {
     private final Money nowAvailable;
 
     public AssetCashUpdated(Instant occurredOn, AccountId id, Money amount, Money nowAvailable) {
-        super(occurredOn, id);
-        this.amount = amount;
-        this.nowAvailable = nowAvailable;
+        this(occurredOn, id, amount, nowAvailable, AssetUpdateType.TradeDeal);
     }
 
     public AssetCashUpdated(Instant occurredOn, AccountId id, Money amount, Money nowAvailable, AssetUpdateType type) {

@@ -64,7 +64,7 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
     }
 
     @Override
-    public void submitImpl(Order order) {
+    public void submit(Order order) {
         cancels.put(order.id(), true);
         TradeRequest requirement = order.requirement();
         dealService.orderSubmitted(order.id(), UUID.randomUUID().toString());
@@ -104,18 +104,16 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
     }
 
     @Override
-    public void withdrawImpl(OrderId order) {
+    public void withdraw(OrderId order) {
         cancels.put(order, false);
         scheduledExecutorService.schedule(
-            () -> {
-                dealService.finish(order);
-            },
+            () -> dealService.finish(order),
             1,
             TimeUnit.MILLISECONDS);
     }
 
     @Override
-    protected AssetInfo queryAssetImpl() {
+    public AssetInfo queryAsset() {
         ConcurrentHashMap<SecurityCode, Shares> usablePositions = new ConcurrentHashMap<>();
         for (String s : mockStocks) {
             if (ThreadLocalRandom.current().nextBoolean()) {
@@ -123,7 +121,9 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
                                     Shares.valueOf(ThreadLocalRandom.current().nextInt(0, 5)));
             }
         }
-        Money usableCash = Money.valueOf(ThreadLocalRandom.current().nextInt(100, 400));
+        usablePositions.put(SecurityCode.valueOf("stock 2"),
+                            Shares.valueOf(ThreadLocalRandom.current().nextInt(10, 20)));
+        Money usableCash = Money.valueOf(ThreadLocalRandom.current().nextInt(200, 400));
         return new AssetInfo(usablePositions, usableCash);
     }
 

@@ -8,12 +8,8 @@ import org.example.trade.domain.queue.OrderQueueRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional(isolation= Isolation.SERIALIZABLE, propagation = Propagation.REQUIRES_NEW)
 public class RegisterService {
 
     private static final Logger log = LoggerFactory.getLogger(RegisterService.class);
@@ -23,7 +19,8 @@ public class RegisterService {
     private final OrderQueueRepository orderQueueRepository;
 
     public RegisterService(AccountRepository accountRepository,
-                           OrderQueueRepository orderQueueRepository) {this.accountRepository = accountRepository;
+                           OrderQueueRepository orderQueueRepository) {
+        this.accountRepository = accountRepository;
         this.orderQueueRepository = orderQueueRepository;
     }
 

@@ -19,26 +19,14 @@ public abstract class SingleAccountBrokerService {
 
     public abstract boolean deactivate();
 
-    public void submit(Order order) {
-        submitImpl(order);
-    }
-
-    public void withdraw(OrderId order) {
-        withdrawImpl(order);
-    }
-
-    public AssetInfo queryAsset() {
-        return queryAssetImpl();
-    }
-
     public AccountId supportedAccount() {
         return supportedAccount;
     }
 
-    protected abstract AssetInfo queryAssetImpl();
+    public abstract AssetInfo queryAsset();
 
-    protected abstract void submitImpl(Order order);
+    public abstract void submit(Order order);
 
-    protected abstract void withdrawImpl(OrderId order);
+    public abstract void withdraw(OrderId order);
 
 }

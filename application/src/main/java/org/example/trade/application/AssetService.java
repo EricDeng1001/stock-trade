@@ -8,64 +8,63 @@ import org.example.trade.domain.account.asset.AssetInfo;
 import org.example.trade.domain.account.asset.AssetRepository;
 import org.example.trade.domain.market.SecurityCode;
 import org.example.trade.domain.market.Shares;
-import org.example.trade.domain.order.*;
+import org.example.trade.domain.order.OrderFinished;
+import org.example.trade.domain.order.OrderId;
+import org.example.trade.domain.order.OrderTraded;
+import org.example.trade.domain.order.OrderUpdated;
 import org.example.trade.infrastructure.SingleAccountBrokerService;
 import org.example.trade.infrastructure.SingleAccountBrokerServiceFactory;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Service
-@Transactional(isolation= Isolation.SERIALIZABLE, propagation = Propagation.REQUIRES_NEW)
 public class AssetService extends DomainEventSubscriber<OrderUpdated> {
 
     private static final Logger log = LoggerFactory.getLogger(AssetService.class);
 
     private final AssetRepository assetRepository;
 
-    private final OrderRepository orderRepository;
-
     private final SingleAccountBrokerServiceFactory factory;
 
+    private final ConcurrentHashMap<OrderId, ReadWriteLock> handlingLocks = new ConcurrentHashMap<>();
+
     @Autowired
-    public AssetService(AssetRepository assetRepository, OrderRepository orderRepository,
+    public AssetService(AssetRepository assetRepository,
                         SingleAccountBrokerServiceFactory factory) {
         this.assetRepository = assetRepository;
-        this.orderRepository = orderRepository;
         this.factory = factory;
         DomainEventBus.instance().subscribe(this);
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handle(OrderUpdated orderEvent) {
-        Order order = orderRepository.findById(orderEvent.orderId());
-        Asset asset = assetRepository.findById(order.account());
-        if (asset == null) { throw new NoSuchElementException(); }
         if (orderEvent instanceof OrderTraded) {
-            if (!asset.consume(order.id(), ((OrderTraded) orderEvent).deal())) {
-                log.warn("券商交易数量超过分配数量，现有资源: {}", asset.resourceOf(orderEvent.orderId()));
-            }
+            handleOrderTraded((OrderTraded) orderEvent);
         } else if (orderEvent instanceof OrderFinished) {
-            asset.reclaim(order.id());
-            log.info("回收订单{} 的资源", order.id());
+            handleOrderFinished((OrderFinished) orderEvent);
         }
-        assetRepository.save(asset);
-        DomainEventBus.instance().publish(asset);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Asset queryAsset(AccountId accountId) {
         return assetRepository.findById(accountId);
     }
 
+    @Transactional
     public void syncAssetFromBroker(AccountId accountId) {
-        log.info("开始同步账户资产: {}", accountId);
         SingleAccountBrokerService service = factory.getOrNew(accountId);
         AssetInfo brokerAssetInfo = service.queryAsset();
         Asset asset = assetRepository.findById(accountId);
@@ -78,8 +77,51 @@ public class AssetService extends DomainEventSubscriber<OrderUpdated> {
             }
         }
         assetRepository.save(asset);
-        log.info("完成同步账户资产: {}, {}", accountId, asset);
+        log.info("完成同步账户资产: {}", accountId);
         DomainEventBus.instance().publish(asset);
+    }
+
+    private void handleOrderFinished(OrderFinished orderEvent) {
+        OrderId orderId = orderEvent.orderId();
+        Lock writeLock = handlingLocks.computeIfAbsent(orderId, o -> new ReentrantReadWriteLock()).writeLock();
+        try {
+            writeLock.lock();
+            Asset asset = getAsset(orderId);
+            asset.reclaim(orderId);
+            assetRepository.save(asset);
+            handlingLocks.remove(orderId);
+            log.info("回收订单{} 的资源", orderId);
+            DomainEventBus.instance().publish(asset);
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    private void handleOrderTraded(OrderTraded orderEvent) {
+        OrderId orderId = orderEvent.orderId();
+        Lock readLock = handlingLocks.computeIfAbsent(orderId, o -> new ReentrantReadWriteLock()).readLock();
+        try {
+            readLock.lock();
+            Asset asset = getAsset(orderId);
+            boolean overDealt = !asset.consume(orderId, orderEvent.deal());
+            assetRepository.save(asset);
+            if (overDealt) {
+                log.warn("券商交易数量超过分配数量，{} 现有资源: {}", orderId, asset.resourceOf(orderId));
+            }
+            log.info("asset updated for {}", orderId.uid());
+            DomainEventBus.instance().publish(asset);
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    @NotNull
+    private Asset getAsset(OrderId orderId) {
+        log.info("try to get lock for {}", orderId.uid());
+        Asset asset = assetRepository.findById(orderId.accountId());
+        log.info("get lock for {}", orderId.uid());
+        if (asset == null) { throw new NoSuchElementException(); }
+        return asset;
     }
 
 }

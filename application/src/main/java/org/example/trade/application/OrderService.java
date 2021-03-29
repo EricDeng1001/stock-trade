@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +24,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
-@Transactional(isolation= Isolation.SERIALIZABLE, propagation = Propagation.REQUIRES_NEW)
 public class OrderService {
 
     private static final Logger log = LoggerFactory.getLogger(OrderService.class);
@@ -56,7 +54,7 @@ public class OrderService {
             orderRepository.nextId(),
             tradeRequest
         );
-        log.info("订单创建，类型: {}", tradeRequest.getClass());
+        log.info("订单创建: {}", order.id());
         orderRepository.save(order);
         return order.id();
     }
@@ -65,20 +63,23 @@ public class OrderService {
         return orderRepository.findById(id);
     }
 
+    @Transactional
     public boolean enqueueOrder(OrderId id) {
         Order order = orderRepository.findById(id);
         return enqueue(order);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     private boolean enqueue(Order order) {
         if (order == null) { throw new NoSuchElementException("订单不存在"); }
         if (order.status() != OrderStatus.created) {
             log.warn("用户在尝试将非新建订单加入队列");
-            return false; }
+            return false;
+        }
         Asset asset = assetRepository.findById(order.account());
         Resource<?> r = asset.tryAllocate(order);
         if (r == null) {
-            log.info("将订单加入到队列");
+            log.info("将订单加入到队列: {}", order.id());
             OrderQueue orderQueue = orderQueueRepository.getInstance(order.account());
             orderQueue.enqueue(order);
         } else {
@@ -100,8 +101,9 @@ public class OrderService {
         }
     }
 
+    @Transactional
     public boolean enqueueAll(AccountId accountId) {
-        List<Order> orders = orderRepository.findByAccount(accountId);
+        List<Order> orders = orderRepository.findNewByAccount(accountId);
         for (Order o : orders) {
             if (!enqueue(o)) {
                 log.warn("执行全部入队操作过程未完全执行");

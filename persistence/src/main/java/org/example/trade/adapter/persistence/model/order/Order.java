@@ -31,8 +31,19 @@ public class Order {
 
     private OrderStatus status;
 
+    @Version
+    private long version;
+
     @ElementCollection(fetch = FetchType.EAGER)
     private List<Trade> trades;
+
+    public long getVersion() {
+        return version;
+    }
+
+    public void setVersion(long version) {
+        this.version = version;
+    }
 
     public String getBrokerId() {
         return brokerId;

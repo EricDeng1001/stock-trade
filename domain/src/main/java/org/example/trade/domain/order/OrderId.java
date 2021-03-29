@@ -37,11 +37,11 @@ public class OrderId {
 
     @Override
     public String toString() {
-        return "OrderId{" +
-            "account=" + accountId +
-            ", tradeDay=" + tradeDay +
-            ", id='" + uid + '\'' +
-            '}';
+        return "OrderId" +
+            "(" + accountId +
+            ", " + tradeDay +
+            ", '" + uid + '\'' +
+            ')';
     }
 
     @Override

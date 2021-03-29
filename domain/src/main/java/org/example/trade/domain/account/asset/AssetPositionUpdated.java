@@ -16,10 +16,7 @@ public class AssetPositionUpdated extends AssetUpdated {
 
     public AssetPositionUpdated(Instant occurredOn, AccountId id, SecurityCode securityCode,
                                 Shares amount, Shares nowUsable) {
-        super(occurredOn, id);
-        this.securityCode = securityCode;
-        this.amount = amount;
-        this.nowUsable = nowUsable;
+        this(occurredOn, id, securityCode, amount, nowUsable, AssetUpdateType.TradeDeal);
     }
 
     public AssetPositionUpdated(Instant occurredOn, AccountId id, SecurityCode securityCode,

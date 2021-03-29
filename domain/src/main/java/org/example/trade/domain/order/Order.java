@@ -1,10 +1,10 @@
 package org.example.trade.domain.order;
 
-import engineering.ericdeng.architecture.domain.model.DomainEventBus;
 import engineering.ericdeng.architecture.domain.model.DomainEventSource;
 import engineering.ericdeng.architecture.domain.model.annotation.AggregateRoot;
 import engineering.ericdeng.architecture.domain.model.annotation.New;
 import engineering.ericdeng.architecture.domain.model.annotation.Rebuild;
+import org.example.finance.domain.Money;
 import org.example.trade.domain.account.AccountId;
 import org.example.trade.domain.market.Shares;
 import org.example.trade.domain.order.request.TradeRequest;
@@ -35,6 +35,12 @@ public final class Order extends DomainEventSource<OrderEvent> {
 
     private Instant closedAt;
 
+    private Shares nonRecordedShares;
+
+    private Money nonRecordedCash;
+
+    private long version;
+
     @Rebuild
     public Order(OrderId orderId, TradeRequest requirement, OrderStatus orderStatus,
                  List<Trade> trades, String brokerId, Instant createdAt, Instant submittedAt, Instant closedAt) {
@@ -52,6 +58,10 @@ public final class Order extends DomainEventSource<OrderEvent> {
     public Order(AccountId account, int id, @NotNull TradeRequest requirement) {
         this(new OrderId(account, LocalDate.now(), id), requirement, OrderStatus.created,
              new ArrayList<>(4), null, Instant.now(), null, null);
+    }
+
+    public long version() {
+        return version;
     }
 
     public Instant createdAt() {
@@ -88,6 +98,14 @@ public final class Order extends DomainEventSource<OrderEvent> {
     }
 
     public Shares traded() {
+        Shares traded = Shares.ZERO;
+        for (Trade trade : trades) {
+            traded = traded.add(trade.shares());
+        }
+        return traded;
+    }
+
+    public Shares tradedValue() {
         Shares traded = Shares.ZERO;
         for (Trade trade : trades) {
             traded = traded.add(trade.shares());
@@ -163,6 +181,10 @@ public final class Order extends DomainEventSource<OrderEvent> {
 
     public boolean isTrading() {
         return orderStatus == OrderStatus.trading;
+    }
+
+    public void setVersion(long version) {
+        this.version = version;
     }
 
 }

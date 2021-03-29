@@ -6,6 +6,7 @@ import org.example.trade.adapter.persistence.translator.OrderTranslator;
 import org.example.trade.domain.account.AccountId;
 import org.example.trade.domain.order.OrderId;
 import org.example.trade.domain.order.OrderRepository;
+import org.example.trade.domain.order.OrderStatus;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -50,8 +51,8 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public List<org.example.trade.domain.order.Order> findByAccount(AccountId accountId) {
-        return orderRepository.findAllByIdAccountId(AccountTranslator.from(accountId))
+    public List<org.example.trade.domain.order.Order> findNewByAccount(AccountId accountId) {
+        return orderRepository.findAllByIdAccountIdAndStatus(AccountTranslator.from(accountId), OrderStatus.created)
             .stream().map(OrderTranslator::from)
             .collect(Collectors.toList());
     }
