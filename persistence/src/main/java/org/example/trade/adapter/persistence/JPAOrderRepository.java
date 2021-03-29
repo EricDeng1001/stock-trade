@@ -14,4 +14,5 @@ public interface JPAOrderRepository extends JpaRepository<Order, OrderId> {
 
     List<Order> findAllByIdAccountIdAndStatus(AccountId id, OrderStatus status);
 
+    List<Order> findAllByIdAccountId(AccountId accountId);
 }

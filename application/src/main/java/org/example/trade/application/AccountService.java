@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.NoSuchElementException;
 
 @Service
-@Transactional
 public class AccountService {
 
     private final AccountRepository accountRepository;
@@ -31,6 +30,7 @@ public class AccountService {
         this.assetService = assetService;
     }
 
+    @Transactional
     public boolean activateAccount(AccountId accountId, String config) {
         Account account = accountRepository.findById(accountId);
         if (account == null) {
@@ -49,6 +49,7 @@ public class AccountService {
         return false;
     }
 
+    @Transactional
     public boolean deactivate(AccountId accountId) {
         SingleAccountBrokerService service = factory.getOrNew(accountId);
         Account account = accountRepository.findById(accountId);
@@ -62,6 +63,13 @@ public class AccountService {
             return true;
         }
         return false;
+    }
+
+    @Transactional
+    public void changeConfig(AccountId accountId, String config) {
+        Account account = accountRepository.findById(accountId);
+        account.changeConfig(config);
+        accountRepository.save(account);
     }
 
     public Collection<Account> getAll() {

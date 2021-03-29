@@ -69,6 +69,10 @@ public class OrderService {
         return enqueue(order);
     }
 
+    public List<Order> queryOrder(AccountId accountId) {
+        return orderRepository.findAllByAccount(accountId);
+    }
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     private boolean enqueue(Order order) {
         if (order == null) { throw new NoSuchElementException("订单不存在"); }

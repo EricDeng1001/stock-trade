@@ -5,4 +5,5 @@ public interface AssetApplication {
     AssetDTO queryAsset(String accountId);
 
     void syncAsset(String accountId);
+
 }

@@ -10,10 +10,13 @@ import org.example.trade.domain.order.OrderId;
 import org.example.trade.interfaces.order.CreateOrderCommand;
 import org.example.trade.interfaces.order.OrderApplication;
 import org.example.trade.interfaces.order.OrderDTO;
+import org.example.trade.interfaces.order.TradeDTO;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/orders")
@@ -37,9 +40,25 @@ public class OrderApplicationAdapter implements OrderApplication {
 
     @Override
     @GetMapping("/{id}")
-    public OrderDTO queryOrder(@PathVariable("id") String orderIdDTO) {
-        OrderId orderId = OrderIdTranslator.from(orderIdDTO);
+    public OrderDTO queryOrder(@PathVariable String id) {
+        OrderId orderId = OrderIdTranslator.from(id);
         return OrderTranslator.from(orderService.queryOrder(orderId));
+    }
+
+    @Override
+    @GetMapping("/account/{accountId}")
+    public List<OrderDTO> queryOrdersOfAccount(@PathVariable String accountId) {
+        return orderService.queryOrder(AccountIdTranslator.from(accountId))
+            .stream().map(OrderTranslator::from)
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    @GetMapping("/account/{accountId}/trades")
+    public List<TradeDTO> queryTradesOfAccount(String accountId) {
+        return queryOrdersOfAccount(accountId).stream().map(
+            o -> o.getTrades().stream()
+        ).reduce(Stream::concat).orElse(Stream.empty()).collect(Collectors.toList());
     }
 
     @Override

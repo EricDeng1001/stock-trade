@@ -57,4 +57,11 @@ public class OrderRepositoryImpl implements OrderRepository {
             .collect(Collectors.toList());
     }
 
+    @Override
+    public List<org.example.trade.domain.order.Order> findAllByAccount(AccountId accountId) {
+        return orderRepository.findAllByIdAccountId(AccountTranslator.from(accountId))
+            .stream().map(OrderTranslator::from)
+            .collect(Collectors.toList());
+    }
+
 }
