@@ -59,11 +59,13 @@ public class XTPSingleAccountSingleServiceAdapter extends SingleAccountBrokerSer
         super(new AccountId(broker, nodeConfig.username()), registerService);
         this.dealService = dealService;
         this.nodeConfig = nodeConfig;
+        this.sessionId = "0";
         this.tradeApi = new TradeApi(this);
     }
 
     @Override
     public boolean activate(String config) {
+        if (!this.sessionId.equals("0")) return true;
         this.registeredAccount = new XTPAccount(supportedAccount, config);
         tradeApi.init(nodeConfig.clientId(), registeredAccount.tradeKey(),
                       nodeConfig.logFolder(), XtpLogLevel.XTP_LOG_LEVEL_ERROR, JniLogLevel.JNI_LOG_LEVEL_ERROR,
@@ -78,7 +80,13 @@ public class XTPSingleAccountSingleServiceAdapter extends SingleAccountBrokerSer
 
     @Override
     public boolean deactivate() {
-        return tradeApi.logout(sessionId) == 0;
+        if (this.sessionId.equals("0")) return true;
+        int logout = tradeApi.logout(sessionId);
+        if (logout == 0) {
+            this.sessionId = "0";
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -87,16 +95,17 @@ public class XTPSingleAccountSingleServiceAdapter extends SingleAccountBrokerSer
     }
 
     @Override
-    public void submit(Order order) {
+    public String submit(Order order) {
         OrderInsertRequest orderInsertRequest = new OrderInsertRequest();
         String s = this.tradeApi.insertOrder(orderInsertRequest, sessionId);
         if (s.equals("0")) {
             log.error("order {} submit failed, reason={}", order, tradeApi.getApiLastError());
+            // TODO failure recover
         } else {
             log.info("order {} submitted", order);
             idMap.put(order.id(), s);
-            dealService.orderSubmitted(order.id(), s);
         }
+        return s;
     }
 
     @Override
@@ -104,6 +113,7 @@ public class XTPSingleAccountSingleServiceAdapter extends SingleAccountBrokerSer
         String s = this.tradeApi.cancelOrder(idMap.get(id), sessionId);
         if (s.equals("0")) {
             log.error("order {} withdraw failed, reason={}", s, tradeApi.getApiLastError());
+            // TODO failure recover
         } else {
             log.info("order {} withdrawn", s);
             dealService.finish(id);

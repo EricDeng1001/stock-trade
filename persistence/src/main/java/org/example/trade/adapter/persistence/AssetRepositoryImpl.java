@@ -30,4 +30,9 @@ public class AssetRepositoryImpl implements AssetRepository {
         assetRepository.save(AssetTranslator.from(asset));
     }
 
+    @Override
+    public boolean exists(AccountId id) {
+        return assetRepository.existsById(AccountTranslator.from(id));
+    }
+
 }

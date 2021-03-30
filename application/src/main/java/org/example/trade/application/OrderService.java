@@ -47,8 +47,7 @@ public class OrderService {
     }
 
     public OrderId createOrder(TradeRequest tradeRequest, AccountId account) {
-        Asset asset = assetRepository.findById(account);
-        if (asset == null) { throw new IllegalArgumentException("所选账户不存在或没有资产信息"); }
+        if (!assetRepository.exists(account)) { throw new IllegalArgumentException("所选账户不存在或没有资产信息"); }
         Order order = new Order(
             account,
             orderRepository.nextId(),
@@ -63,9 +62,9 @@ public class OrderService {
         return orderRepository.findById(id);
     }
 
-    @Transactional
     public boolean enqueueOrder(OrderId id) {
         Order order = orderRepository.findById(id);
+        if (order == null) { throw new NoSuchElementException("订单不存在"); }
         return enqueue(order);
     }
 
@@ -75,7 +74,6 @@ public class OrderService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     private boolean enqueue(Order order) {
-        if (order == null) { throw new NoSuchElementException("订单不存在"); }
         if (order.status() != OrderStatus.created) {
             log.warn("用户在尝试将非新建订单加入队列");
             return false;
@@ -105,16 +103,16 @@ public class OrderService {
         }
     }
 
-    @Transactional
     public boolean enqueueAll(AccountId accountId) {
         List<Order> orders = orderRepository.findNewByAccount(accountId);
+        boolean flag = true;
         for (Order o : orders) {
             if (!enqueue(o)) {
                 log.warn("执行全部入队操作过程未完全执行");
-                return false;
+                flag = false;
             }
         }
-        return true;
+        return flag;
     }
 
     public Iterable<Order> getAll() {

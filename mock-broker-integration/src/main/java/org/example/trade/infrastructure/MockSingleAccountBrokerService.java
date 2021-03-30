@@ -25,7 +25,7 @@ import java.util.concurrent.*;
 @Service
 public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
 
-    private static final int simTradingWaitTime = 1000;
+    private static final int simTradingWaitTime = 2000;
 
     private static final String[] mockStocks = new String[]{
         "stock 1",
@@ -38,7 +38,7 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
 
     private static final Broker broker = Broker.valueOf("mock broker");
 
-    private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(4);
 
     private final Map<OrderId, Boolean> cancels = new ConcurrentHashMap<>();
 
@@ -65,13 +65,11 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
     }
 
     @Override
-    public void submit(Order order) {
+    public String submit(Order order) {
         cancels.put(order.id(), true);
         TradeRequest requirement = order.requirement();
-        dealService.orderSubmitted(order.id(), UUID.randomUUID().toString());
         // broker income message
-        int simTradeCount = ThreadLocalRandom.current().nextInt(2, 6);
-
+        int simTradeCount = ThreadLocalRandom.current().nextInt(4, 10);
         Shares[] sims = requirement.shares().allocate(simTradeCount);
         for (int i = 0; i < simTradeCount; i++) {
             Shares t = sims[i];
@@ -100,8 +98,10 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
                     dealService.finish(order.id());
                 }
             },
-            (long) simTradingWaitTime * simTradeCount + 1,
+            // 保证finish消息最后发到
+            (long) simTradingWaitTime * simTradeCount + 10,
             TimeUnit.MILLISECONDS);
+        return UUID.randomUUID().toString();
     }
 
     @Override

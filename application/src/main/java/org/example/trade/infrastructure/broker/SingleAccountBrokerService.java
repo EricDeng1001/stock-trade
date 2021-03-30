@@ -25,7 +25,7 @@ public abstract class SingleAccountBrokerService {
 
     public abstract AssetInfo queryAsset();
 
-    public abstract void submit(Order order);
+    public abstract String submit(Order order) throws OrderRejectedException;
 
     public abstract void withdraw(OrderId order);
 

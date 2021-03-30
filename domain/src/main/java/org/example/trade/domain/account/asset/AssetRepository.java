@@ -8,4 +8,5 @@ public interface AssetRepository {
 
     void save(Asset asset);
 
+    boolean exists(AccountId id);
 }

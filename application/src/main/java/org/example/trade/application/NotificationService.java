@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class NotificationService extends DomainEventSubscriber<DomainEvent> {
 
-    private static final Logger log = LoggerFactory.getLogger(NotificationService.class);
+    private static final Logger logger = LoggerFactory.getLogger(NotificationService.class);
 
     private final WebSocketNotificationService webSocketNotificationService;
 
@@ -27,7 +27,7 @@ public class NotificationService extends DomainEventSubscriber<DomainEvent> {
 
     @Override
     public void handle(DomainEvent domainEvent) {
-        log.info("准备推送事件");
+        logger.info("准备推送事件");
         if (domainEvent instanceof OrderTraded) {
             webSocketNotificationService.orderTraded((OrderTraded) domainEvent);
         } else if (domainEvent instanceof OrderClosed) {

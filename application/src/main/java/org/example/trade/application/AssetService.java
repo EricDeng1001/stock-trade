@@ -32,7 +32,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @Service
 public class AssetService extends DomainEventSubscriber<OrderUpdated> {
 
-    private static final Logger log = LoggerFactory.getLogger(AssetService.class);
+    private static final Logger logger = LoggerFactory.getLogger(AssetService.class);
 
     private final AssetRepository assetRepository;
 
@@ -77,7 +77,7 @@ public class AssetService extends DomainEventSubscriber<OrderUpdated> {
             }
         }
         assetRepository.save(asset);
-        log.info("完成同步账户资产: {}", accountId);
+        logger.info("完成同步账户资产: {}", accountId);
         DomainEventBus.instance().publish(asset);
     }
 
@@ -90,7 +90,7 @@ public class AssetService extends DomainEventSubscriber<OrderUpdated> {
             asset.reclaim(orderId);
             assetRepository.save(asset);
             handlingLocks.remove(orderId);
-            log.info("回收订单{} 的资源", orderId);
+            logger.info("回收订单{} 的资源", orderId);
             DomainEventBus.instance().publish(asset);
         } finally {
             writeLock.unlock();
@@ -106,9 +106,9 @@ public class AssetService extends DomainEventSubscriber<OrderUpdated> {
             boolean overDealt = !asset.consume(orderId, orderEvent.deal());
             assetRepository.save(asset);
             if (overDealt) {
-                log.warn("券商交易数量超过分配数量，{} 现有资源: {}", orderId, asset.resourceOf(orderId));
+                logger.warn("券商交易数量超过分配数量，{} 现有资源: {}", orderId, asset.resourceOf(orderId));
             }
-            log.info("asset updated for {}", orderId.uid());
+            logger.info("asset updated for {}", orderId.uid());
             DomainEventBus.instance().publish(asset);
         } finally {
             readLock.unlock();
@@ -117,9 +117,9 @@ public class AssetService extends DomainEventSubscriber<OrderUpdated> {
 
     @NotNull
     private Asset getAsset(OrderId orderId) {
-        log.info("try to get lock for {}", orderId.uid());
+        logger.info("try to get lock for {}", orderId.uid());
         Asset asset = assetRepository.findById(orderId.accountId());
-        log.info("get lock for {}", orderId.uid());
+        logger.info("get lock for {}", orderId.uid());
         if (asset == null) { throw new NoSuchElementException(); }
         return asset;
     }

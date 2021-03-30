@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class DealService {
 
-    private static final Logger log = LoggerFactory.getLogger(DealService.class);
+    private static final Logger logger = LoggerFactory.getLogger(DealService.class);
 
     private final OrderRepository orderRepository;
 
@@ -26,20 +26,11 @@ public class DealService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Retryable(ObjectOptimisticLockingFailureException.class)
-    public void orderSubmitted(OrderId orderId, String brokerId) {
-        Order order = orderRepository.findById(orderId);
-        order.submitted(brokerId);
-        orderRepository.save(order);
-        log.info("订单开始交易: {}", orderId);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @Retryable(ObjectOptimisticLockingFailureException.class)
     public void newDeal(OrderId id, Deal deal, String brokerId) {
         Order order = orderRepository.findById(id);
         order.makeDeal(deal, brokerId);
         orderRepository.save(order);
-        log.info("订单取得交易: {}, 成交: {}", id, deal);
+        logger.info("订单取得交易: {}, 成交: {}", id, deal);
         DomainEventBus.instance().publish(order);
     }
 
@@ -49,7 +40,7 @@ public class DealService {
         Order order = orderRepository.findById(id);
         order.close();
         orderRepository.save(order);
-        log.info("订单关闭交易: {}", id);
+        logger.info("订单关闭交易: {}", id);
         DomainEventBus.instance().publish(order);
     }
 

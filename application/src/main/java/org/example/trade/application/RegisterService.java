@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class RegisterService {
 
-    private static final Logger log = LoggerFactory.getLogger(RegisterService.class);
+    private static final Logger logger = LoggerFactory.getLogger(RegisterService.class);
 
     private final AccountRepository accountRepository;
 
@@ -29,7 +29,7 @@ public class RegisterService {
         accountRepository.save(account);
         OrderQueue orderQueue = new OrderQueue(account.id());
         orderQueueRepository.add(orderQueue);
-        log.info("{} 已经注册", account);
+        logger.info("{} 已经注册", account);
         // 向service register注册自己
     }
 
