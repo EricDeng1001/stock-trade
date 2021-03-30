@@ -65,7 +65,7 @@ public class XTPSingleAccountSingleServiceAdapter extends SingleAccountBrokerSer
 
     @Override
     public boolean activate(String config) {
-        if (!this.sessionId.equals("0")) return true;
+        if (!this.sessionId.equals("0")) { return true; }
         this.registeredAccount = new XTPAccount(supportedAccount, config);
         tradeApi.init(nodeConfig.clientId(), registeredAccount.tradeKey(),
                       nodeConfig.logFolder(), XtpLogLevel.XTP_LOG_LEVEL_ERROR, JniLogLevel.JNI_LOG_LEVEL_ERROR,
@@ -80,7 +80,7 @@ public class XTPSingleAccountSingleServiceAdapter extends SingleAccountBrokerSer
 
     @Override
     public boolean deactivate() {
-        if (this.sessionId.equals("0")) return true;
+        if (this.sessionId.equals("0")) { return true; }
         int logout = tradeApi.logout(sessionId);
         if (logout == 0) {
             this.sessionId = "0";
@@ -139,7 +139,7 @@ public class XTPSingleAccountSingleServiceAdapter extends SingleAccountBrokerSer
         OrderId orderId = OrderId.valueOf(registeredAccount.id(), LocalDate.now(), rId);
         switch (orderInfo.getOrderStatusType()) {
             // 拒单
-            case XTP_ORDER_STATUS_REJECTED -> {
+            case XTP_ORDER_STATUS_REJECTED:
                 //29999: 深交所拒单, 10000: 上交所拒单
                 log.error("order {} rejected, errorInfo={}, reason={}, detail={}",
                           orderId,
@@ -147,26 +147,36 @@ public class XTPSingleAccountSingleServiceAdapter extends SingleAccountBrokerSer
                           this.tradeApi.getApiLastError(),
                           orderInfo);
                 dealService.finish(orderId);
-            }
-            case XTP_ORDER_STATUS_PARTTRADEDNOTQUEUEING, XTP_ORDER_STATUS_CANCELED -> {
+                break;
+            case XTP_ORDER_STATUS_PARTTRADEDNOTQUEUEING:
+            case XTP_ORDER_STATUS_CANCELED:
                 log.warn("order {} traded not fully, order status={}, detail={}",
                          orderId,
                          orderInfo.getOrderStatusType().name(), orderInfo);
                 dealService.finish(orderId);
-            }
-            case XTP_ORDER_STATUS_ALLTRADED -> dealService.finish(orderId);
-            case XTP_ORDER_STATUS_UNKNOWN -> log
-                .error("unknown error: {}, reason: {}, xtpId={}, detail={}", errorMessage,
-                       this.tradeApi.getApiLastError(), xtpId,
-                       orderInfo);
-            case XTP_ORDER_STATUS_INIT -> log
-                .debug("order {} is initializing now, xtpId={}, detail={} ", orderId, xtpId,
-                       orderInfo);
-            case XTP_ORDER_STATUS_NOTRADEQUEUEING -> log
-                .debug("order {} is waiting for trade, xtpId={}, detail={}", orderId, xtpId,
-                       orderInfo);
-            case XTP_ORDER_STATUS_PARTTRADEDQUEUEING -> log
-                .debug("order {} is executing, xtpId={}, detail={}", orderId, xtpId, orderInfo);
+                break;
+            case XTP_ORDER_STATUS_ALLTRADED:
+                dealService.finish(orderId);
+                break;
+            case XTP_ORDER_STATUS_UNKNOWN:
+                log
+                    .error("unknown error: {}, reason: {}, xtpId={}, detail={}", errorMessage,
+                           this.tradeApi.getApiLastError(), xtpId,
+                           orderInfo);
+                break;
+            case XTP_ORDER_STATUS_INIT:
+                log
+                    .debug("order {} is initializing now, xtpId={}, detail={} ", orderId, xtpId,
+                           orderInfo);
+                break;
+            case XTP_ORDER_STATUS_NOTRADEQUEUEING:
+                log
+                    .debug("order {} is waiting for trade, xtpId={}, detail={}", orderId, xtpId,
+                           orderInfo);
+                break;
+            case XTP_ORDER_STATUS_PARTTRADEDQUEUEING:
+                log
+                    .debug("order {} is executing, xtpId={}, detail={}", orderId, xtpId, orderInfo);
         }
     }
 

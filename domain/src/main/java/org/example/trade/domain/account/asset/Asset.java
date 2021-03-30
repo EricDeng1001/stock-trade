@@ -71,8 +71,8 @@ public class Asset extends DomainEventSource<AssetEvent> {
     public boolean consume(OrderId id, Deal deal) {
         Resource<?> resource = resourceOf(id);
         switch (resource.usedFor()) {
-            case BUY -> gain(resource.securityCode(), deal.shares());
-            case SELL -> gain(deal.value());
+            case BUY: gain(resource.securityCode(), deal.shares()); break;
+            case SELL: gain(deal.value()); break;
         }
         return resource.consume(deal);
     }
@@ -84,13 +84,15 @@ public class Asset extends DomainEventSource<AssetEvent> {
     public void reclaim(OrderId id) {
         Resource<?> resource = resourceOf(id);
         switch (resource.usedFor()) {
-            case BUY -> {
+            case BUY: {
                 Money m = (Money) resource.remain();
                 gain(m);
+                break;
             }
-            case SELL -> {
+            case SELL: {
                 Shares shares = (Shares) resource.remain();
                 gain(resource.securityCode(), shares);
+                break;
             }
         }
         removeResource(id);
@@ -128,10 +130,11 @@ public class Asset extends DomainEventSource<AssetEvent> {
     }
 
     public Resource<?> tryAllocate(Order order) {
-        return switch (order.requirement().tradeSide()) {
-            case BUY -> tryAllocate(order.id(), order.requirement().securityCode(), order.requirement().value());
-            case SELL -> tryAllocate(order.id(), order.requirement().securityCode(), order.requirement().shares());
-        };
+        switch (order.requirement().tradeSide()) {
+            case BUY: return tryAllocate(order.id(), order.requirement().securityCode(), order.requirement().value());
+            case SELL: return tryAllocate(order.id(), order.requirement().securityCode(), order.requirement().shares());
+        }
+        return null;
     }
 
     public AssetInfo info() {

@@ -12,6 +12,7 @@ import org.example.trade.domain.market.Shares;
 import org.example.trade.domain.order.Deal;
 import org.example.trade.domain.order.Order;
 import org.example.trade.domain.order.OrderId;
+import org.example.trade.domain.order.PriceType;
 import org.example.trade.domain.order.request.LimitedPriceTradeRequest;
 import org.example.trade.domain.order.request.TradeRequest;
 import org.example.trade.infrastructure.broker.SingleAccountBrokerService;
@@ -80,10 +81,9 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
                             order.id(),
                             new Deal(
                                 t,
-                                switch (requirement.priceType()) {
-                                    case MARKET -> Price.TEN;
-                                    case LIMITED -> ((LimitedPriceTradeRequest) requirement).targetPrice();
-                                }),
+                                requirement.priceType() == PriceType.MARKET ? Price.TEN
+                                    : ((LimitedPriceTradeRequest) requirement).targetPrice()
+                            ),
                             UUID.randomUUID().toString());
                     }
                 },

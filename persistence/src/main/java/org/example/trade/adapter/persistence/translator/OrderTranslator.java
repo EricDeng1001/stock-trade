@@ -76,10 +76,8 @@ public class OrderTranslator {
         record.setSubmittedAt(order.submittedAt());
         TradeRequest requirement = order.requirement();
         record.setStockCode(requirement.securityCode().value());
-        record.setShares(switch (requirement.tradeSide()) {
-            case BUY -> requirement.shares().value();
-            case SELL -> requirement.shares().value().negate();
-        });
+        record.setShares(requirement.tradeSide() == TradeSide.BUY ? requirement.shares().value()
+                             : requirement.shares().value().negate());
         record.setPrice(
             requirement.priceType() == PriceType.LIMITED ? ((LimitedPriceTradeRequest) requirement)
                 .targetPrice().unitValue().value() : BigDecimal.ZERO);

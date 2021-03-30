@@ -35,8 +35,10 @@ public class OrderQueue {
 
     public void enqueue(Order order) {
         switch (order.requirement().tradeSide()) {
-            case BUY -> buys.add(order);
-            case SELL -> {
+            case BUY:
+                buys.add(order);
+                break;
+            case SELL: {
                 SecurityCode key = order.requirement().securityCode();
                 ConcurrentLinkedDeque<Order> deque = sells.get(key);
                 if (deque == null) {
@@ -49,17 +51,19 @@ public class OrderQueue {
     }
 
     public boolean dequeue(Order order) {
-        return switch (order.requirement().tradeSide()) {
-            case BUY -> buys.remove(order);
-            case SELL -> {
+        switch (order.requirement().tradeSide()) {
+            case BUY:
+                return buys.remove(order);
+            case SELL: {
                 SecurityCode key = order.requirement().securityCode();
                 ConcurrentLinkedDeque<Order> deque = sells.get(key);
                 if (deque == null) {
-                    yield false;
+                    return false;
                 }
-                yield deque.remove(order);
+                return deque.remove(order);
             }
-        };
+        }
+        return false;
     }
 
     public AccountId account() {
