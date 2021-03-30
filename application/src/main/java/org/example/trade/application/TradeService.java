@@ -6,7 +6,7 @@ import org.example.trade.domain.account.asset.ResourceAllocated;
 import org.example.trade.domain.order.Order;
 import org.example.trade.domain.order.OrderId;
 import org.example.trade.domain.order.OrderRepository;
-import org.example.trade.infrastructure.SingleAccountBrokerService;
+import org.example.trade.infrastructure.broker.SingleAccountBrokerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -134,7 +134,7 @@ public final class Order extends DomainEventSource<OrderEvent> {
         } else {
             orderStatus = OrderStatus.overflow;
         }
-        raise(new OrderFinished(closedAt, id, orderStatus));
+        raise(new OrderClosed(closedAt, id, orderStatus));
     }
 
     public void makeDeal(Deal deal, String brokerId) {

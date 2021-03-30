@@ -12,7 +12,7 @@ import org.example.trade.domain.order.OrderStatus;
 import org.example.trade.domain.order.request.TradeRequest;
 import org.example.trade.domain.queue.OrderQueue;
 import org.example.trade.domain.queue.OrderQueueRepository;
-import org.example.trade.infrastructure.SingleAccountBrokerService;
+import org.example.trade.infrastructure.broker.SingleAccountBrokerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

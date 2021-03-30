@@ -2,17 +2,17 @@ package org.example.trade.domain.order;
 
 import java.time.Instant;
 
-public final class OrderFinished extends OrderUpdated {
+public final class OrderClosed extends OrderUpdated {
 
     private final OrderStatus orderStatus;
 
-    protected OrderFinished(Instant occurredOn, OrderId id,
-                            OrderStatus orderStatus) {
+    protected OrderClosed(Instant occurredOn, OrderId id,
+                          OrderStatus orderStatus) {
         super(occurredOn, id);
         this.orderStatus = orderStatus;
     }
 
-    public OrderFinished(OrderId id, OrderStatus orderStatus) {
+    public OrderClosed(OrderId id, OrderStatus orderStatus) {
         this(Instant.now(), id, orderStatus);
     }
 
@@ -22,7 +22,7 @@ public final class OrderFinished extends OrderUpdated {
 
     @Override
     public String toString() {
-        return "OrderFinished{" +
+        return "OrderClosed{" +
             "orderId=" + orderId +
             ", orderStatus=" + orderStatus +
             ", occurredOn=" + occurredOn +

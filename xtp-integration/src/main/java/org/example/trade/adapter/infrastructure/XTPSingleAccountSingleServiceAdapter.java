@@ -21,7 +21,7 @@ import org.example.trade.domain.market.Shares;
 import org.example.trade.domain.order.Deal;
 import org.example.trade.domain.order.Order;
 import org.example.trade.domain.order.OrderId;
-import org.example.trade.infrastructure.SingleAccountBrokerService;
+import org.example.trade.infrastructure.broker.SingleAccountBrokerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

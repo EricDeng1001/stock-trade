@@ -1,4 +1,4 @@
-package org.example.trade.infrastructure;
+package org.example.trade.infrastructure.broker;
 
 import org.example.trade.application.RegisterService;
 import org.example.trade.domain.account.AccountId;

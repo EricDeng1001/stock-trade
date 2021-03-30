@@ -8,12 +8,12 @@ import org.example.trade.domain.account.asset.AssetInfo;
 import org.example.trade.domain.account.asset.AssetRepository;
 import org.example.trade.domain.market.SecurityCode;
 import org.example.trade.domain.market.Shares;
-import org.example.trade.domain.order.OrderFinished;
+import org.example.trade.domain.order.OrderClosed;
 import org.example.trade.domain.order.OrderId;
 import org.example.trade.domain.order.OrderTraded;
 import org.example.trade.domain.order.OrderUpdated;
-import org.example.trade.infrastructure.SingleAccountBrokerService;
-import org.example.trade.infrastructure.SingleAccountBrokerServiceFactory;
+import org.example.trade.infrastructure.broker.SingleAccountBrokerService;
+import org.example.trade.infrastructure.broker.SingleAccountBrokerServiceFactory;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,8 +53,8 @@ public class AssetService extends DomainEventSubscriber<OrderUpdated> {
     public void handle(OrderUpdated orderEvent) {
         if (orderEvent instanceof OrderTraded) {
             handleOrderTraded((OrderTraded) orderEvent);
-        } else if (orderEvent instanceof OrderFinished) {
-            handleOrderFinished((OrderFinished) orderEvent);
+        } else if (orderEvent instanceof OrderClosed) {
+            handleOrderFinished((OrderClosed) orderEvent);
         }
     }
 
@@ -81,7 +81,7 @@ public class AssetService extends DomainEventSubscriber<OrderUpdated> {
         DomainEventBus.instance().publish(asset);
     }
 
-    private void handleOrderFinished(OrderFinished orderEvent) {
+    private void handleOrderFinished(OrderClosed orderEvent) {
         OrderId orderId = orderEvent.orderId();
         Lock writeLock = handlingLocks.computeIfAbsent(orderId, o -> new ReentrantReadWriteLock()).writeLock();
         try {

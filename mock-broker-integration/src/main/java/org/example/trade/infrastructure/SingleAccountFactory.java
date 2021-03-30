@@ -1,6 +1,9 @@
 package org.example.trade.infrastructure;
 
 import org.example.trade.domain.account.AccountId;
+import org.example.trade.infrastructure.broker.AccountNotSupportedException;
+import org.example.trade.infrastructure.broker.SingleAccountBrokerService;
+import org.example.trade.infrastructure.broker.SingleAccountBrokerServiceFactory;
 import org.springframework.stereotype.Component;
 
 @Component

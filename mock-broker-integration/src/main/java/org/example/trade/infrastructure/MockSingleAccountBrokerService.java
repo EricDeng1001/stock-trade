@@ -14,6 +14,7 @@ import org.example.trade.domain.order.Order;
 import org.example.trade.domain.order.OrderId;
 import org.example.trade.domain.order.request.LimitedPriceTradeRequest;
 import org.example.trade.domain.order.request.TradeRequest;
+import org.example.trade.infrastructure.broker.SingleAccountBrokerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
