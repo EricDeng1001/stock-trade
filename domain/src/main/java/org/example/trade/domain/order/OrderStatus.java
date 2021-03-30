@@ -4,7 +4,7 @@ public enum OrderStatus {
     created(false),
     trading(false),
     withdrawn(true),
-    overflow(true),
+    rejected(true),
     fulfilled(true);
 
     private final boolean isClosed;

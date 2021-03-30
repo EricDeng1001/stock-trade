@@ -48,7 +48,7 @@ public class TradeService extends DomainEventSubscriber<ResourceAllocated> {
             order.close();
             orderRepository.save(order);
             DomainEventBus.instance().publish(order);
-            e.printStackTrace();
+            logger.error("订单被拒绝: ", e);
         }
     }
 
