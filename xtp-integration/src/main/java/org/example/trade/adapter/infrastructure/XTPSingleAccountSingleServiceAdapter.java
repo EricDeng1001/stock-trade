@@ -43,11 +43,11 @@ public class XTPSingleAccountSingleServiceAdapter extends SingleAccountBrokerSer
 
     private final DealService dealService;
 
-    private XTPAccount registeredAccount;
-
     private final NodeConfig nodeConfig;
 
     private final TradeApi tradeApi;
+
+    private XTPAccount registeredAccount;
 
     private volatile String sessionId;
 
@@ -110,7 +110,6 @@ public class XTPSingleAccountSingleServiceAdapter extends SingleAccountBrokerSer
         }
     }
 
-
     @Override
     public void onTradeEvent(TradeResponse tradeInfo, String sessionId) {
         int requestId = tradeInfo.getRequestId();
@@ -145,25 +144,19 @@ public class XTPSingleAccountSingleServiceAdapter extends SingleAccountBrokerSer
                          orderInfo.getOrderStatusType().name(), orderInfo);
                 dealService.finish(orderId);
             }
-            case XTP_ORDER_STATUS_ALLTRADED -> {
-                dealService.finish(orderId);
-            }
-            case XTP_ORDER_STATUS_UNKNOWN -> {
-                log.error("unknown error: {}, reason: {}, xtpId={}, detail={}", errorMessage,
-                          this.tradeApi.getApiLastError(), xtpId,
-                          orderInfo);
-            }
-            case XTP_ORDER_STATUS_INIT -> {
-                log.debug("order {} is initializing now, xtpId={}, detail={} ", orderId, xtpId,
-                          orderInfo);
-            }
-            case XTP_ORDER_STATUS_NOTRADEQUEUEING -> {
-                log.debug("order {} is waiting for trade, xtpId={}, detail={}", orderId, xtpId,
-                          orderInfo);
-            }
-            case XTP_ORDER_STATUS_PARTTRADEDQUEUEING -> {
-                log.debug("order {} is executing, xtpId={}, detail={}", orderId, xtpId, orderInfo);
-            }
+            case XTP_ORDER_STATUS_ALLTRADED -> dealService.finish(orderId);
+            case XTP_ORDER_STATUS_UNKNOWN -> log
+                .error("unknown error: {}, reason: {}, xtpId={}, detail={}", errorMessage,
+                       this.tradeApi.getApiLastError(), xtpId,
+                       orderInfo);
+            case XTP_ORDER_STATUS_INIT -> log
+                .debug("order {} is initializing now, xtpId={}, detail={} ", orderId, xtpId,
+                       orderInfo);
+            case XTP_ORDER_STATUS_NOTRADEQUEUEING -> log
+                .debug("order {} is waiting for trade, xtpId={}, detail={}", orderId, xtpId,
+                       orderInfo);
+            case XTP_ORDER_STATUS_PARTTRADEDQUEUEING -> log
+                .debug("order {} is executing, xtpId={}, detail={}", orderId, xtpId, orderInfo);
         }
     }
 
