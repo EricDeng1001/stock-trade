@@ -2,8 +2,9 @@ package org.example.trade.infrastructure;
 
 import org.example.finance.domain.Money;
 import org.example.finance.domain.Price;
-import org.example.trade.application.DealService;
 import org.example.trade.application.RegisterService;
+import org.example.trade.application.SyncService;
+import org.example.trade.application.TradeService;
 import org.example.trade.domain.account.AccountId;
 import org.example.trade.domain.account.asset.AssetInfo;
 import org.example.trade.domain.market.Broker;
@@ -43,16 +44,14 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
 
     private final Map<OrderId, Boolean> cancels = new ConcurrentHashMap<>();
 
-    private final DealService dealService;
-
     @Autowired
     public MockSingleAccountBrokerService(
-        DealService dealService,
+        TradeService tradeService,
         RegisterService registerService,
+        SyncService syncService,
         MockConfig config
     ) {
-        super(new AccountId(broker, config.getUsername()), registerService);
-        this.dealService = dealService;
+        super(new AccountId(broker, config.getUsername()), registerService, syncService, tradeService);
     }
 
     @Override
@@ -66,9 +65,10 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
     }
 
     @Override
-    public String submit(Order order) {
+    public void submit(Order order) {
         cancels.put(order.id(), true);
         TradeRequest requirement = order.requirement();
+        tradeService.startTradingOrder(order.id(), UUID.randomUUID().toString());
         // broker income message
         int simTradeCount = ThreadLocalRandom.current().nextInt(4, 10);
         Shares[] sims = requirement.shares().allocate(simTradeCount);
@@ -77,7 +77,7 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
             scheduledExecutorService.schedule(
                 () -> {
                     if (notCancel(order.id())) {
-                        dealService.newDeal(
+                        tradeService.offerDeal(
                             order.id(),
                             new Deal(
                                 t,
@@ -95,26 +95,25 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
         scheduledExecutorService.schedule(
             () -> {
                 if (notCancel(order.id())) {
-                    dealService.finish(order.id());
+                    tradeService.closeOrder(order.id());
                 }
             },
             // 保证finish消息最后发到
             (long) simTradingWaitTime * simTradeCount + 10,
             TimeUnit.MILLISECONDS);
-        return UUID.randomUUID().toString();
     }
 
     @Override
     public void withdraw(OrderId order) {
         cancels.put(order, false);
         scheduledExecutorService.schedule(
-            () -> dealService.finish(order),
+            () -> tradeService.closeOrder(order),
             1,
             TimeUnit.MILLISECONDS);
     }
 
     @Override
-    public AssetInfo queryAsset() {
+    public void queryAsset() {
         ConcurrentHashMap<SecurityCode, Shares> usablePositions = new ConcurrentHashMap<>();
         for (String s : mockStocks) {
             if (ThreadLocalRandom.current().nextBoolean()) {
@@ -125,7 +124,7 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
         usablePositions.put(SecurityCode.valueOf("stock 2"),
                             Shares.valueOf(ThreadLocalRandom.current().nextInt(10, 20)));
         Money usableCash = Money.valueOf(ThreadLocalRandom.current().nextInt(200, 400));
-        return new AssetInfo(usablePositions, usableCash);
+        syncService.syncAsset(supportedAccount, new AssetInfo(usablePositions, usableCash));
     }
 
     private boolean notCancel(OrderId id) {

@@ -7,16 +7,21 @@ import com.zts.xtp.common.enums.XtpTeResumeType;
 import com.zts.xtp.common.model.ErrorMessage;
 import com.zts.xtp.trade.api.TradeApi;
 import com.zts.xtp.trade.model.request.OrderInsertRequest;
+import com.zts.xtp.trade.model.response.AssetResponse;
 import com.zts.xtp.trade.model.response.OrderResponse;
+import com.zts.xtp.trade.model.response.StockPositionResponse;
 import com.zts.xtp.trade.model.response.TradeResponse;
 import com.zts.xtp.trade.spi.TradeSpi;
+import org.example.finance.domain.Money;
 import org.example.finance.domain.Price;
-import org.example.trade.application.DealService;
 import org.example.trade.application.RegisterService;
+import org.example.trade.application.SyncService;
+import org.example.trade.application.TradeService;
 import org.example.trade.domain.account.AccountId;
 import org.example.trade.domain.account.XTPAccount;
 import org.example.trade.domain.account.asset.AssetInfo;
 import org.example.trade.domain.market.Broker;
+import org.example.trade.domain.market.SecurityCode;
 import org.example.trade.domain.market.Shares;
 import org.example.trade.domain.order.Deal;
 import org.example.trade.domain.order.Order;
@@ -28,20 +33,33 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
-public class XTPSingleAccountSingleServiceAdapter extends SingleAccountBrokerService
-    implements TradeSpi {
+public class XTPSingleAccountSingleServiceAdapter
+    extends SingleAccountBrokerService implements TradeSpi {
 
-    private static final Broker broker = Broker.valueOf("xtp");
+    private static final Broker xtp = Broker.valueOf("xtp");
 
     private static final Logger log = LoggerFactory.getLogger(XTPSingleAccountSingleServiceAdapter.class);
 
     private final Map<OrderId, String> idMap = new ConcurrentHashMap<>();
 
-    private final DealService dealService;
+    private final AtomicInteger requestId = new AtomicInteger(0);
+
+    private final Map<Integer, AssetResponse> assetResponseMap = new HashMap<>();
+
+    private final Map<Integer, ConcurrentLinkedQueue<StockPositionResponse>> positionResponsesMap =
+        new HashMap<>();
+
+    private final Map<Integer, CountDownLatch> latchMap = new HashMap<>();
+
+    private final TradeService tradeService;
 
     private final NodeConfig nodeConfig;
 
@@ -54,10 +72,12 @@ public class XTPSingleAccountSingleServiceAdapter extends SingleAccountBrokerSer
     @Autowired
     public XTPSingleAccountSingleServiceAdapter(
         RegisterService registerService,
-        DealService dealService,
-        NodeConfig nodeConfig) {
-        super(new AccountId(broker, nodeConfig.username()), registerService);
-        this.dealService = dealService;
+        TradeService tradeService,
+        SyncService syncService,
+        NodeConfig nodeConfig
+    ) {
+        super(new AccountId(xtp, nodeConfig.username()), registerService, syncService, tradeService);
+        this.tradeService = tradeService;
         this.nodeConfig = nodeConfig;
         this.sessionId = "0";
         this.tradeApi = new TradeApi(this);
@@ -90,13 +110,65 @@ public class XTPSingleAccountSingleServiceAdapter extends SingleAccountBrokerSer
     }
 
     @Override
-    public AssetInfo queryAsset() {
-        return null;
+    public void queryAsset() {
+        int requestId = this.requestId.incrementAndGet();
+        ConcurrentLinkedQueue<StockPositionResponse> positionResponses = new ConcurrentLinkedQueue<>();
+        positionResponsesMap.put(requestId, positionResponses);
+        latchMap.put(requestId, new CountDownLatch(1));
+        try {
+            this.tradeApi.queryAsset(sessionId, requestId);
+            this.tradeApi.queryPosition("", sessionId, requestId);
+        } catch (Exception e) {
+            log.error("", e);
+        }
     }
 
     @Override
-    public String submit(Order order) {
+    public void onQueryAsset(AssetResponse assetInfo, ErrorMessage errorMessage, String sessionId) {
+        if (errorMessage.getErrorId() != 0) {
+            log.error("synchronization balances failed: {}", tradeApi.getApiLastError());
+        } else {
+            int requestId = assetInfo.getRequestId();
+            assetResponseMap.put(requestId, assetInfo);
+            if (assetInfo.isLastResp()) {
+                latchMap.get(requestId).countDown();
+            }
+        }
+    }
+
+    @Override
+    public void onQueryPosition(StockPositionResponse stockPositionInfo, ErrorMessage errorMessage, String sessionId) {
+        if (errorMessage.getErrorId() != 0) {
+            log.error("synchronization positions failed: {}", tradeApi.getApiLastError());
+        } else {
+            int requestId = stockPositionInfo.getRequestId();
+            ConcurrentLinkedQueue<StockPositionResponse> responses = positionResponsesMap.get(requestId);
+            responses.add(stockPositionInfo);
+            if (stockPositionInfo.isLastResp()) {
+                try {
+                    latchMap.get(requestId).await();
+                    AssetResponse assetResponse = assetResponseMap.get(requestId);
+                    Money usableCash = Money.valueOf(assetResponse.getTotalAsset());
+                    Map<SecurityCode, Shares> usablePositions = new HashMap<>(responses.size());
+                    for (StockPositionResponse response : responses) {
+                        usablePositions.put(
+                            SecurityCode.valueOf(response.getTicker()),
+                            Shares.valueOf(response.getTotalQty())
+                        );
+                    }
+                    AssetInfo assetInfo = new AssetInfo(usablePositions, usableCash);
+                    syncService.syncAsset(supportedAccount, assetInfo);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void submit(Order order) {
         OrderInsertRequest orderInsertRequest = new OrderInsertRequest();
+        // TODO fill orderInsertRequest
         String s = this.tradeApi.insertOrder(orderInsertRequest, sessionId);
         if (s.equals("0")) {
             log.error("order {} submit failed, reason={}", order, tradeApi.getApiLastError());
@@ -105,7 +177,6 @@ public class XTPSingleAccountSingleServiceAdapter extends SingleAccountBrokerSer
             log.info("order {} submitted", order);
             idMap.put(order.id(), s);
         }
-        return s;
     }
 
     @Override
@@ -116,7 +187,7 @@ public class XTPSingleAccountSingleServiceAdapter extends SingleAccountBrokerSer
             // TODO failure recover
         } else {
             log.info("order {} withdrawn", s);
-            dealService.finish(id);
+            tradeService.closeOrder(id);
         }
     }
 
@@ -128,7 +199,7 @@ public class XTPSingleAccountSingleServiceAdapter extends SingleAccountBrokerSer
             Shares.valueOf(tradeInfo.getQuantity()),
             Price.valueOf(tradeInfo.getPrice())
         );
-        dealService.newDeal(orderId, deal, tradeInfo.getExecId());
+        tradeService.offerDeal(orderId, deal, tradeInfo.getExecId());
         log.info("order {} traded, detail={}", orderId, tradeInfo);
     }
 
@@ -146,17 +217,17 @@ public class XTPSingleAccountSingleServiceAdapter extends SingleAccountBrokerSer
                           errorMessage,
                           this.tradeApi.getApiLastError(),
                           orderInfo);
-                dealService.finish(orderId);
+                tradeService.closeOrder(orderId);
                 break;
             case XTP_ORDER_STATUS_PARTTRADEDNOTQUEUEING:
             case XTP_ORDER_STATUS_CANCELED:
                 log.warn("order {} traded not fully, order status={}, detail={}",
                          orderId,
                          orderInfo.getOrderStatusType().name(), orderInfo);
-                dealService.finish(orderId);
+                tradeService.closeOrder(orderId);
                 break;
             case XTP_ORDER_STATUS_ALLTRADED:
-                dealService.finish(orderId);
+                tradeService.closeOrder(orderId);
                 break;
             case XTP_ORDER_STATUS_UNKNOWN:
                 log
@@ -168,6 +239,7 @@ public class XTPSingleAccountSingleServiceAdapter extends SingleAccountBrokerSer
                 log
                     .debug("order {} is initializing now, xtpId={}, detail={} ", orderId, xtpId,
                            orderInfo);
+                tradeService.startTradingOrder(orderId, xtpId);
                 break;
             case XTP_ORDER_STATUS_NOTRADEQUEUEING:
                 log

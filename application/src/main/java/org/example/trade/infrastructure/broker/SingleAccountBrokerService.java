@@ -1,31 +1,44 @@
 package org.example.trade.infrastructure.broker;
 
 import org.example.trade.application.RegisterService;
+import org.example.trade.application.SyncService;
+import org.example.trade.application.TradeService;
 import org.example.trade.domain.account.AccountId;
-import org.example.trade.domain.account.asset.AssetInfo;
 import org.example.trade.domain.order.Order;
 import org.example.trade.domain.order.OrderId;
 
 public abstract class SingleAccountBrokerService {
 
+    protected final RegisterService registerService;
+
+    protected final SyncService syncService;
+
+    protected final TradeService tradeService;
+
     protected final AccountId supportedAccount;
 
-    protected SingleAccountBrokerService(AccountId supportedAccount, RegisterService registerService) {
+    protected SingleAccountBrokerService(AccountId supportedAccount,
+                                         RegisterService registerService,
+                                         SyncService syncService,
+                                         TradeService tradeService) {
         this.supportedAccount = supportedAccount;
+        this.syncService = syncService;
+        this.tradeService = tradeService;
+        this.registerService = registerService;
         registerService.registerAccount(supportedAccount);
+    }
+
+    public AccountId supportedAccount() {
+        return supportedAccount;
     }
 
     public abstract boolean activate(String config);
 
     public abstract boolean deactivate();
 
-    public AccountId supportedAccount() {
-        return supportedAccount;
-    }
+    public abstract void queryAsset();
 
-    public abstract AssetInfo queryAsset();
-
-    public abstract String submit(Order order) throws OrderRejectedException;
+    public abstract void submit(Order order);
 
     public abstract void withdraw(OrderId order);
 

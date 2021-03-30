@@ -4,10 +4,7 @@ import engineering.ericdeng.architecture.domain.model.DomainEventBus;
 import engineering.ericdeng.architecture.domain.model.DomainEventSubscriber;
 import org.example.trade.domain.account.AccountId;
 import org.example.trade.domain.account.asset.Asset;
-import org.example.trade.domain.account.asset.AssetInfo;
 import org.example.trade.domain.account.asset.AssetRepository;
-import org.example.trade.domain.market.SecurityCode;
-import org.example.trade.domain.market.Shares;
 import org.example.trade.domain.order.OrderClosed;
 import org.example.trade.domain.order.OrderId;
 import org.example.trade.domain.order.OrderTraded;
@@ -22,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
@@ -63,22 +59,9 @@ public class AssetService extends DomainEventSubscriber<OrderUpdated> {
         return assetRepository.findById(accountId);
     }
 
-    @Transactional
     public void syncAssetFromBroker(AccountId accountId) {
         SingleAccountBrokerService service = factory.getOrNew(accountId);
-        AssetInfo brokerAssetInfo = service.queryAsset();
-        Asset asset = assetRepository.findById(accountId);
-        if (asset == null) {
-            asset = new Asset(accountId, brokerAssetInfo);
-        } else {
-            asset.set(brokerAssetInfo.usableCash());
-            for (Map.Entry<SecurityCode, Shares> e : brokerAssetInfo.usablePositions().entrySet()) {
-                asset.set(e.getKey(), e.getValue());
-            }
-        }
-        assetRepository.save(asset);
-        logger.info("完成同步账户资产: {}", accountId);
-        DomainEventBus.instance().publish(asset);
+        service.queryAsset();
     }
 
     private void handleOrderFinished(OrderClosed orderEvent) {

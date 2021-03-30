@@ -108,7 +108,7 @@ public final class Order extends DomainEventSource<OrderEvent> {
         return traded;
     }
 
-    public void submitted(String brokerId) {
+    public void startTrading(String brokerId) {
         if (submittedAt != null) { return; }
         this.brokerId = brokerId;
         orderStatus = OrderStatus.trading;
