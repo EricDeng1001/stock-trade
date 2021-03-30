@@ -31,7 +31,7 @@ import java.time.LocalDate;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Component("xtp-single")
+@Component
 public class XTPSingleAccountSingleServiceAdapter extends SingleAccountBrokerService
     implements TradeSpi {
 
