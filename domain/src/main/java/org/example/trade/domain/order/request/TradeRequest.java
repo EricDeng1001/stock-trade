@@ -41,6 +41,8 @@ public abstract class TradeRequest {
         return priceType;
     }
 
+    public abstract Price price();
+
     public abstract Money value();
 
     @Override

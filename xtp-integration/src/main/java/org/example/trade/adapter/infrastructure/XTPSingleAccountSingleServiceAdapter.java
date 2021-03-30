@@ -1,9 +1,6 @@
 package org.example.trade.adapter.infrastructure;
 
-import com.zts.xtp.common.enums.JniLogLevel;
-import com.zts.xtp.common.enums.TransferProtocol;
-import com.zts.xtp.common.enums.XtpLogLevel;
-import com.zts.xtp.common.enums.XtpTeResumeType;
+import com.zts.xtp.common.enums.*;
 import com.zts.xtp.common.model.ErrorMessage;
 import com.zts.xtp.trade.api.TradeApi;
 import com.zts.xtp.trade.model.request.OrderInsertRequest;
@@ -21,11 +18,12 @@ import org.example.trade.domain.account.AccountId;
 import org.example.trade.domain.account.XTPAccount;
 import org.example.trade.domain.account.asset.AssetInfo;
 import org.example.trade.domain.market.Broker;
+import org.example.trade.domain.market.Market;
 import org.example.trade.domain.market.SecurityCode;
 import org.example.trade.domain.market.Shares;
-import org.example.trade.domain.order.Deal;
-import org.example.trade.domain.order.Order;
-import org.example.trade.domain.order.OrderId;
+import org.example.trade.domain.order.PriceType;
+import org.example.trade.domain.order.*;
+import org.example.trade.domain.order.request.TradeRequest;
 import org.example.trade.infrastructure.broker.SingleAccountBrokerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -167,8 +165,18 @@ public class XTPSingleAccountSingleServiceAdapter
 
     @Override
     public void submit(Order order) {
+        TradeRequest requirement = order.requirement();
         OrderInsertRequest orderInsertRequest = new OrderInsertRequest();
-        // TODO fill orderInsertRequest
+        orderInsertRequest.setOrderClientId(order.id().uid());
+        orderInsertRequest.setMarketType(
+            requirement.securityCode().market() == Market.SZ ? MarketType.XTP_MKT_SZ_A : MarketType.XTP_MKT_SH_A);
+        orderInsertRequest.setPrice(requirement.price().value().doubleValue());
+        orderInsertRequest.setPriceType(
+            requirement.priceType() == PriceType.LIMITED ? com.zts.xtp.common.enums.PriceType.XTP_PRICE_LIMIT
+                : com.zts.xtp.common.enums.PriceType.XTP_PRICE_BEST5_OR_CANCEL);
+        orderInsertRequest.setSideType(requirement.tradeSide() == TradeSide.BUY ? SideType.XTP_SIDE_BUY : SideType.XTP_SIDE_SELL);
+        orderInsertRequest.setQuantity(requirement.shares().value().longValue());
+        orderInsertRequest.setOrderXtpId("0");
         String s = this.tradeApi.insertOrder(orderInsertRequest, sessionId);
         if (s.equals("0")) {
             log.error("order {} submit failed, reason={}", order, tradeApi.getApiLastError());
