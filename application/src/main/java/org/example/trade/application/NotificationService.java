@@ -24,14 +24,13 @@ public class NotificationService {
         DomainEventBus.instance().subscribe(DomainEvent.class, this::publish);
     }
 
-    public boolean publish(DomainEvent domainEvent) {
-        logger.info("准备推送事件");
+    public void publish(DomainEvent domainEvent) {
+        logger.info("准备推送: {}", domainEvent);
         if (domainEvent instanceof OrderTraded) {
             webSocketNotificationService.orderTraded((OrderTraded) domainEvent);
         } else if (domainEvent instanceof OrderClosed) {
             webSocketNotificationService.orderClosed((OrderClosed) domainEvent);
         }
-        return true;
     }
 
 }

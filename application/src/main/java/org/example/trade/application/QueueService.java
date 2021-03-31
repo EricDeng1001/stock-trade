@@ -30,23 +30,21 @@ public class QueueService {
     }
 
     @Transactional
-    private boolean tryAllocateToBuy(AssetCashUpdated assetEvent) {
+    private void tryAllocateToBuy(AssetCashUpdated assetEvent) {
         Asset asset = assetRepository.findById(assetEvent.account());
         OrderQueue orderQueue = orderQueueRepository.getInstance(assetEvent.account());
-        if (orderQueue.isEmpty()) { return true; }
+        if (orderQueue.isEmpty()) { return; }
         Order o = orderQueue.peek();
         tryAlloc(asset, orderQueue, o);
-        return true;
     }
 
     @Transactional
-    private boolean tryAllocateToSell(AssetPositionUpdated assetEvent) {
+    private void tryAllocateToSell(AssetPositionUpdated assetEvent) {
         Asset asset = assetRepository.findById(assetEvent.account());
         OrderQueue orderQueue = orderQueueRepository.getInstance(assetEvent.account());
-        if (orderQueue.isEmpty(assetEvent.securityCode())) { return true; }
+        if (orderQueue.isEmpty(assetEvent.securityCode())) { return; }
         Order o = orderQueue.peek(assetEvent.securityCode());
         tryAlloc(asset, orderQueue, o);
-        return true;
     }
 
     private void tryAlloc(Asset asset, OrderQueue orderQueue, Order o) {

@@ -28,11 +28,10 @@ public class SubmitService {
         DomainEventBus.instance().subscribe(ResourceAllocated.class, this::submit);
     }
 
-    public boolean submit(ResourceAllocated resourceAllocated) {
+    public void submit(ResourceAllocated resourceAllocated) {
         OrderId id = resourceAllocated.order();
         Order order = orderRepository.findById(id);
         brokerTradeService.submit(order);
         logger.info("已向券商提交订单: {}", id);
-        return true;
     }
 }

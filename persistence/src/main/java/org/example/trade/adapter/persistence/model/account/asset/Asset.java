@@ -3,7 +3,10 @@ package org.example.trade.adapter.persistence.model.account.asset;
 import org.example.trade.adapter.persistence.model.account.AccountId;
 import org.example.trade.adapter.persistence.model.order.OrderId;
 
-import javax.persistence.*;
+import javax.persistence.ElementCollection;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Map;
