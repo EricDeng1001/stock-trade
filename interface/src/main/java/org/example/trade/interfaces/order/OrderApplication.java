@@ -1,6 +1,7 @@
 package org.example.trade.interfaces.order;
 
 import java.util.List;
+import java.util.Map;
 
 public interface OrderApplication {
 
@@ -14,7 +15,7 @@ public interface OrderApplication {
 
     boolean enqueueOrder(String orderIdDTO);
 
-    boolean enqueueAll(String accountId);
+    Map<String, Boolean> enqueueAll(String accountId);
 
     boolean dequeueOrder(String orderIdDTO);
 

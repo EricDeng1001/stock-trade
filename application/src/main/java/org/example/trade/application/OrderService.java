@@ -20,7 +20,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 @Service
@@ -72,6 +74,30 @@ public class OrderService {
         return orderRepository.findAllByAccount(accountId);
     }
 
+    public boolean dequeueOrder(OrderId id) {
+        Order order = orderRepository.findById(id);
+        if (order.isTrading()) {
+            brokerTradeService.withdraw(id);
+            return true;
+        } else {
+            OrderQueue queue = orderQueueRepository.getInstance(order.account());
+            return queue.dequeue(order);
+        }
+    }
+
+    public Map<OrderId, Boolean> enqueueAll(AccountId accountId) {
+        List<Order> orders = orderRepository.findNewByAccount(accountId);
+        Map<OrderId, Boolean> r = new HashMap<>(orders.size());
+        for (Order o : orders) {
+            r.put(o.id(), enqueue(o));
+        }
+        return r;
+    }
+
+    public Iterable<Order> getAll() {
+        return orderRepository.findAll();
+    }
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     private boolean enqueue(Order order) {
         if (order.status() != OrderStatus.created) {
@@ -90,33 +116,6 @@ public class OrderService {
             DomainEventBus.instance().publish(asset);
         }
         return true;
-    }
-
-    public boolean dequeueOrder(OrderId id) {
-        Order order = orderRepository.findById(id);
-        if (order.isTrading()) {
-            brokerTradeService.withdraw(id);
-            return true;
-        } else {
-            OrderQueue queue = orderQueueRepository.getInstance(order.account());
-            return queue.dequeue(order);
-        }
-    }
-
-    public boolean enqueueAll(AccountId accountId) {
-        List<Order> orders = orderRepository.findNewByAccount(accountId);
-        boolean flag = true;
-        for (Order o : orders) {
-            if (!enqueue(o)) {
-                log.warn("执行全部入队操作过程未完全执行");
-                flag = false;
-            }
-        }
-        return flag;
-    }
-
-    public Iterable<Order> getAll() {
-        return orderRepository.findAll();
     }
 
 }

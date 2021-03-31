@@ -145,6 +145,11 @@ public class Asset extends DomainEventSource<AssetEvent> {
         return allocatedResources;
     }
 
+    @Override
+    public int sourceId() {
+        return id.hashCode();
+    }
+
     /**
      * 锁定一部分现金，使得它们不再可以被使用为其他目的
      *

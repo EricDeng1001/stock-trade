@@ -24,31 +24,31 @@ public class TradeService {
     @Autowired
     public TradeService(OrderRepository orderRepository) {this.orderRepository = orderRepository;}
 
+    @Retryable(value = ObjectOptimisticLockingFailureException.class, maxAttempts = 100)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @Retryable(ObjectOptimisticLockingFailureException.class)
     public void startTradingOrder(OrderId orderId, String brokerId) {
         Order order = orderRepository.findById(orderId);
         order.startTrading(brokerId);
         orderRepository.save(order);
     }
 
+    @Retryable(value = ObjectOptimisticLockingFailureException.class)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @Retryable(ObjectOptimisticLockingFailureException.class)
-    public void offerDeal(OrderId id, Deal deal, String brokerId) {
-        Order order = orderRepository.findById(id);
-        order.makeDeal(deal, brokerId);
-        orderRepository.save(order);
-        logger.info("订单取得交易: {}, 成交: {}", id, deal);
-        DomainEventBus.instance().publish(order);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @Retryable(ObjectOptimisticLockingFailureException.class)
     public void closeOrder(OrderId id) {
         Order order = orderRepository.findById(id);
         order.close();
         orderRepository.save(order);
         logger.info("订单关闭交易: {}", id);
+        DomainEventBus.instance().publish(order);
+    }
+
+    @Retryable(value = ObjectOptimisticLockingFailureException.class)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void offerDeal(OrderId id, Deal deal, String brokerId) {
+        Order order = orderRepository.findById(id);
+        order.makeDeal(deal, brokerId);
+        orderRepository.save(order);
+        logger.info("订单取得交易: {}, 成交: {}", id, deal);
         DomainEventBus.instance().publish(order);
     }
 

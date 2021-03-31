@@ -5,6 +5,7 @@ import org.example.trade.adapter.interfaces.translator.AssetTranslator;
 import org.example.trade.application.AssetService;
 import org.example.trade.interfaces.account.AssetApplication;
 import org.example.trade.interfaces.account.AssetDTO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,6 +14,7 @@ public class AssetApplicationAdapter implements AssetApplication {
 
     private final AssetService assetService;
 
+    @Autowired
     public AssetApplicationAdapter(AssetService assetService) {this.assetService = assetService;}
 
     @Override

@@ -13,6 +13,12 @@
   <artifactId>trade</artifactId>
   <packaging>pom</packaging>
   <version>1.0-SNAPSHOT</version>
+
+  <properties>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
+  </properties>
+
   <modules>
     <module>domain</module>
     <module>application</module>
@@ -22,16 +28,11 @@
     <module>xtp-integration</module>
     <module>mock-broker-integration</module>
   </modules>
-
-  <properties>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
-  </properties>
   <dependencies>
     <dependency>
       <groupId>engineering.ericdeng</groupId>
       <artifactId>architecture-common</artifactId>
-      <version>3.3.0</version>
+      <version>4.0.0</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -78,26 +79,34 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
   <build>
-    <plugins>
-      <plugin>
-        <groupId>com.nickwongdev</groupId>
-        <artifactId>aspectj-maven-plugin</artifactId>
-        <version>1.12.6</version>
-        <configuration>
-          <source>${maven.compiler.source}</source>
-          <target>${maven.compiler.target}</target>
-          <complianceLevel>${maven.compiler.source}</complianceLevel>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>compile</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>com.nickwongdev</groupId>
+          <artifactId>aspectj-maven-plugin</artifactId>
+          <version>1.12.6</version>
+          <configuration>
+            <complianceLevel>${maven.compiler.source}</complianceLevel>
+            <showWeaveInfo>true</showWeaveInfo>
+            <aspectLibraries>
+              <aspectLibrary>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-aspects</artifactId>
+              </aspectLibrary>
+            </aspectLibraries>
+          </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>compile</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 
   <dependencyManagement>

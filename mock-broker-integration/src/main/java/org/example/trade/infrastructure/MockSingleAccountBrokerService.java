@@ -40,7 +40,7 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
 
     private static final Broker broker = Broker.valueOf("mock broker");
 
-    private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(4);
+    private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(10);
 
     private final Map<OrderId, Boolean> cancels = new ConcurrentHashMap<>();
 
@@ -74,6 +74,7 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
         Shares[] sims = requirement.shares().allocate(simTradeCount);
         for (int i = 0; i < simTradeCount; i++) {
             Shares t = sims[i];
+            int k = i;
             scheduledExecutorService.schedule(
                 () -> {
                     if (notCancel(order.id())) {
@@ -85,6 +86,10 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
                                     : ((LimitedPriceTradeRequest) requirement).targetPrice()
                             ),
                             UUID.randomUUID().toString());
+                        // all deal offered, then close the order, as promised
+                        if (k == simTradeCount - 1) {
+                            tradeService.closeOrder(order.id());
+                        }
                     }
                 },
                 (long) simTradingWaitTime * (i + 1),
@@ -92,15 +97,6 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
             );
         }
 
-        scheduledExecutorService.schedule(
-            () -> {
-                if (notCancel(order.id())) {
-                    tradeService.closeOrder(order.id());
-                }
-            },
-            // 保证finish消息最后发到
-            (long) simTradingWaitTime * simTradeCount + 10,
-            TimeUnit.MILLISECONDS);
     }
 
     @Override

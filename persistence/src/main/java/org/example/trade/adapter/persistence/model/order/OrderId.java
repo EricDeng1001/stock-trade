@@ -54,4 +54,11 @@ public class OrderId implements Serializable {
         this.orderId = id;
     }
 
+    @Override
+    public String toString() {
+        return "OrderId{" +
+            "orderId=" + orderId +
+            '}';
+    }
+
 }

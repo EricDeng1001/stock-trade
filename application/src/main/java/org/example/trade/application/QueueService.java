@@ -1,22 +1,18 @@
 package org.example.trade.application;
 
 import engineering.ericdeng.architecture.domain.model.DomainEventBus;
-import engineering.ericdeng.architecture.domain.model.DomainEventSubscriber;
 import org.example.trade.domain.account.asset.*;
-import org.example.trade.domain.market.SecurityCode;
 import org.example.trade.domain.order.Order;
 import org.example.trade.domain.queue.OrderQueue;
 import org.example.trade.domain.queue.OrderQueueRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class QueueService extends DomainEventSubscriber<AssetUpdated> {
+public class QueueService {
 
     private static final Logger logger = LoggerFactory.getLogger(QueueService.class);
 
@@ -29,38 +25,28 @@ public class QueueService extends DomainEventSubscriber<AssetUpdated> {
                         OrderQueueRepository orderQueueRepository) {
         this.assetRepository = assetRepository;
         this.orderQueueRepository = orderQueueRepository;
-        DomainEventBus.instance().subscribe(this);
+        DomainEventBus.instance().subscribe(AssetCashUpdated.class, this::tryAllocateToBuy);
+        DomainEventBus.instance().subscribe(AssetPositionUpdated.class, this::tryAllocateToSell);
     }
 
-    @Override
     @Transactional
-    @Retryable(ObjectOptimisticLockingFailureException.class)
-    public void handle(AssetUpdated assetEvent) {
-        logger.info("try get lock queue");
+    private boolean tryAllocateToBuy(AssetCashUpdated assetEvent) {
         Asset asset = assetRepository.findById(assetEvent.account());
-        logger.info("get lock queue");
         OrderQueue orderQueue = orderQueueRepository.getInstance(assetEvent.account());
-        if (assetEvent instanceof AssetCashUpdated) {
-            tryAllocateToBuy(asset, orderQueue);
-        } else if (assetEvent instanceof AssetPositionUpdated) {
-            tryAllocateToSell(asset, orderQueue, ((AssetPositionUpdated) assetEvent).securityCode());
-        }
-    }
-
-    private void tryAllocateToBuy(Asset asset, OrderQueue orderQueue) {
-        if (orderQueue.isEmpty()) { return; }
+        if (orderQueue.isEmpty()) { return true; }
         Order o = orderQueue.peek();
-        logger.info("准备分配: {}, {}", o.requirement().securityCode(), o.requirement().value());
-        logger.info("拥有: {}", asset.usableCash());
         tryAlloc(asset, orderQueue, o);
+        return true;
     }
 
-    private void tryAllocateToSell(Asset asset, OrderQueue orderQueue, SecurityCode securityCode) {
-        if (orderQueue.isEmpty(securityCode)) { return; }
-        Order o = orderQueue.peek(securityCode);
-        logger.info("准备分配: {}, {}", o.requirement().securityCode(), o.requirement().shares());
-        logger.info("拥有: {}", asset.usablePositions().get(o.requirement().securityCode()));
+    @Transactional
+    private boolean tryAllocateToSell(AssetPositionUpdated assetEvent) {
+        Asset asset = assetRepository.findById(assetEvent.account());
+        OrderQueue orderQueue = orderQueueRepository.getInstance(assetEvent.account());
+        if (orderQueue.isEmpty(assetEvent.securityCode())) { return true; }
+        Order o = orderQueue.peek(assetEvent.securityCode());
         tryAlloc(asset, orderQueue, o);
+        return true;
     }
 
     private void tryAlloc(Asset asset, OrderQueue orderQueue, Order o) {

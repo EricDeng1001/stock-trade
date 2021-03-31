@@ -11,10 +11,12 @@ import org.example.trade.interfaces.order.CreateOrderCommand;
 import org.example.trade.interfaces.order.OrderApplication;
 import org.example.trade.interfaces.order.OrderDTO;
 import org.example.trade.interfaces.order.TradeDTO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,6 +26,7 @@ public class OrderApplicationAdapter implements OrderApplication {
 
     private final OrderService orderService;
 
+    @Autowired
     public OrderApplicationAdapter(OrderService orderService) {
         this.orderService = orderService;
     }
@@ -69,8 +72,12 @@ public class OrderApplicationAdapter implements OrderApplication {
 
     @Override
     @PostMapping("/enqueue/all")
-    public boolean enqueueAll(@RequestBody String accountId) {
-        return orderService.enqueueAll(AccountIdTranslator.from(accountId));
+    public Map<String, Boolean> enqueueAll(@RequestBody String accountId) {
+        return orderService.enqueueAll(AccountIdTranslator.from(accountId)).entrySet()
+            .stream().collect(Collectors.toMap(
+                e -> OrderIdTranslator.from(e.getKey()),
+                Map.Entry::getValue
+            ));
     }
 
     @Override

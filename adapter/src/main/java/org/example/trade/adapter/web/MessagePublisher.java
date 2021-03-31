@@ -6,6 +6,7 @@ import org.example.trade.domain.order.OrderTraded;
 import org.example.trade.infrastructure.messaging.WebSocketNotificationService;
 import org.example.trade.interfaces.message.OrderClosedMessage;
 import org.example.trade.interfaces.message.OrderTradedMessage;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
@@ -14,6 +15,7 @@ public class MessagePublisher implements WebSocketNotificationService {
 
     private final SimpMessagingTemplate simpMessagingTemplate;
 
+    @Autowired
     public MessagePublisher(SimpMessagingTemplate simpMessagingTemplate) {
         this.simpMessagingTemplate = simpMessagingTemplate;
 

@@ -2,7 +2,6 @@ package org.example.trade.application;
 
 import engineering.ericdeng.architecture.domain.model.DomainEvent;
 import engineering.ericdeng.architecture.domain.model.DomainEventBus;
-import engineering.ericdeng.architecture.domain.model.DomainEventSubscriber;
 import org.example.trade.domain.order.OrderClosed;
 import org.example.trade.domain.order.OrderTraded;
 import org.example.trade.infrastructure.messaging.WebSocketNotificationService;
@@ -12,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class NotificationService extends DomainEventSubscriber<DomainEvent> {
+public class NotificationService {
 
     private static final Logger logger = LoggerFactory.getLogger(NotificationService.class);
 
@@ -22,17 +21,17 @@ public class NotificationService extends DomainEventSubscriber<DomainEvent> {
     public NotificationService(
         WebSocketNotificationService webSocketNotificationService) {
         this.webSocketNotificationService = webSocketNotificationService;
-        DomainEventBus.instance().subscribe(this);
+        DomainEventBus.instance().subscribe(DomainEvent.class, this::publish);
     }
 
-    @Override
-    public void handle(DomainEvent domainEvent) {
+    public boolean publish(DomainEvent domainEvent) {
         logger.info("准备推送事件");
         if (domainEvent instanceof OrderTraded) {
             webSocketNotificationService.orderTraded((OrderTraded) domainEvent);
         } else if (domainEvent instanceof OrderClosed) {
             webSocketNotificationService.orderClosed((OrderClosed) domainEvent);
         }
+        return true;
     }
 
 }

@@ -1,7 +1,6 @@
 package org.example.trade.application;
 
 import engineering.ericdeng.architecture.domain.model.DomainEventBus;
-import engineering.ericdeng.architecture.domain.model.DomainEventSubscriber;
 import org.example.trade.domain.account.asset.ResourceAllocated;
 import org.example.trade.domain.order.Order;
 import org.example.trade.domain.order.OrderId;
@@ -13,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SubmitService extends DomainEventSubscriber<ResourceAllocated> {
+public class SubmitService {
 
     private static final Logger logger = LoggerFactory.getLogger(SubmitService.class);
 
@@ -26,14 +25,14 @@ public class SubmitService extends DomainEventSubscriber<ResourceAllocated> {
                          SingleAccountBrokerService brokerTradeService) {
         this.orderRepository = orderRepository;
         this.brokerTradeService = brokerTradeService;
-        DomainEventBus.instance().subscribe(this);
+        DomainEventBus.instance().subscribe(ResourceAllocated.class, this::submit);
     }
 
-    @Override
-    public void handle(ResourceAllocated resourceAllocated) {
+    public boolean submit(ResourceAllocated resourceAllocated) {
         OrderId id = resourceAllocated.order();
         Order order = orderRepository.findById(id);
         brokerTradeService.submit(order);
         logger.info("已向券商提交订单: {}", id);
+        return true;
     }
 }

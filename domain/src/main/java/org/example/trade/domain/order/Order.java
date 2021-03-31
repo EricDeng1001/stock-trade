@@ -177,6 +177,11 @@ public final class Order extends DomainEventSource<OrderEvent> {
         return orderStatus;
     }
 
+    @Override
+    public int sourceId() {
+        return id.hashCode();
+    }
+
     public boolean isTrading() {
         return orderStatus == OrderStatus.trading;
     }
