@@ -30,6 +30,7 @@ public class AssetApplicationAdapter implements AssetApplication {
     @Override
     @PostMapping("/sync")
     public void syncAsset(@RequestBody String accountId) {
+        if (accountId == null) { throw new IllegalArgumentException(); }
         assetService.syncAssetFromBroker(AccountIdTranslator.from(accountId));
     }
 
