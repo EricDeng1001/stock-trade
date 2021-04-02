@@ -1,0 +1,5 @@
+<aspectj>
+  <weaver>
+    <include within="org.example.trade.application..*"/>
+  </weaver>
+</aspectj>

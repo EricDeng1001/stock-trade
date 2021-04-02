@@ -3,24 +3,19 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
+    <groupId>org.example.trade</groupId>
     <artifactId>trade</artifactId>
-    <groupId>org.example</groupId>
     <version>1.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>trade.domain</artifactId>
-
-  <properties>
-    <maven.compiler.source>15</maven.compiler.source>
-    <maven.compiler.target>15</maven.compiler.target>
-  </properties>
+  <artifactId>domain</artifactId>
 
   <dependencies>
     <dependency>
-      <groupId>org.example</groupId>
+      <groupId>org.example.money</groupId>
       <artifactId>money</artifactId>
-      <version>1.1.1</version>
+      <version>1.2.0</version>
     </dependency>
   </dependencies>
 </project>

@@ -64,15 +64,19 @@ public class Asset extends DomainEventSource<AssetEvent> {
     }
 
     public boolean canAllocate(SecurityCode securityCode, Shares amount) {
-        Shares usableShares = usablePositions.get(securityCode);
-        return usableShares != null && usableShares.compareTo(amount) >= 0;
+        Shares usableShares = getUsablePosition(securityCode);
+        return usableShares.compareTo(amount) >= 0;
     }
 
     public boolean consume(OrderId id, Deal deal) {
         Resource<?> resource = resourceOf(id);
         switch (resource.usedFor()) {
-            case BUY -> gain(resource.securityCode(), deal.shares());
-            case SELL -> gain(deal.value());
+            case BUY:
+                gain(resource.securityCode(), deal.shares());
+                break;
+            case SELL:
+                gain(deal.value());
+                break;
         }
         return resource.consume(deal);
     }
@@ -84,13 +88,15 @@ public class Asset extends DomainEventSource<AssetEvent> {
     public void reclaim(OrderId id) {
         Resource<?> resource = resourceOf(id);
         switch (resource.usedFor()) {
-            case BUY -> {
+            case BUY: {
                 Money m = (Money) resource.remain();
                 gain(m);
+                break;
             }
-            case SELL -> {
+            case SELL: {
                 Shares shares = (Shares) resource.remain();
                 gain(resource.securityCode(), shares);
+                break;
             }
         }
         removeResource(id);
@@ -101,7 +107,11 @@ public class Asset extends DomainEventSource<AssetEvent> {
     }
 
     public void set(SecurityCode securityCode, Shares shares) {
-        gain(securityCode, shares.subtract(usablePositions.get(securityCode)));
+        gain(securityCode, shares.subtract(getUsablePosition(securityCode)));
+    }
+
+    public Shares getUsablePosition(SecurityCode securityCode) {
+        return usablePositions.computeIfAbsent(securityCode, s -> Shares.ZERO);
     }
 
     public void gain(Money amount) {
@@ -114,24 +124,22 @@ public class Asset extends DomainEventSource<AssetEvent> {
 
     public void gain(SecurityCode securityCode, Shares shares) {
         if (shares.compareTo(Shares.ZERO) == 0) { return; }
-        Shares x = usablePositions.get(securityCode);
-        if (x == null) {
-            usablePositions.put(securityCode, shares);
-            x = shares;
-        } else {
-            x = x.add(shares);
-            usablePositions.put(securityCode, x);
-        }
+        Shares x = getUsablePosition(securityCode);
+        x = x.add(shares);
+        usablePositions.put(securityCode, x);
         raise(
             new AssetPositionUpdated(Instant.now(), id, securityCode, shares, x)
         );
     }
 
     public Resource<?> tryAllocate(Order order) {
-        return switch (order.requirement().tradeSide()) {
-            case BUY -> tryAllocate(order.id(), order.requirement().securityCode(), order.requirement().value());
-            case SELL -> tryAllocate(order.id(), order.requirement().securityCode(), order.requirement().shares());
-        };
+        switch (order.requirement().tradeSide()) {
+            case BUY:
+                return tryAllocate(order.id(), order.requirement().securityCode(), order.requirement().value());
+            case SELL:
+                return tryAllocate(order.id(), order.requirement().securityCode(), order.requirement().shares());
+        }
+        return null;
     }
 
     public AssetInfo info() {
@@ -140,6 +148,11 @@ public class Asset extends DomainEventSource<AssetEvent> {
 
     public Map<OrderId, Resource<?>> resources() {
         return allocatedResources;
+    }
+
+    @Override
+    public int sourceId() {
+        return id.hashCode();
     }
 
     /**

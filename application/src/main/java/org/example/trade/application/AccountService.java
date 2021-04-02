@@ -1,10 +1,14 @@
 package org.example.trade.application;
 
+import org.example.trade.adapter.broker.SingleAccountBrokerService;
+import org.example.trade.adapter.broker.SingleAccountBrokerServiceFactory;
 import org.example.trade.domain.account.Account;
 import org.example.trade.domain.account.AccountId;
 import org.example.trade.domain.account.AccountRepository;
-import org.example.trade.infrastructure.SingleAccountBrokerService;
-import org.example.trade.infrastructure.SingleAccountBrokerServiceFactory;
+import org.example.trade.domain.queue.OrderQueue;
+import org.example.trade.domain.queue.OrderQueueRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,8 +17,11 @@ import java.util.Collection;
 import java.util.NoSuchElementException;
 
 @Service
-@Transactional
 public class AccountService {
+
+    private static final Logger logger = LoggerFactory.getLogger(AccountService.class);
+
+    private final OrderQueueRepository orderQueueRepository;
 
     private final AccountRepository accountRepository;
 
@@ -23,14 +30,17 @@ public class AccountService {
     private final AssetService assetService;
 
     @Autowired
-    public AccountService(AccountRepository accountRepository,
+    public AccountService(OrderQueueRepository orderQueueRepository,
+                          AccountRepository accountRepository,
                           SingleAccountBrokerServiceFactory factory,
                           AssetService assetService) {
+        this.orderQueueRepository = orderQueueRepository;
         this.accountRepository = accountRepository;
         this.factory = factory;
         this.assetService = assetService;
     }
 
+    @Transactional
     public boolean activateAccount(AccountId accountId, String config) {
         Account account = accountRepository.findById(accountId);
         if (account == null) {
@@ -49,6 +59,7 @@ public class AccountService {
         return false;
     }
 
+    @Transactional
     public boolean deactivate(AccountId accountId) {
         SingleAccountBrokerService service = factory.getOrNew(accountId);
         Account account = accountRepository.findById(accountId);
@@ -62,6 +73,22 @@ public class AccountService {
             return true;
         }
         return false;
+    }
+
+    @Transactional
+    public void changeConfig(AccountId accountId, String config) {
+        Account account = accountRepository.findById(accountId);
+        account.changeConfig(config);
+        accountRepository.save(account);
+    }
+
+    public void registerAccount(AccountId supportedAccount) {
+        Account account = new Account(supportedAccount, "");
+        accountRepository.save(account);
+        OrderQueue orderQueue = new OrderQueue(account.id());
+        orderQueueRepository.add(orderQueue);
+        logger.info("{} 已经注册", account);
+        // 向service register注册自己
     }
 
     public Collection<Account> getAll() {

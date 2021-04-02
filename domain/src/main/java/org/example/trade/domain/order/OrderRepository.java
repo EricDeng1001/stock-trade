@@ -16,4 +16,6 @@ public interface OrderRepository {
 
     List<Order> findNewByAccount(AccountId accountId);
 
+    List<Order> findAllByAccount(AccountId accountId);
+
 }

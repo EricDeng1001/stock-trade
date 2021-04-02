@@ -15,6 +15,11 @@ public final class MarketTradeRequest extends TradeRequest {
     }
 
     @Override
+    public Price price() {
+        return Price.ZERO;
+    }
+
+    @Override
     public Money value() {
         return Money.ZERO;
     }

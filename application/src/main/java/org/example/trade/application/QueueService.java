@@ -1,65 +1,102 @@
 package org.example.trade.application;
 
 import engineering.ericdeng.architecture.domain.model.DomainEventBus;
-import engineering.ericdeng.architecture.domain.model.DomainEventSubscriber;
+import org.example.trade.adapter.broker.SingleAccountBrokerServiceFactory;
+import org.example.trade.domain.account.AccountId;
 import org.example.trade.domain.account.asset.*;
-import org.example.trade.domain.market.SecurityCode;
 import org.example.trade.domain.order.Order;
+import org.example.trade.domain.order.OrderId;
+import org.example.trade.domain.order.OrderRepository;
+import org.example.trade.domain.order.OrderStatus;
 import org.example.trade.domain.queue.OrderQueue;
 import org.example.trade.domain.queue.OrderQueueRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-public class QueueService extends DomainEventSubscriber<AssetUpdated> {
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 
-    private static final Logger log = LoggerFactory.getLogger(QueueService.class);
+@Service
+public class QueueService {
+
+    private static final Logger logger = LoggerFactory.getLogger(QueueService.class);
 
     private final AssetRepository assetRepository;
 
     private final OrderQueueRepository orderQueueRepository;
 
+    private final OrderRepository orderRepository;
+
+    private final SingleAccountBrokerServiceFactory factory;
+
     @Autowired
     public QueueService(AssetRepository assetRepository,
-                        OrderQueueRepository orderQueueRepository) {
+                        OrderQueueRepository orderQueueRepository,
+                        OrderRepository orderRepository,
+                        SingleAccountBrokerServiceFactory factory) {
         this.assetRepository = assetRepository;
         this.orderQueueRepository = orderQueueRepository;
-        DomainEventBus.instance().subscribe(this);
+        this.orderRepository = orderRepository;
+        this.factory = factory;
+        DomainEventBus.instance().subscribe(AssetCashUpdated.class, this::tryAllocateToBuy);
+        DomainEventBus.instance().subscribe(AssetPositionUpdated.class, this::tryAllocateToSell);
+        DomainEventBus.instance().subscribe(ResourceAllocated.class, this::submit);
     }
 
-    @Override
-    @Transactional
-    @Retryable(ObjectOptimisticLockingFailureException.class)
-    public void handle(AssetUpdated assetEvent) {
-        log.info("try get lock queue");
-        Asset asset = assetRepository.findById(assetEvent.account());
-        log.info("get lock queue");
-        OrderQueue orderQueue = orderQueueRepository.getInstance(assetEvent.account());
-        if (assetEvent instanceof AssetCashUpdated) {
-            tryAllocateToBuy(asset, orderQueue);
-        } else if (assetEvent instanceof AssetPositionUpdated) {
-            tryAllocateToSell(asset, orderQueue, ((AssetPositionUpdated) assetEvent).securityCode());
+    public boolean enqueue(OrderId id) {
+        Order order = orderRepository.findById(id);
+        if (order == null) { throw new NoSuchElementException("订单不存在"); }
+        return enqueue(order);
+    }
+
+    public Map<OrderId, Boolean> enqueueAll(AccountId accountId) {
+        List<Order> orders = orderRepository.findNewByAccount(accountId);
+        Map<OrderId, Boolean> r = new HashMap<>(orders.size());
+        for (Order o : orders) {
+            r.put(o.id(), enqueue(o));
+        }
+        return r;
+    }
+
+    public boolean dequeue(OrderId id) {
+        Order order = orderRepository.findById(id);
+        if (order.isTrading()) {
+            factory.getOrNew(id.accountId()).withdraw(id);
+            return true;
+        } else {
+            OrderQueue queue = orderQueueRepository.getInstance(order.account());
+            return queue.dequeue(order);
         }
     }
 
-    private void tryAllocateToBuy(Asset asset, OrderQueue orderQueue) {
+    private void submit(ResourceAllocated resourceAllocated) {
+        OrderId id = resourceAllocated.order();
+        Order order = orderRepository.findById(id);
+        factory.getOrNew(id.accountId()).submit(order);
+        logger.info("已向券商提交订单: {}", id);
+    }
+
+    @Transactional
+    private void tryAllocateToBuy(AssetCashUpdated assetEvent) {
+        Asset asset = assetRepository.findById(assetEvent.account());
+        OrderQueue orderQueue = orderQueueRepository.getInstance(assetEvent.account());
         if (orderQueue.isEmpty()) { return; }
         Order o = orderQueue.peek();
-        log.info("准备分配: {}, {}", o.requirement().securityCode(), o.requirement().value());
-        log.info("拥有: {}", asset.usableCash());
         tryAlloc(asset, orderQueue, o);
     }
 
-    private void tryAllocateToSell(Asset asset, OrderQueue orderQueue, SecurityCode securityCode) {
-        if (orderQueue.isEmpty(securityCode)) { return; }
-        Order o = orderQueue.peek(securityCode);
-        log.info("准备分配: {}, {}", o.requirement().securityCode(), o.requirement().shares());
-        log.info("拥有: {}", asset.usablePositions().get(o.requirement().securityCode()));
+    @Transactional
+    private void tryAllocateToSell(AssetPositionUpdated assetEvent) {
+        Asset asset = assetRepository.findById(assetEvent.account());
+        OrderQueue orderQueue = orderQueueRepository.getInstance(assetEvent.account());
+        if (orderQueue.isEmpty(assetEvent.securityCode())) { return; }
+        Order o = orderQueue.peek(assetEvent.securityCode());
         tryAlloc(asset, orderQueue, o);
     }
 
@@ -68,9 +105,29 @@ public class QueueService extends DomainEventSubscriber<AssetUpdated> {
         if (r != null) {
             orderQueue.dequeue(o);
             assetRepository.save(asset);
-            log.info("订单: {} 资源分配完成: {}", o.id(), r);
+            logger.info("订单: {} 资源分配完成: {}", o.id(), r);
             DomainEventBus.instance().publish(asset);
         }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    private boolean enqueue(Order order) {
+        if (order.status() != OrderStatus.created) {
+            logger.warn("用户在尝试将非新建订单加入队列");
+            return false;
+        }
+        Asset asset = assetRepository.findById(order.account());
+        Resource<?> r = asset.tryAllocate(order);
+        if (r == null) {
+            logger.info("将订单加入到队列: {}", order.id());
+            OrderQueue orderQueue = orderQueueRepository.getInstance(order.account());
+            orderQueue.enqueue(order);
+        } else {
+            logger.info("订单: {} 资源分配完成: {}", order.id(), r);
+            assetRepository.save(asset);
+            DomainEventBus.instance().publish(asset);
+        }
+        return true;
     }
 
 }

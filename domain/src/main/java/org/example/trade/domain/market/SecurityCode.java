@@ -39,4 +39,9 @@ public class SecurityCode {
         return Objects.hash(value);
     }
 
+    // TODO
+    public Market market() {
+        return null;
+    }
+
 }

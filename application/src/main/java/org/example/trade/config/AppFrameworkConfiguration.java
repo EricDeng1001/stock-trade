@@ -23,7 +23,7 @@ public class AppFrameworkConfiguration {
 
     @Bean
     public List<RetryListener> retryListeners() {
-        Logger log = LoggerFactory.getLogger(getClass());
+        Logger logger = LoggerFactory.getLogger(getClass());
 
         return Collections.singletonList(new RetryListener() {
 
@@ -33,21 +33,21 @@ public class AppFrameworkConfiguration {
                 Field labelField = ReflectionUtils.findField(callback.getClass(), "val$label");
                 ReflectionUtils.makeAccessible(labelField);
                 String label = (String) ReflectionUtils.getField(labelField, callback);
-                log.info("Starting retryable method {}", label);
+                logger.info("Starting retryable method {}", label);
                 return true;
             }
 
             @Override
             public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback,
                                                          Throwable throwable) {
-                log.info("Retryable method {} threw {}th exception {}",
+                logger.info("Retryable method {} threw {}th exception {}",
                          context.getAttribute("context.name"), context.getRetryCount(), throwable.toString());
             }
 
             @Override
             public <T, E extends Throwable> void close(RetryContext context, RetryCallback<T, E> callback,
                                                        Throwable throwable) {
-                log.info("Finished retryable method {}", context.getAttribute("context.name"));
+                logger.info("Finished retryable method {}", context.getAttribute("context.name"));
             }
         });
     }

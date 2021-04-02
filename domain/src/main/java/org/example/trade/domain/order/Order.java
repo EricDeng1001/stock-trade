@@ -4,7 +4,6 @@ import engineering.ericdeng.architecture.domain.model.DomainEventSource;
 import engineering.ericdeng.architecture.domain.model.annotation.AggregateRoot;
 import engineering.ericdeng.architecture.domain.model.annotation.New;
 import engineering.ericdeng.architecture.domain.model.annotation.Rebuild;
-import org.example.finance.domain.Money;
 import org.example.trade.domain.account.AccountId;
 import org.example.trade.domain.market.Shares;
 import org.example.trade.domain.order.request.TradeRequest;
@@ -34,10 +33,6 @@ public final class Order extends DomainEventSource<OrderEvent> {
     private Instant submittedAt;
 
     private Instant closedAt;
-
-    private Shares nonRecordedShares;
-
-    private Money nonRecordedCash;
 
     private long version;
 
@@ -113,7 +108,7 @@ public final class Order extends DomainEventSource<OrderEvent> {
         return traded;
     }
 
-    public void submitted(String brokerId) {
+    public void startTrading(String brokerId) {
         if (submittedAt != null) { return; }
         this.brokerId = brokerId;
         orderStatus = OrderStatus.trading;
@@ -125,16 +120,19 @@ public final class Order extends DomainEventSource<OrderEvent> {
      */
     public void close() {
         if (closedAt != null) { return; }
-        int i = traded().compareTo(requirement.shares());
         closedAt = Instant.now();
-        if (i == 0) {
-            orderStatus = OrderStatus.fulfilled;
-        } else if (i < 0) {
-            orderStatus = OrderStatus.withdrawn;
+        if (this.brokerId == null) {
+            submittedAt = closedAt;
+            orderStatus = OrderStatus.rejected;
         } else {
-            orderStatus = OrderStatus.overflow;
+            int i = traded().compareTo(requirement.shares());
+            if (i == 0) {
+                orderStatus = OrderStatus.fulfilled;
+            } else {
+                orderStatus = OrderStatus.withdrawn;
+            }
         }
-        raise(new OrderFinished(closedAt, id, orderStatus));
+        raise(new OrderClosed(closedAt, id, orderStatus));
     }
 
     public void makeDeal(Deal deal, String brokerId) {
@@ -177,6 +175,11 @@ public final class Order extends DomainEventSource<OrderEvent> {
 
     public OrderStatus status() {
         return orderStatus;
+    }
+
+    @Override
+    public int sourceId() {
+        return id.hashCode();
     }
 
     public boolean isTrading() {

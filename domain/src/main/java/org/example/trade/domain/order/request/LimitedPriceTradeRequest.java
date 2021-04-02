@@ -28,6 +28,11 @@ public final class LimitedPriceTradeRequest extends TradeRequest {
             '}';
     }
 
+    @Override
+    public Price price() {
+        return targetPrice;
+    }
+
     /**
      * @return net value of this request, regardless of tradeSide
      */
