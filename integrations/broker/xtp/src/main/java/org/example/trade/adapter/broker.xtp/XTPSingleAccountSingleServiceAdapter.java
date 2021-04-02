@@ -28,7 +28,6 @@ import org.example.trade.domain.order.request.TradeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -39,7 +38,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Profile("xtp")
 @Component
 public class XTPSingleAccountSingleServiceAdapter
     extends SingleAccountBrokerService implements TradeSpi {

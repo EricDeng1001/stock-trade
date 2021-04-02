@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
-public class OrderQueueRepositoryJpaAdapter implements OrderQueueRepository {
+public class OrderQueueRepositoryMapAdapter implements OrderQueueRepository {
 
     Map<AccountId, OrderQueue> map = new ConcurrentHashMap<>();
 

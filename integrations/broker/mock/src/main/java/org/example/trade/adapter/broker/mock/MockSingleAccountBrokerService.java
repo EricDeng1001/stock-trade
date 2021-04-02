@@ -18,14 +18,12 @@ import org.example.trade.domain.order.PriceType;
 import org.example.trade.domain.order.request.LimitedPriceTradeRequest;
 import org.example.trade.domain.order.request.TradeRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.*;
 
-@Profile("mock-broker")
 @Service
 public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
 
@@ -51,7 +49,7 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
         TradeService tradeService,
         RegisterService registerService,
         SyncService syncService,
-        MockConfig config
+        MockNodeConfig config
     ) {
         super(new AccountId(broker, config.getUsername()), registerService, syncService, tradeService);
     }

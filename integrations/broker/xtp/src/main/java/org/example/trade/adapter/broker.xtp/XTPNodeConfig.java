@@ -2,9 +2,7 @@ package org.example.trade.adapter.broker.xtp;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
-@Profile("xtp")
 @Configuration
 @ConfigurationProperties(prefix = "xtp")
 public class XTPNodeConfig {

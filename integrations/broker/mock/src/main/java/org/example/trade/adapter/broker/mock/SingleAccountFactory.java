@@ -4,10 +4,8 @@ import org.example.trade.adapter.broker.AccountNotSupportedException;
 import org.example.trade.adapter.broker.SingleAccountBrokerService;
 import org.example.trade.adapter.broker.SingleAccountBrokerServiceFactory;
 import org.example.trade.domain.account.AccountId;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-@Profile("mock-broker")
 @Component
 public class SingleAccountFactory implements SingleAccountBrokerServiceFactory {
 
