@@ -1,12 +1,12 @@
 package org.example.trade.application;
 
+import org.example.trade.adapter.broker.SingleAccountBrokerService;
+import org.example.trade.adapter.broker.SingleAccountBrokerServiceFactory;
 import org.example.trade.domain.account.Account;
 import org.example.trade.domain.account.AccountId;
 import org.example.trade.domain.account.AccountRepository;
 import org.example.trade.domain.queue.OrderQueue;
 import org.example.trade.domain.queue.OrderQueueRepository;
-import org.example.trade.infrastructure.broker.SingleAccountBrokerService;
-import org.example.trade.infrastructure.broker.SingleAccountBrokerServiceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

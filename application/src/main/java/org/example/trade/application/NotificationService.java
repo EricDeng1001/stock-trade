@@ -2,9 +2,9 @@ package org.example.trade.application;
 
 import engineering.ericdeng.architecture.domain.model.DomainEvent;
 import engineering.ericdeng.architecture.domain.model.DomainEventBus;
+import org.example.trade.adapter.messaging.WebSocketNotificationService;
 import org.example.trade.domain.order.OrderClosed;
 import org.example.trade.domain.order.OrderTraded;
-import org.example.trade.infrastructure.messaging.WebSocketNotificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

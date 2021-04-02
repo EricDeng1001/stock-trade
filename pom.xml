@@ -22,12 +22,13 @@
   <modules>
     <module>domain</module>
     <module>application</module>
-    <module>interface</module>
-    <module>persistence</module>
+    <module>usecase</module>
     <module>adapter</module>
-    <module>xtp-integration</module>
-    <module>mock-broker-integration</module>
+    <module>broker-integration</module>
+    <module>persistence</module>
+    <module>launcher</module>
   </modules>
+
   <dependencies>
     <dependency>
       <groupId>engineering.ericdeng</groupId>
@@ -35,38 +36,17 @@
       <version>4.1.0</version>
     </dependency>
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-configuration-processor</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-aop</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-websocket</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.retry</groupId>
-      <artifactId>spring-retry</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-aspects</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.aspectj</groupId>
-      <artifactId>aspectjrt</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-devtools</artifactId>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jetbrains</groupId>
       <artifactId>annotations</artifactId>
       <version>20.1.0</version>
-      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -118,7 +98,7 @@
       </dependency>
       <dependency>
         <groupId>org.example</groupId>
-        <artifactId>trade.interface</artifactId>
+        <artifactId>trade.usecase</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -134,6 +114,11 @@
       <dependency>
         <groupId>org.example</groupId>
         <artifactId>trade.persistence</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.example</groupId>
+        <artifactId>trade.broker-integration.all</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>

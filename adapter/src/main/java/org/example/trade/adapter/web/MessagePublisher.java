@@ -1,9 +1,9 @@
 package org.example.trade.adapter.web;
 
-import org.example.trade.adapter.interfaces.translator.OrderIdTranslator;
+import org.example.trade.adapter.messaging.WebSocketNotificationService;
+import org.example.trade.adapter.usecase.translator.OrderIdTranslator;
 import org.example.trade.domain.order.OrderClosed;
 import org.example.trade.domain.order.OrderTraded;
-import org.example.trade.infrastructure.messaging.WebSocketNotificationService;
 import org.example.trade.interfaces.message.OrderClosedMessage;
 import org.example.trade.interfaces.message.OrderTradedMessage;
 import org.springframework.beans.factory.annotation.Autowired;
