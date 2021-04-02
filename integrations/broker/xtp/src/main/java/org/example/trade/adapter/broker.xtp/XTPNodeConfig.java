@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Profile;
 @Profile("xtp")
 @Configuration
 @ConfigurationProperties(prefix = "xtp")
-public class NodeConfig {
+public class XTPNodeConfig {
 
     private String serverIp;
 

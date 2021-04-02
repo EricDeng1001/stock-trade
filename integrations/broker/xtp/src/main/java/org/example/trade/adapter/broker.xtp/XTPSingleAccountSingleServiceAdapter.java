@@ -61,7 +61,7 @@ public class XTPSingleAccountSingleServiceAdapter
 
     private final TradeService tradeService;
 
-    private final NodeConfig nodeConfig;
+    private final XTPNodeConfig XTPNodeConfig;
 
     private final TradeApi tradeApi;
 
@@ -74,11 +74,11 @@ public class XTPSingleAccountSingleServiceAdapter
         RegisterService registerService,
         TradeService tradeService,
         SyncService syncService,
-        NodeConfig nodeConfig
+        XTPNodeConfig XTPNodeConfig
     ) {
-        super(new AccountId(xtp, nodeConfig.username()), registerService, syncService, tradeService);
+        super(new AccountId(xtp, XTPNodeConfig.username()), registerService, syncService, tradeService);
         this.tradeService = tradeService;
-        this.nodeConfig = nodeConfig;
+        this.XTPNodeConfig = XTPNodeConfig;
         this.sessionId = "0";
         this.tradeApi = new TradeApi(this);
     }
@@ -87,8 +87,8 @@ public class XTPSingleAccountSingleServiceAdapter
     public boolean activate(String config) {
         if (!this.sessionId.equals("0")) { return true; }
         this.registeredAccount = new XTPAccount(supportedAccount, config);
-        tradeApi.init(nodeConfig.clientId(), registeredAccount.tradeKey(),
-                      nodeConfig.logFolder(), XtpLogLevel.XTP_LOG_LEVEL_ERROR, JniLogLevel.JNI_LOG_LEVEL_ERROR,
+        tradeApi.init(XTPNodeConfig.clientId(), registeredAccount.tradeKey(),
+                      XTPNodeConfig.logFolder(), XtpLogLevel.XTP_LOG_LEVEL_ERROR, JniLogLevel.JNI_LOG_LEVEL_ERROR,
                       XtpTeResumeType.XTP_TERT_QUICK);
         tradeApi.setHeartBeatInterval(180);
         if (!login()) {
@@ -271,7 +271,7 @@ public class XTPSingleAccountSingleServiceAdapter
 
     private boolean login() {
         this.sessionId =
-            this.tradeApi.login(nodeConfig.serverIp(), nodeConfig.serverPort(),
+            this.tradeApi.login(XTPNodeConfig.serverIp(), XTPNodeConfig.serverPort(),
                                 registeredAccount.username(), registeredAccount.password(),
                                 TransferProtocol.XTP_PROTOCOL_TCP);
         // 0 = 失败
