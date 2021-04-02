@@ -1,15 +1,13 @@
-package org.example.trade.config;
+package org.example.trade.application.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.RetryListener;
 import org.springframework.retry.annotation.EnableRetry;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
@@ -18,8 +16,7 @@ import java.util.List;
 
 @Configuration
 @EnableRetry
-@EnableTransactionManagement(mode = AdviceMode.ASPECTJ)
-public class AppFrameworkConfiguration {
+public class RetryConfig {
 
     @Bean
     public List<RetryListener> retryListeners() {
@@ -38,16 +35,16 @@ public class AppFrameworkConfiguration {
             }
 
             @Override
-            public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback,
-                                                         Throwable throwable) {
-                logger.info("Retryable method {} threw {}th exception {}",
-                         context.getAttribute("context.name"), context.getRetryCount(), throwable.toString());
-            }
-
-            @Override
             public <T, E extends Throwable> void close(RetryContext context, RetryCallback<T, E> callback,
                                                        Throwable throwable) {
                 logger.info("Finished retryable method {}", context.getAttribute("context.name"));
+            }
+
+            @Override
+            public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback,
+                                                         Throwable throwable) {
+                logger.info("Retryable method {} threw {}th exception {}",
+                            context.getAttribute("context.name"), context.getRetryCount(), throwable.toString());
             }
         });
     }
