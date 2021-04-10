@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <groupId>org.example.trade</groupId>
-    <artifactId>trade</artifactId>
+    <artifactId>pom</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -14,7 +14,7 @@
   <dependencies>
     <dependency>
       <groupId>org.example.trade</groupId>
-      <artifactId>services.all</artifactId>
+      <artifactId>service</artifactId>
     </dependency>
     <dependency>
       <groupId>org.example.trade</groupId>
@@ -26,7 +26,11 @@
     </dependency>
     <dependency>
       <groupId>org.example.trade</groupId>
-      <artifactId>integrations.broker.all</artifactId>
+      <artifactId>integrations.xtp</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.example.trade</groupId>
+      <artifactId>integrations.mock</artifactId>
     </dependency>
     <dependency>
       <groupId>com.h2database</groupId>

@@ -1,7 +1,6 @@
 package org.example.trade.application;
 
 import engineering.ericdeng.architecture.domain.model.DomainEventBus;
-import org.example.trade.adapter.broker.SingleAccountBrokerServiceFactory;
 import org.example.trade.domain.account.AccountId;
 import org.example.trade.domain.account.asset.*;
 import org.example.trade.domain.order.Order;

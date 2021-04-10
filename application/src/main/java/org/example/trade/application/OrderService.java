@@ -1,6 +1,5 @@
 package org.example.trade.application;
 
-import org.example.trade.adapter.broker.SingleAccountBrokerServiceFactory;
 import org.example.trade.domain.account.AccountId;
 import org.example.trade.domain.account.asset.AssetRepository;
 import org.example.trade.domain.order.Order;

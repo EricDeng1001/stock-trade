@@ -25,7 +25,7 @@ public abstract class SingleAccountBrokerService {
         this.syncService = syncService;
         this.tradeService = tradeService;
         this.registerService = registerService;
-        registerService.registerAccount(supportedAccount);
+        registerService.registerAccount(supportedAccount, this);
     }
 
     public AccountId supportedAccount() {

@@ -14,9 +14,7 @@ spring:
       enabled: true
   profiles:
     active:
-      - mock-broker
-      - rest
-      - jpa
+      - mock
   config:
     import:
       - classpath:mock.yml
