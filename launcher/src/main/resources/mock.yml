@@ -1,2 +1,6 @@
 mock:
-  username: mock user
+  users:
+    -
+      username: mock user
+    -
+      username: mock user 2

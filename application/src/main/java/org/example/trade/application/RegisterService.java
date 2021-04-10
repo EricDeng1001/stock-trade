@@ -9,8 +9,10 @@ import org.example.trade.domain.queue.OrderQueue;
 import org.example.trade.domain.queue.OrderQueueRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -25,20 +27,28 @@ public class RegisterService implements SingleAccountBrokerServiceFactory {
 
     private final OrderQueueRepository orderQueueRepository;
 
-    public RegisterService(AccountRepository accountRepository,
-                           OrderQueueRepository orderQueueRepository) {
+    @Autowired
+    public RegisterService(
+        AccountRepository accountRepository,
+        OrderQueueRepository orderQueueRepository,
+        List<SingleAccountBrokerService> services
+    ) {
         this.accountRepository = accountRepository;
         this.orderQueueRepository = orderQueueRepository;
         this.serviceMap = new ConcurrentHashMap<>();
+        for (SingleAccountBrokerService service : services) {
+            this.registerAccount(service);
+        }
     }
 
-    public void registerAccount(AccountId supportedAccount, SingleAccountBrokerService service) {
+    private void registerAccount(SingleAccountBrokerService service) {
+        AccountId supportedAccount = service.supportedAccount();
         Account account = new Account(supportedAccount, "");
         accountRepository.save(account);
         OrderQueue orderQueue = new OrderQueue(account.id());
         orderQueueRepository.add(orderQueue);
         serviceMap.put(supportedAccount, service);
-        logger.info("{} 已经注册", account);
+        logger.info("{} 已经注册", supportedAccount);
     }
 
     @Override

@@ -3,7 +3,6 @@ package org.example.trade.adapter.broker.mock;
 import org.example.finance.domain.Money;
 import org.example.finance.domain.Price;
 import org.example.trade.adapter.broker.SingleAccountBrokerService;
-import org.example.trade.application.RegisterService;
 import org.example.trade.application.TradeService;
 import org.example.trade.domain.account.AccountId;
 import org.example.trade.domain.account.asset.AssetInfo;
@@ -17,14 +16,11 @@ import org.example.trade.domain.order.PriceType;
 import org.example.trade.domain.order.request.LimitedPriceTradeRequest;
 import org.example.trade.domain.order.request.TradeRequest;
 import org.example.trade.interfaces.SyncService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.*;
 
-@Service
 public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
 
     private static final int simTradingWaitTime = 2000;
@@ -44,14 +40,12 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
 
     private final Map<OrderId, Boolean> cancels = new ConcurrentHashMap<>();
 
-    @Autowired
     public MockSingleAccountBrokerService(
         TradeService tradeService,
-        RegisterService registerService,
         SyncService syncService,
-        MockNodeConfig config
+        UserConfig config
     ) {
-        super(new AccountId(broker, config.getUsername()), registerService, syncService, tradeService);
+        super(new AccountId(broker, config.getUsername()), syncService, tradeService);
     }
 
     @Override

@@ -12,7 +12,6 @@ import com.zts.xtp.trade.spi.TradeSpi;
 import org.example.finance.domain.Money;
 import org.example.finance.domain.Price;
 import org.example.trade.adapter.broker.SingleAccountBrokerService;
-import org.example.trade.application.RegisterService;
 import org.example.trade.application.TradeService;
 import org.example.trade.domain.account.AccountId;
 import org.example.trade.domain.account.XTPAccount;
@@ -69,12 +68,11 @@ public class XTPSingleAccountSingleServiceAdapter
 
     @Autowired
     public XTPSingleAccountSingleServiceAdapter(
-        RegisterService registerService,
         TradeService tradeService,
         SyncService syncService,
         XTPNodeConfig XTPNodeConfig
     ) {
-        super(new AccountId(xtp, XTPNodeConfig.username()), registerService, syncService, tradeService);
+        super(new AccountId(xtp, XTPNodeConfig.username()), syncService, tradeService);
         this.tradeService = tradeService;
         this.XTPNodeConfig = XTPNodeConfig;
         this.sessionId = "0";
