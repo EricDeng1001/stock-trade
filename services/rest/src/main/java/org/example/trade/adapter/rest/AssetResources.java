@@ -3,7 +3,7 @@ package org.example.trade.adapter.rest;
 import org.example.trade.adapter.rest.boundary.AssetDTO;
 import org.example.trade.adapter.rest.translator.AccountIdTranslator;
 import org.example.trade.adapter.rest.translator.AssetTranslator;
-import org.example.trade.application.AssetService;
+import org.example.trade.interfaces.AssetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

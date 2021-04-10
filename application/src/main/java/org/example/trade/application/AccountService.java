@@ -7,6 +7,7 @@ import org.example.trade.domain.account.AccountId;
 import org.example.trade.domain.account.AccountRepository;
 import org.example.trade.domain.queue.OrderQueue;
 import org.example.trade.domain.queue.OrderQueueRepository;
+import org.example.trade.interfaces.AssetService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,7 @@ import java.util.Collection;
 import java.util.NoSuchElementException;
 
 @Service
-public class AccountService {
+public class AccountService implements org.example.trade.interfaces.AccountService {
 
     private static final Logger logger = LoggerFactory.getLogger(AccountService.class);
 
@@ -33,13 +34,14 @@ public class AccountService {
     public AccountService(OrderQueueRepository orderQueueRepository,
                           AccountRepository accountRepository,
                           SingleAccountBrokerServiceFactory factory,
-                          AssetService assetService) {
+                          org.example.trade.interfaces.AssetService assetService) {
         this.orderQueueRepository = orderQueueRepository;
         this.accountRepository = accountRepository;
         this.factory = factory;
         this.assetService = assetService;
     }
 
+    @Override
     @Transactional
     public boolean activateAccount(AccountId accountId, String config) {
         Account account = accountRepository.findById(accountId);
@@ -75,6 +77,7 @@ public class AccountService {
         return false;
     }
 
+    @Override
     @Transactional
     public void changeConfig(AccountId accountId, String config) {
         Account account = accountRepository.findById(accountId);
@@ -91,6 +94,7 @@ public class AccountService {
         // 向service register注册自己
     }
 
+    @Override
     public Collection<Account> getAll() {
         return accountRepository.findAll();
     }

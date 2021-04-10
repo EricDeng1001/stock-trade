@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class AssetService {
+public class AssetService implements org.example.trade.interfaces.AssetService {
 
     private static final Logger logger = LoggerFactory.getLogger(AssetService.class);
 
@@ -34,11 +34,13 @@ public class AssetService {
         DomainEventBus.instance().subscribe(OrderClosed.class, this::handleOrderClosed);
     }
 
+    @Override
     public void syncAssetFromBroker(AccountId accountId) {
         SingleAccountBrokerService service = factory.getOrNew(accountId);
         service.queryAsset();
     }
 
+    @Override
     @Transactional
     public Asset queryAsset(AccountId accountId) {
         return assetRepository.findById(accountId);

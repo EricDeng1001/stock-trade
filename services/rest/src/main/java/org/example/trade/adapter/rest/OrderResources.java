@@ -7,10 +7,10 @@ import org.example.trade.adapter.rest.translator.AccountIdTranslator;
 import org.example.trade.adapter.rest.translator.OrderIdTranslator;
 import org.example.trade.adapter.rest.translator.OrderTranslator;
 import org.example.trade.adapter.rest.translator.TradeRequestTranslator;
-import org.example.trade.application.OrderService;
-import org.example.trade.application.QueueService;
 import org.example.trade.domain.order.Order;
 import org.example.trade.domain.order.OrderId;
+import org.example.trade.interfaces.OrderService;
+import org.example.trade.interfaces.QueueService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

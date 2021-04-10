@@ -1,17 +1,17 @@
 package org.example.trade.adapter.broker;
 
 import org.example.trade.application.RegisterService;
-import org.example.trade.application.SyncService;
 import org.example.trade.application.TradeService;
 import org.example.trade.domain.account.AccountId;
 import org.example.trade.domain.order.Order;
 import org.example.trade.domain.order.OrderId;
+import org.example.trade.interfaces.SyncService;
 
 public abstract class SingleAccountBrokerService {
 
     protected final RegisterService registerService;
 
-    protected final SyncService syncService;
+    protected final org.example.trade.interfaces.SyncService syncService;
 
     protected final TradeService tradeService;
 

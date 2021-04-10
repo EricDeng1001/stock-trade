@@ -4,7 +4,6 @@ import org.example.finance.domain.Money;
 import org.example.finance.domain.Price;
 import org.example.trade.adapter.broker.SingleAccountBrokerService;
 import org.example.trade.application.RegisterService;
-import org.example.trade.application.SyncService;
 import org.example.trade.application.TradeService;
 import org.example.trade.domain.account.AccountId;
 import org.example.trade.domain.account.asset.AssetInfo;
@@ -17,6 +16,7 @@ import org.example.trade.domain.order.OrderId;
 import org.example.trade.domain.order.PriceType;
 import org.example.trade.domain.order.request.LimitedPriceTradeRequest;
 import org.example.trade.domain.order.request.TradeRequest;
+import org.example.trade.interfaces.SyncService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

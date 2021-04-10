@@ -2,7 +2,7 @@ package org.example.trade.adapter.rest;
 
 import org.example.trade.adapter.rest.boundary.ActivateAccountCommand;
 import org.example.trade.adapter.rest.translator.AccountIdTranslator;
-import org.example.trade.application.AccountService;
+import org.example.trade.interfaces.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

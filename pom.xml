@@ -25,6 +25,7 @@
     <module>services</module>
     <module>integrations</module>
     <module>launcher</module>
+
   </modules>
 
   <dependencies>
