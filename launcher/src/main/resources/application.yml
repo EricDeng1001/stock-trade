@@ -1,20 +1,10 @@
 spring:
-  datasource:
-    url: jdbc:h2:mem:jpadb
-    driverClassName: org.h2.Driver
-    username: sa
-    password:
-  jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-    open-in-view: false
-    hibernate:
-      ddl-auto: create
-  h2:
-    console:
-      enabled: true
+  output:
+    ansi:
+      enabled: ALWAYS
   profiles:
-    active:
-      - mock
-  config:
-    import:
-      - classpath:mock.yml
+    include:
+      - service
+      - app
+      - db
+    active: @broker.distro@

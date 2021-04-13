@@ -19,7 +19,10 @@ import org.example.trade.interfaces.SyncService;
 
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 
 public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
 
@@ -36,16 +39,17 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
 
     private static final Broker broker = Broker.valueOf("mock broker");
 
-    private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(10);
+    private final ScheduledExecutorService scheduledExecutorService;
 
     private final Map<OrderId, Boolean> cancels = new ConcurrentHashMap<>();
 
     public MockSingleAccountBrokerService(
         TradeService tradeService,
         SyncService syncService,
-        UserConfig config
-    ) {
+        UserConfig config,
+        ScheduledExecutorService scheduledExecutorService) {
         super(new AccountId(broker, config.getUsername()), syncService, tradeService);
+        this.scheduledExecutorService = scheduledExecutorService;
     }
 
     @Override

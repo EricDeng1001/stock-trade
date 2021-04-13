@@ -11,6 +11,16 @@ public class MockNodeConfig {
 
     private List<UserConfig> users;
 
+    private int coreSize;
+
+    public int getCoreSize() {
+        return coreSize;
+    }
+
+    public void setCoreSize(int coreSize) {
+        this.coreSize = coreSize;
+    }
+
     public List<UserConfig> getUsers() {
         return users;
     }

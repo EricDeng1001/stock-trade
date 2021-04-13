@@ -1,6 +1,7 @@
 #一个系统支持的账户
-POST localhost:8080/accounts/activate
+POST localhost:80/accounts/activate
 Content-Type: application/json
+account: mock user@mock broker
 
 {
   "accountId" : "mock user@mock broker",
@@ -9,8 +10,9 @@ Content-Type: application/json
 
 ###
 #一个不存在的账户
-POST localhost:8080/accounts/activate
+POST localhost:80/accounts/activate
 Content-Type: application/json
+account: mock user@mock broker
 
 {
   "accountId" : "not exist@mock broker",
@@ -19,8 +21,9 @@ Content-Type: application/json
 
 ###
 #一个不存在的券商
-POST localhost:8080/accounts/activate
+POST localhost:80/accounts/activate
 Content-Type: application/json
+account: mock user@mock broker
 
 {
   "accountId" : "not exist@not exist",
@@ -29,8 +32,9 @@ Content-Type: application/json
 
 ###
 #一个不合法的账号
-POST localhost:8080/accounts/activate
+POST localhost:80/accounts/activate
 Content-Type: application/json
+account: mock user@mock broker
 
 {
   "accountId" : "invalid",

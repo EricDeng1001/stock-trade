@@ -1,0 +1,8 @@
+spring:
+  h2:
+    console:
+      enabled: true
+      settings:
+        web-allow-others: true
+server:
+  port: 80

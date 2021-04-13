@@ -1,5 +1,6 @@
-POST localhost:8080/orders/
+POST localhost:80/orders/
 Content-Type: application/json
+account: mock user@mock broker
 
 {
   "stockCode": "stock 1",
@@ -9,8 +10,9 @@ Content-Type: application/json
 }
 
 ####
-POST localhost:8080/orders/
+POST localhost:80/orders/
 Content-Type: application/json
+account: mock user@mock broker
 
 {
   "stockCode": "stock 1",
@@ -20,8 +22,9 @@ Content-Type: application/json
 }
 
 ###
-POST localhost:8080/orders/
+POST localhost:80/orders/
 Content-Type: application/json
+account: mock user@mock broker
 
 {
   "stockCode": "stock 2",
@@ -31,8 +34,9 @@ Content-Type: application/json
 }
 
 #####
-POST localhost:8080/orders/
+POST localhost:80/orders/
 Content-Type: application/json
+account: mock user@mock broker
 
 {
   "stockCode": "stock 2",
@@ -42,8 +46,9 @@ Content-Type: application/json
 }
 
 ####
-POST localhost:8080/orders/
+POST localhost:80/orders/
 Content-Type: application/json
+account: mock user@mock broker
 
 {
   "stockCode": "stock 3",
@@ -53,8 +58,9 @@ Content-Type: application/json
 }
 
 ####
-POST localhost:8080/orders/
+POST localhost:80/orders/
 Content-Type: application/json
+account: mock user@mock broker
 
 {
   "stockCode": "stock 3",
@@ -63,8 +69,9 @@ Content-Type: application/json
   "accountId": "mock user@mock broker"
 }
 ###
-POST localhost:8080/orders/
+POST localhost:80/orders/
 Content-Type: application/json
+account: mock user@mock broker
 
 {
   "stockCode": "stock 4",
@@ -74,8 +81,9 @@ Content-Type: application/json
 }
 
 ####
-POST localhost:8080/orders/
+POST localhost:80/orders/
 Content-Type: application/json
+account: mock user@mock broker
 
 {
   "stockCode": "stock 4",
@@ -84,8 +92,9 @@ Content-Type: application/json
   "accountId": "mock user@mock broker"
 }
 ###
-POST localhost:8080/orders/
+POST localhost:80/orders/
 Content-Type: application/json
+account: mock user@mock broker
 
 {
   "stockCode": "stock 5",
@@ -95,8 +104,9 @@ Content-Type: application/json
 }
 
 ####
-POST localhost:8080/orders/
+POST localhost:80/orders/
 Content-Type: application/json
+account: mock user@mock broker
 
 {
   "stockCode": "stock 5",
@@ -105,8 +115,9 @@ Content-Type: application/json
   "accountId": "mock user@mock broker"
 }
 ###
-POST localhost:8080/orders/
+POST localhost:80/orders/
 Content-Type: application/json
+account: mock user@mock broker
 
 {
   "stockCode": "stock 6",
@@ -116,8 +127,9 @@ Content-Type: application/json
 }
 
 ####
-POST localhost:8080/orders/
+POST localhost:80/orders/
 Content-Type: application/json
+account: mock user@mock broker
 
 {
   "stockCode": "stock 6",

@@ -9,12 +9,12 @@ import org.example.trade.interfaces.SyncService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
-@Profile("mock")
 @Configuration
 @ComponentScan(basePackages = "org.example.trade.adapter.broker.mock")
 public class MockLaunchConfig {
@@ -27,9 +27,10 @@ public class MockLaunchConfig {
     ) {
         List<UserConfig> configs = config.getUsers();
         List<SingleAccountBrokerService> services = new ArrayList<>(configs.size());
+        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(config.getCoreSize());
         for (UserConfig userConfig : configs) {
             MockSingleAccountBrokerService e =
-                new MockSingleAccountBrokerService(tradeService, syncService, userConfig);
+                new MockSingleAccountBrokerService(tradeService, syncService, userConfig, scheduledExecutorService);
             services.add(e);
         }
         return services;

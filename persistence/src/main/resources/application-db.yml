@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:h2:mem:jpadb}
+    driverClassName: ${DB_DRIVER:org.h2.Driver}
+    username: ${DB_USER:sa}
+    password: ${DB_PASS:}
+  jpa:
+    database-platform: ${DB_PLATFORM:org.hibernate.dialect.H2Dialect}
+    open-in-view: false
+    hibernate:
+      ddl-auto: create
