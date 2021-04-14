@@ -1,5 +1,6 @@
 package org.example.trade.adapter.jpa.model.account;
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
@@ -7,8 +8,10 @@ import java.util.Objects;
 @Embeddable
 public class AccountId implements Serializable {
 
+    @Column(length = 20)
     private String broker;
 
+    @Column(length = 30)
     private String accountBrokerId;
 
     public AccountId(org.example.trade.domain.account.AccountId id) {
