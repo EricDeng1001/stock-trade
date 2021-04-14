@@ -7,6 +7,16 @@ account: mock user@mock broker
   "accountId" : "mock user@mock broker",
   "config": ""
 }
+###
+#一个系统支持的账户
+POST localhost:80/accounts/activate
+Content-Type: application/json
+account: mock user2@mock broker
+
+{
+"accountId" : "mock user2@mock broker",
+"config": ""
+}
 
 ###
 #一个不存在的账户
