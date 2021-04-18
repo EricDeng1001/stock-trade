@@ -10,7 +10,7 @@
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>org.example.trade</groupId>
-  <artifactId>trade</artifactId>
+  <artifactId>pom</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
@@ -22,7 +22,7 @@
     <module>domain</module>
     <module>application</module>
     <module>persistence</module>
-    <module>services</module>
+    <module>service</module>
     <module>integrations</module>
     <module>launcher</module>
   </modules>
@@ -106,12 +106,7 @@
       </dependency>
       <dependency>
         <groupId>org.example.trade</groupId>
-        <artifactId>services.all</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.example.trade</groupId>
-        <artifactId>integrations.broker.all</artifactId>
+        <artifactId>service</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>

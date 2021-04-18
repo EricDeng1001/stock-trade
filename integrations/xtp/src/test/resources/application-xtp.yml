@@ -1,0 +1,6 @@
+xtp:
+  server-ip: 1.1.1.1
+  server-port: 80
+  log-folder: /var/log
+  client-id: 3
+  username: xyz

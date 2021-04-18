@@ -1,0 +1,7 @@
+mock:
+  core-size: 4
+  users:
+    -
+      username: default 1
+    -
+      username: default 2

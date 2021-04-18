@@ -1,0 +1,118 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql
+  labels:
+    type: local
+spec:
+  storageClassName: local-storage
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /mnt/data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql
+spec:
+  storageClassName: local-storage
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+spec:
+  ports:
+    - port: 3306
+  selector:
+    app: mysql
+  clusterIP: None
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mysql
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      initContainers:
+        - name: init-mysql
+          image: mysql:8
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POD_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          command:
+            - bash
+            - -c
+            - |
+              set -ex
+              cp /etc/orgin/my.cnf /etc/conf.d/my.cnf
+              [[ $POD_ID =~ .*-([0-9a-f]+)-.* ]] || exit 1
+              pod_number=$((16#${BASH_REMATCH[1]} / 73628 + 42))
+              echo -e "\nserver-id=$((100 + pod_number))" >> /etc/conf.d/my.cnf
+          volumeMounts:
+            - mountPath: /etc/orgin
+              name: origin
+              readOnly: true
+            - mountPath: /etc/conf.d
+              name: config
+      containers:
+        - name: mysql
+          image: mysql:8
+          imagePullPolicy: IfNotPresent
+          env:
+            # Use secret in real usage
+            - name: MYSQL_ROOT_PASSWORD
+              value: password
+            - name: MYSQL_DATABASE
+              value: trade
+          ports:
+            - containerPort: 3306
+              name: mysql
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+            - name: config
+              mountPath: /etc/mysql/conf.d
+            - name: init
+              mountPath: /docker-entrypoint-initdb.d/
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: mysql
+        - name: config
+          emptyDir: { }
+        - name: origin
+          configMap:
+            name: mysql
+            items:
+              - key: my.cnf
+                path: my.cnf
+        - name: init
+          configMap:
+            name: mysql
+            items:
+              - key: init.sql
+                path: init.sql
+

@@ -1,11 +1,13 @@
 package org.example.trade.adapter.jpa.model.account.asset;
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.math.BigDecimal;
 
 @Embeddable
 public class CashResource extends Resource {
 
+    @Column(length = 10)
     private String stockCode;
 
     private BigDecimal money;

@@ -1,7 +1,6 @@
 package org.example.trade.application;
 
 import engineering.ericdeng.architecture.domain.model.DomainEventBus;
-import org.example.trade.adapter.broker.SingleAccountBrokerServiceFactory;
 import org.example.trade.domain.account.AccountId;
 import org.example.trade.domain.account.asset.*;
 import org.example.trade.domain.order.Order;
@@ -23,7 +22,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 @Service
-public class QueueService {
+public class QueueService implements org.example.trade.interfaces.QueueService {
 
     private static final Logger logger = LoggerFactory.getLogger(QueueService.class);
 
@@ -49,12 +48,14 @@ public class QueueService {
         DomainEventBus.instance().subscribe(ResourceAllocated.class, this::submit);
     }
 
+    @Override
     public boolean enqueue(OrderId id) {
         Order order = orderRepository.findById(id);
         if (order == null) { throw new NoSuchElementException("订单不存在"); }
         return enqueue(order);
     }
 
+    @Override
     public Map<OrderId, Boolean> enqueueAll(AccountId accountId) {
         List<Order> orders = orderRepository.findNewByAccount(accountId);
         Map<OrderId, Boolean> r = new HashMap<>(orders.size());
@@ -64,6 +65,7 @@ public class QueueService {
         return r;
     }
 
+    @Override
     public boolean dequeue(OrderId id) {
         Order order = orderRepository.findById(id);
         if (order.isTrading()) {

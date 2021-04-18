@@ -4,17 +4,38 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <groupId>org.example.trade</groupId>
-    <artifactId>trade</artifactId>
+    <artifactId>pom</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>launcher</artifactId>
 
+  <profiles>
+    <profile>
+      <id>central</id>
+      <properties>
+        <broker.distro>empty</broker.distro>
+      </properties>
+    </profile>
+    <profile>
+      <id>mock</id>
+      <properties>
+        <broker.distro>mock</broker.distro>
+      </properties>
+    </profile>
+    <profile>
+      <id>xtp</id>
+      <properties>
+        <broker.distro>xtp</broker.distro>
+      </properties>
+    </profile>
+  </profiles>
+
   <dependencies>
     <dependency>
       <groupId>org.example.trade</groupId>
-      <artifactId>services.all</artifactId>
+      <artifactId>service</artifactId>
     </dependency>
     <dependency>
       <groupId>org.example.trade</groupId>
@@ -25,14 +46,6 @@
       <artifactId>application</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.example.trade</groupId>
-      <artifactId>integrations.broker.all</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-    </dependency>
-    <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
     </dependency>
@@ -40,14 +53,45 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-devtools</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.example.trade</groupId>
+      <artifactId>integrations.${broker.distro}</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
+    <finalName>trade-${broker.distro}</finalName>
     <plugins>
       <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
+        <groupId>com.google.cloud.tools</groupId>
+        <artifactId>jib-maven-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <to>
+            <image>${project.build.finalName}</image>
+            <tags>
+              <tag>${project.version}</tag>
+            </tags>
+          </to>
+          <container>
+            <mainClass>${project.groupId}.launch.Launcher</mainClass>
+            <environment>
+              <TZ>ASIA/SHANGHAI</TZ>
+              <LC_ALL>en_US.UTF-8</LC_ALL>
+            </environment>
+          </container>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>dockerBuild</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
+
 </project>

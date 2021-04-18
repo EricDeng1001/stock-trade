@@ -5,11 +5,12 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.example.trade</groupId>
-    <artifactId>trade</artifactId>
+    <artifactId>pom</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>persistence</artifactId>
+
 
   <dependencies>
     <dependency>
@@ -20,10 +21,21 @@
       <groupId>org.example.trade</groupId>
       <artifactId>application</artifactId>
     </dependency>
-
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-core</artifactId>
     </dependency>
   </dependencies>
 

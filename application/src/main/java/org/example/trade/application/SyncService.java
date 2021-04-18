@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Map;
 
 @Service
-public class SyncService {
+public class SyncService implements org.example.trade.interfaces.SyncService {
 
     private static final Logger logger = LoggerFactory.getLogger(SyncService.class);
 
@@ -25,6 +25,7 @@ public class SyncService {
         this.assetRepository = assetRepository;
     }
 
+    @Override
     @Transactional
     public void syncAsset(AccountId accountId, AssetInfo brokerAssetInfo) {
         Asset asset = assetRepository.findById(accountId);

@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <groupId>org.example.trade</groupId>
-    <artifactId>trade</artifactId>
+    <artifactId>pom</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -12,13 +12,10 @@
 
   <artifactId>integrations</artifactId>
 
-  <description>
-    aggregate submodules which provides integrations with third-party service/system/library/sdk/api/dll etc,
-    excluding integrations with database, which live inside the `persistence` module.
-  </description>
-
   <modules>
-    <module>broker</module>
+    <module>mock</module>
+    <module>xtp</module>
+    <module>empty</module>
   </modules>
 
   <dependencies>
