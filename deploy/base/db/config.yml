@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql
+  labels:
+    app: mysql
+data:
+  my.cnf: |-
+    [mysqld]
+    log-bin=mysql-bin
+    gtid-mode=on
+    enforce-gtid-consistency=true
+  init.sql: |-
+    CREATE USER 'central'@'%' IDENTIFIED WITH mysql_native_password BY 'password';
+    GRANT REPLICATION SLAVE ON *.* TO 'central'@'%';
+    flush privileges;
+immutable: true

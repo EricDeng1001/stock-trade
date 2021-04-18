@@ -1,0 +1,26 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+spec:
+  components:
+    pilot:
+      k8s:
+        nodeSelector:
+          node-role.kubernetes.io/master: ""
+        tolerations:
+          - effect: NoSchedule
+            key: node-role.kubernetes.io/master
+            operator: Equal
+    ingressGateways:
+      - name: istio-ingressgateway
+        k8s:
+          nodeSelector:
+            location: central
+          tolerations:
+            - effect: NoSchedule
+              key: node-role.kubernetes.io/master
+              operator: Equal
+          service:
+            ports:
+              - name: http
+                port: 30080
+                nodePort: 30080

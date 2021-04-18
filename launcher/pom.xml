@@ -13,6 +13,12 @@
 
   <profiles>
     <profile>
+      <id>central</id>
+      <properties>
+        <broker.distro>empty</broker.distro>
+      </properties>
+    </profile>
+    <profile>
       <id>mock</id>
       <properties>
         <broker.distro>mock</broker.distro>
@@ -21,7 +27,7 @@
     <profile>
       <id>xtp</id>
       <properties>
-        <broker-distro>xtp</broker-distro>
+        <broker.distro>xtp</broker.distro>
       </properties>
     </profile>
   </profiles>
@@ -50,6 +56,7 @@
     <dependency>
       <groupId>org.example.trade</groupId>
       <artifactId>integrations.${broker.distro}</artifactId>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
 
@@ -87,15 +94,4 @@
     </plugins>
   </build>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.example.trade</groupId>
-        <artifactId>integrations</artifactId>
-        <version>${project.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 </project>

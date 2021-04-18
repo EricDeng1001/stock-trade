@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trade
+  labels:
+    app: trade
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: trade
+  template:
+    metadata:
+      labels:
+        app: trade
+    spec:
+      containers:
+        - name: trade
+          ports:
+            - containerPort: 80
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MYSQL_PORT
+              value: "3306"
+            - name: MYSQL_USER
+              value: root
+            - name: MYSQL_PASS
+              value: password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: trade
+  labels:
+    app: trade
+spec:
+  selector:
+    app: trade
+  ports:
+    - port: 80
+      name: http
+      protocol: TCP

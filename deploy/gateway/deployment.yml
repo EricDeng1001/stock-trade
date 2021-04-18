@@ -1,13 +1,13 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
-  name: trade-gateway
+  name: trade
 spec:
   selector:
     istio: ingressgateway
   servers:
     - port:
-        number: 80
+        number: 30080
         name: http
         protocol: HTTP
       hosts:
@@ -21,7 +21,7 @@ spec:
   hosts:
     - "*"
   gateways:
-    - trade-gateway
+    - trade
   http:
     - match:
         - headers:
@@ -29,7 +29,7 @@ spec:
               exact: "mock user@mock broker"
       route:
         - destination:
-            host: trade-mock-mock-user-service
+            host: trade-mock-mock-user
             port:
               number: 80
     - match:
@@ -38,12 +38,12 @@ spec:
               exact: "mock user2@mock broker"
       route:
         - destination:
-            host: trade-mock-mock-user2-service
+            host: trade-mock-mock-user2
             port:
               number: 80
     - route:
         - destination:
-            host: trade-mock-mock-user-service
+            host: trade-central
             port:
               number: 80
 
