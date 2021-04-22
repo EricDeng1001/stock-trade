@@ -11,7 +11,6 @@
 
   <artifactId>persistence</artifactId>
 
-
   <dependencies>
     <dependency>
       <groupId>org.example.trade</groupId>
@@ -20,10 +19,6 @@
     <dependency>
       <groupId>org.example.trade</groupId>
       <artifactId>application</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
     </dependency>
     <dependency>
       <groupId>mysql</groupId>

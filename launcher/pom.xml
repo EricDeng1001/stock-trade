@@ -14,6 +14,9 @@
   <profiles>
     <profile>
       <id>central</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
       <properties>
         <broker.distro>empty</broker.distro>
       </properties>
@@ -84,7 +87,7 @@
         </configuration>
         <executions>
           <execution>
-            <phase>package</phase>
+            <phase>install</phase>
             <goals>
               <goal>dockerBuild</goal>
             </goals>
