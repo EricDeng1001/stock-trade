@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.example.trade</groupId>
     <artifactId>pom</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -14,6 +14,9 @@
   <profiles>
     <profile>
       <id>central</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
       <properties>
         <broker.distro>empty</broker.distro>
       </properties>
@@ -84,7 +87,7 @@
         </configuration>
         <executions>
           <execution>
-            <phase>package</phase>
+            <phase>install</phase>
             <goals>
               <goal>dockerBuild</goal>
             </goals>

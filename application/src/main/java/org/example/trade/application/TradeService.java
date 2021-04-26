@@ -8,8 +8,11 @@ import org.example.trade.domain.order.OrderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.retry.interceptor.RetryOperationsInterceptor;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,15 +27,29 @@ public class TradeService {
     @Autowired
     public TradeService(OrderRepository orderRepository) {this.orderRepository = orderRepository;}
 
-    @Retryable(value = ObjectOptimisticLockingFailureException.class, maxAttempts = 100)
+    @Bean
+    public RetryOperationsInterceptor orderConcurrentModificationRetry() {
+        RetryOperationsInterceptor retryOperationsInterceptor = new RetryOperationsInterceptor();
+        retryOperationsInterceptor.setRetryOperations(
+            RetryTemplate.builder()
+                .retryOn(ObjectOptimisticLockingFailureException.class)
+                .uniformRandomBackoff(3, 120)
+                .infiniteRetry()
+                .build()
+        );
+        return retryOperationsInterceptor;
+    }
+
+    @Retryable(interceptor = "orderConcurrentModificationRetry")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void startTradingOrder(OrderId orderId, String brokerId) {
+
         Order order = orderRepository.findById(orderId);
         order.startTrading(brokerId);
         orderRepository.save(order);
     }
 
-    @Retryable(value = ObjectOptimisticLockingFailureException.class)
+    @Retryable(interceptor = "orderConcurrentModificationRetry")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void closeOrder(OrderId id) {
         Order order = orderRepository.findById(id);
@@ -42,7 +59,7 @@ public class TradeService {
         DomainEventBus.instance().publish(order);
     }
 
-    @Retryable(value = ObjectOptimisticLockingFailureException.class)
+    @Retryable(interceptor = "orderConcurrentModificationRetry")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void offerDeal(OrderId id, Deal deal, String brokerId) {
         Order order = orderRepository.findById(id);

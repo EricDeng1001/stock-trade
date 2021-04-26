@@ -8,18 +8,15 @@ data:
     log-bin=mysql-bin
     gtid-mode=on
     enforce-gtid-consistency=true
-    slave-skip-errors=ddl_exist_errors,1062
+    slave-skip-errors=ddl_exist_errors,1062,1396
+    replicate-do-db=trade
   init.sql: |-
     change replication source to source_host='mysql-mock-mock-user',
         source_user='central',
         source_password='password',
         source_auto_position=1 for channel 'mysql-mock-mock-user';
-    change replication filter
-            REPLICATE_WILD_DO_TABLE = ('trade.%') for channel 'mysql-mock-mock-user';
     change replication source to source_host='mysql-mock-mock-user2',
-            source_user='central',
-            source_password='password',
-            source_auto_position=1 for channel 'mysql-mock-mock-user2';
-    change replication filter
-        REPLICATE_WILD_DO_TABLE = ('trade.%') for channel 'mysql-mock-mock-user2';
+        source_user='central',
+        source_password='password',
+        source_auto_position=1 for channel 'mysql-mock-mock-user2';
     start replica;
