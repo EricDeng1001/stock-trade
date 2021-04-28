@@ -8,8 +8,6 @@ public class CreateOrderCommand {
 
     private String price;
 
-    private String accountId;
-
     public String getStockCode() {
         return stockCode;
     }
@@ -22,10 +20,6 @@ public class CreateOrderCommand {
         return price;
     }
 
-    public String getAccountId() {
-        return accountId;
-    }
-
     public void setStockCode(String stockCode) {
         this.stockCode = stockCode;
     }
@@ -36,10 +30,6 @@ public class CreateOrderCommand {
 
     public void setPrice(String price) {
         this.price = price;
-    }
-
-    public void setAccountId(String accountId) {
-        this.accountId = accountId;
     }
 
 }

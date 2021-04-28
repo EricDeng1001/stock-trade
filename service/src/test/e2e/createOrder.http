@@ -1,3 +1,15 @@
+#xtp 测试盘
+POST localhost:80/orders/
+Content-Type: application/json
+account: 15011348@xtp
+
+{
+  "stockCode": "000002.SZ",
+  "shares": -400,
+  "price": "27.68"
+}
+
+###
 POST localhost:80/orders/
 Content-Type: application/json
 account: mock user@mock broker
@@ -5,8 +17,7 @@ account: mock user@mock broker
 {
   "stockCode": "stock 1",
   "shares": -10,
-  "price": "2.000",
-  "accountId": "mock user@mock broker"
+  "price": "2.000"
 }
 
 ###

@@ -16,19 +16,18 @@ public class AssetResources {
     @Autowired
     public AssetResources(AssetService assetService) {this.assetService = assetService;}
 
-    @GetMapping("/{id}")
-    public AssetDTO queryAsset(@PathVariable("id") String accountId) {
+    @GetMapping("/account")
+    public AssetDTO queryAsset(@RequestHeader String account) {
         return AssetTranslator.from(
             assetService.queryAsset(
-                AccountIdTranslator.from(accountId)
+                AccountIdTranslator.from(account)
             )
         );
     }
 
     @PostMapping("/sync")
-    public void syncAsset(@RequestBody String accountId) {
-        if (accountId == null) { throw new IllegalArgumentException(); }
-        assetService.syncAssetFromBroker(AccountIdTranslator.from(accountId));
+    public void syncAsset(@RequestHeader String account) {
+        assetService.syncAssetFromBroker(AccountIdTranslator.from(account));
     }
 
 }

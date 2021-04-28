@@ -1,10 +1,2 @@
-GET http://localhost:80/orders/MjAyMS0wMy0yNC8vbW9jayB1c2VyQG1vY2sgYnJva2VyLy8w
-account: mock user@mock broker
-
-###
-GET http://localhost:80/orders/
-account: mock user@mock broker
-
-###
-GET http://localhost:80/orders/
-account: mock user2@mock broker
+GET http://localhost:80/orders/account
+account: 15011348@xtp

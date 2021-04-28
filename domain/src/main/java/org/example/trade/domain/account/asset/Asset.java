@@ -14,7 +14,9 @@ import org.example.trade.domain.order.OrderId;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @AggregateRoot
@@ -108,6 +110,19 @@ public class Asset extends DomainEventSource<AssetEvent> {
 
     public void set(SecurityCode securityCode, Shares shares) {
         gain(securityCode, shares.subtract(getUsablePosition(securityCode)));
+    }
+
+    public void setTo(AssetInfo assetInfo) {
+        Set<SecurityCode> toRemove = new HashSet<>(usablePositions.keySet());
+        Set<SecurityCode> remains = assetInfo.usablePositions().keySet();
+        toRemove.removeAll(remains);
+        for (SecurityCode securityCode : toRemove) {
+            set(securityCode, Shares.ZERO);
+        }
+        for (SecurityCode securityCode : remains) {
+            set(securityCode, assetInfo.usablePositions().get(securityCode));
+        }
+        set(assetInfo.usableCash());
     }
 
     public Shares getUsablePosition(SecurityCode securityCode) {

@@ -51,19 +51,17 @@ public class OrderService implements org.example.trade.interfaces.OrderService {
     }
 
     @Override
-    public Order queryOrder(OrderId id) {
+    public Order describeAll(OrderId id) {
         return orderRepository.findById(id);
     }
 
     @Override
-    public List<Order> queryOrder(AccountId accountId) {
+    public List<Order> describeAll(AccountId accountId) {
         return orderRepository.findAllByAccount(accountId);
     }
 
-
-
     @Override
-    public Iterable<Order> getAll() {
+    public Iterable<Order> list() {
         return orderRepository.findAll();
     }
 

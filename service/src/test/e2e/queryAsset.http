@@ -1,6 +1,10 @@
-GET http://localhost:80/assets/mock user@mock broker
+GET http://localhost:80/assets/account
+account: 15011348@xtp
+
+###
+GET http://localhost:80/assets/
 account: mock user@mock broker
 
 ###
-GET http://localhost:80/assets/mock user2@mock broker
+GET http://localhost:80/assets/
 account: mock user2@mock broker

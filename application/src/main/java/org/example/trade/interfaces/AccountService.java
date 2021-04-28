@@ -11,6 +11,7 @@ public interface AccountService {
 
     void changeConfig(AccountId accountId, String config);
 
-    Collection<Account> getAll();
+    Collection<Account> get();
 
+    Account describe(AccountId accountId);
 }

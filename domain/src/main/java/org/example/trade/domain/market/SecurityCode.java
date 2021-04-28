@@ -1,47 +1,43 @@
 package org.example.trade.domain.market;
 
-import java.util.Objects;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 
+@Accessors(fluent = true)
+@EqualsAndHashCode
 public class SecurityCode {
 
-    // TODO regex check
-    private final String value;
+    @Getter
+    private final String code;
 
-    private SecurityCode(String value) {
-        this.value = value;
-    }
+    @Getter
+    private final Market market;
 
     public static SecurityCode valueOf(String s) {
         return new SecurityCode(s);
     }
 
-    public String value() {
-        return value;
+    private SecurityCode(String value) {
+        String[] t = value.split("\\.");
+        if (t.length != 2) { throw new IllegalArgumentException(); }
+        code = t[0];
+        market = Market.valueOf(t[1]);
+    }
+
+    public final String value() {
+        return fullName();
+    }
+
+    public String fullName() {
+        return code + '.' + market;
     }
 
     @Override
     public String toString() {
         return "SecurityCode{" +
-            value +
+            fullName() +
             '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) { return true; }
-        if (o == null || getClass() != o.getClass()) { return false; }
-        SecurityCode that = (SecurityCode) o;
-        return value.equals(that.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(value);
-    }
-
-    // TODO
-    public Market market() {
-        return null;
     }
 
 }

@@ -1,0 +1,6 @@
+xtp:
+  server-ip: 120.27.164.69
+  server-port: 6001
+  log-folder: /var/log
+  client-id: 3
+  username: 15011348

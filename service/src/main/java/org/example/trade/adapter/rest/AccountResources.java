@@ -1,6 +1,5 @@
 package org.example.trade.adapter.rest;
 
-import org.example.trade.adapter.rest.boundary.ActivateAccountCommand;
 import org.example.trade.adapter.rest.translator.AccountIdTranslator;
 import org.example.trade.interfaces.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,22 +20,25 @@ public class AccountResources {
     }
 
     @PostMapping("/activate")
-    public boolean activateAccount(@RequestBody ActivateAccountCommand command) {
+    public boolean activateAccount(
+        @RequestHeader String account,
+        @RequestBody String config
+    ) {
         return accountService.activateAccount(
-            AccountIdTranslator.from(command.getAccountId()),
-            command.getConfig()
+            AccountIdTranslator.from(account),
+            config
         );
     }
 
     @GetMapping("/")
     public List<String> querySupportedAccounts() {
-        return accountService.getAll().stream().map(account -> AccountIdTranslator.from(account.id()))
+        return accountService.get().stream().map(account -> AccountIdTranslator.from(account.id()))
             .collect(Collectors.toList());
     }
 
-    @PatchMapping("/{accountId}")
-    public void changeConfig(@PathVariable String accountId, @RequestBody String config) {
-        accountService.changeConfig(AccountIdTranslator.from(accountId), config);
+    @PatchMapping("/")
+    public void changeConfig(@RequestHeader String account, @RequestBody String config) {
+        accountService.changeConfig(AccountIdTranslator.from(account), config);
     }
 
 }

@@ -11,10 +11,10 @@ public interface OrderService {
 
     OrderId createOrder(TradeRequest tradeRequest, AccountId account);
 
-    Order queryOrder(OrderId id);
+    Order describeAll(OrderId id);
 
-    List<Order> queryOrder(AccountId accountId);
+    List<Order> describeAll(AccountId accountId);
 
-    Iterable<Order> getAll();
+    Iterable<Order> list();
 
 }

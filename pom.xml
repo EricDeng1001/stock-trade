@@ -11,19 +11,43 @@
   </parent>
   <groupId>org.example.trade</groupId>
   <artifactId>pom</artifactId>
-  <version>1.0</version>
+  <version>1.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <properties>
     <java.version>11</java.version>
   </properties>
 
+  <profiles>
+    <profile>
+      <id>central</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <broker.distro>empty</broker.distro>
+      </properties>
+    </profile>
+    <profile>
+      <id>mock</id>
+      <properties>
+        <broker.distro>mock</broker.distro>
+      </properties>
+    </profile>
+    <profile>
+      <id>xtp</id>
+      <properties>
+        <broker.distro>xtp</broker.distro>
+      </properties>
+    </profile>
+  </profiles>
+
   <modules>
     <module>domain</module>
     <module>application</module>
     <module>persistence</module>
     <module>service</module>
-    <module>integrations</module>
+    <module>integration</module>
     <module>launcher</module>
   </modules>
 
@@ -32,6 +56,10 @@
       <groupId>engineering.ericdeng</groupId>
       <artifactId>architecture-common</artifactId>
       <version>4.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

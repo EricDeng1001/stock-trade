@@ -35,42 +35,42 @@ public class OrderResources {
     }
 
     @PostMapping("/")
-    public String createOrder(@RequestBody CreateOrderCommand command) {
+    public String createOrder(@RequestHeader String account, @RequestBody CreateOrderCommand command) {
         return OrderIdTranslator.from(
             orderService.createOrder(
                 TradeRequestTranslator.from(command),
-                AccountIdTranslator.from(command.getAccountId())
+                AccountIdTranslator.from(account)
             ));
     }
 
     @GetMapping("/{id}")
-    public OrderDTO queryOrder(@PathVariable String id) {
+    public OrderDTO get(@PathVariable String id) {
         OrderId orderId = OrderIdTranslator.from(id);
-        return OrderTranslator.from(orderService.queryOrder(orderId));
+        return OrderTranslator.from(orderService.describeAll(orderId));
     }
 
-    @GetMapping("/account/{accountId}")
-    public List<OrderDTO> queryOrdersOfAccount(@PathVariable String accountId) {
-        return orderService.queryOrder(AccountIdTranslator.from(accountId))
-            .stream().map(OrderTranslator::from)
-            .collect(Collectors.toList());
-    }
-
-    @GetMapping("/account/{accountId}/trades")
-    public List<TradeDTO> queryTradesOfAccount(@PathVariable String accountId) {
-        return queryOrdersOfAccount(accountId).stream().map(
+    @GetMapping("/trades")
+    public List<TradeDTO> getAllTrades(@RequestHeader String account) {
+        return getAll(account).stream().map(
             o -> o.getTrades().stream()
         ).reduce(Stream::concat).orElse(Stream.empty()).collect(Collectors.toList());
     }
 
+    @GetMapping("/account")
+    public List<OrderDTO> getAll(@RequestHeader String account) {
+        return orderService.describeAll(AccountIdTranslator.from(account))
+            .stream().map(OrderTranslator::from)
+            .collect(Collectors.toList());
+    }
+
     @PostMapping("/enqueue")
-    public boolean enqueueOrder(@RequestBody String orderIdDTO) {
-        return queueService.enqueue(OrderIdTranslator.from(orderIdDTO));
+    public boolean enqueue(@RequestBody String orderId) {
+        return queueService.enqueue(OrderIdTranslator.from(orderId));
     }
 
     @PostMapping("/enqueue/all")
-    public Map<String, Boolean> enqueueAll(@RequestBody String accountId) {
-        return queueService.enqueueAll(AccountIdTranslator.from(accountId)).entrySet()
+    public Map<String, Boolean> enqueueAll(@RequestHeader String account) {
+        return queueService.enqueueAll(AccountIdTranslator.from(account)).entrySet()
             .stream().collect(Collectors.toMap(
                 e -> OrderIdTranslator.from(e.getKey()),
                 Map.Entry::getValue
@@ -78,13 +78,13 @@ public class OrderResources {
     }
 
     @PostMapping("/dequeue")
-    public boolean dequeueOrder(@PathVariable String orderIdDTO) {
-        return queueService.dequeue(OrderIdTranslator.from(orderIdDTO));
+    public boolean dequeue(@RequestBody String orderId) {
+        return queueService.dequeue(OrderIdTranslator.from(orderId));
     }
 
     @GetMapping("/")
-    public Iterable<OrderDTO> getAll() {
-        Iterable<Order> all = orderService.getAll();
+    public Iterable<OrderDTO> list() {
+        Iterable<Order> all = orderService.list();
         List<OrderDTO> result = new ArrayList<>();
         for (Order o : all) {
             result.add(OrderTranslator.from(o));

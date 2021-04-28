@@ -5,35 +5,11 @@
   <parent>
     <groupId>org.example.trade</groupId>
     <artifactId>pom</artifactId>
-    <version>1.0</version>
+    <version>1.1.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>launcher</artifactId>
-
-  <profiles>
-    <profile>
-      <id>central</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <properties>
-        <broker.distro>empty</broker.distro>
-      </properties>
-    </profile>
-    <profile>
-      <id>mock</id>
-      <properties>
-        <broker.distro>mock</broker.distro>
-      </properties>
-    </profile>
-    <profile>
-      <id>xtp</id>
-      <properties>
-        <broker.distro>xtp</broker.distro>
-      </properties>
-    </profile>
-  </profiles>
 
   <dependencies>
     <dependency>
@@ -58,7 +34,7 @@
     </dependency>
     <dependency>
       <groupId>org.example.trade</groupId>
-      <artifactId>integrations.${broker.distro}</artifactId>
+      <artifactId>integration.${broker.distro}</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>

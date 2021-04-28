@@ -1,6 +1,7 @@
 package org.example.trade.adapter.broker.xtp;
 
 import com.zts.xtp.common.enums.*;
+import com.zts.xtp.common.jni.JNILoadLibrary;
 import com.zts.xtp.common.model.ErrorMessage;
 import com.zts.xtp.trade.api.TradeApi;
 import com.zts.xtp.trade.model.request.OrderInsertRequest;
@@ -77,6 +78,7 @@ public class XTPSingleAccountSingleServiceAdapter
         this.XTPNodeConfig = XTPNodeConfig;
         this.sessionId = "0";
         this.tradeApi = new TradeApi(this);
+        JNILoadLibrary.loadLibrary();
     }
 
     @Override
@@ -120,67 +122,30 @@ public class XTPSingleAccountSingleServiceAdapter
     }
 
     @Override
-    public void onQueryAsset(AssetResponse assetInfo, ErrorMessage errorMessage, String sessionId) {
-        if (errorMessage.getErrorId() != 0) {
-            log.error("synchronization balances failed: {}", tradeApi.getApiLastError());
-        } else {
-            int requestId = assetInfo.getRequestId();
-            assetResponseMap.put(requestId, assetInfo);
-            if (assetInfo.isLastResp()) {
-                latchMap.get(requestId).countDown();
-            }
-        }
-    }
-
-    @Override
-    public void onQueryPosition(StockPositionResponse stockPositionInfo, ErrorMessage errorMessage, String sessionId) {
-        if (errorMessage.getErrorId() != 0) {
-            log.error("synchronization positions failed: {}", tradeApi.getApiLastError());
-        } else {
-            int requestId = stockPositionInfo.getRequestId();
-            ConcurrentLinkedQueue<StockPositionResponse> responses = positionResponsesMap.get(requestId);
-            responses.add(stockPositionInfo);
-            if (stockPositionInfo.isLastResp()) {
-                try {
-                    latchMap.get(requestId).await();
-                    AssetResponse assetResponse = assetResponseMap.get(requestId);
-                    Money usableCash = Money.valueOf(assetResponse.getTotalAsset());
-                    Map<SecurityCode, Shares> usablePositions = new HashMap<>(responses.size());
-                    for (StockPositionResponse response : responses) {
-                        usablePositions.put(
-                            SecurityCode.valueOf(response.getTicker()),
-                            Shares.valueOf(response.getTotalQty())
-                        );
-                    }
-                    AssetInfo assetInfo = new AssetInfo(usablePositions, usableCash);
-                    syncService.syncAsset(supportedAccount, assetInfo);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    @Override
     public void submit(Order order) {
         TradeRequest requirement = order.requirement();
-        OrderInsertRequest orderInsertRequest = new OrderInsertRequest();
-        orderInsertRequest.setOrderClientId(order.id().uid());
-        orderInsertRequest.setMarketType(
-            requirement.securityCode().market() == Market.SZ ? MarketType.XTP_MKT_SZ_A : MarketType.XTP_MKT_SH_A);
-        orderInsertRequest.setPrice(requirement.price().value().doubleValue());
-        orderInsertRequest.setPriceType(
-            requirement.priceType() == PriceType.LIMITED ? com.zts.xtp.common.enums.PriceType.XTP_PRICE_LIMIT
-                : com.zts.xtp.common.enums.PriceType.XTP_PRICE_BEST5_OR_CANCEL);
-        orderInsertRequest.setSideType(requirement.tradeSide() == TradeSide.BUY ? SideType.XTP_SIDE_BUY : SideType.XTP_SIDE_SELL);
-        orderInsertRequest.setQuantity(requirement.shares().value().longValue());
-        orderInsertRequest.setOrderXtpId("0");
+
+        OrderInsertRequest orderInsertRequest = OrderInsertRequest
+            .builder()
+            .orderXtpId("0") //默认0, 如果执行成功则会被覆盖为XTPId，不设置的话，会因为空指针打崩JVM
+            .orderClientId(order.id().uid())
+            .ticker(requirement.securityCode().code())
+            .marketType(
+                requirement.securityCode().market() == Market.SZ ? MarketType.XTP_MKT_SZ_A : MarketType.XTP_MKT_SH_A)
+            .price(requirement.price().value().doubleValue())
+            .priceType(requirement.priceType() == PriceType.LIMITED ? com.zts.xtp.common.enums.PriceType.XTP_PRICE_LIMIT
+                           : com.zts.xtp.common.enums.PriceType.XTP_PRICE_BEST5_OR_CANCEL)
+            .quantity(requirement.shares().value().longValue())
+            .sideType(requirement.tradeSide() == TradeSide.BUY ? SideType.XTP_SIDE_BUY : SideType.XTP_SIDE_SELL)
+            .businessType(BusinessType.XTP_BUSINESS_TYPE_CASH) //普通股票业务
+            .positionEffectType(PositionEffectType.XTP_POSITION_EFFECT_CLOSE)
+            .build();
         String s = this.tradeApi.insertOrder(orderInsertRequest, sessionId);
         if (s.equals("0")) {
-            log.error("order {} submit failed, reason={}", order, tradeApi.getApiLastError());
+            log.error("{} submit failed, reason={}", order, tradeApi.getApiLastError());
             // TODO failure recover
         } else {
-            log.info("order {} submitted", order);
+            log.info("{} submitted", order);
             idMap.put(order.id(), s);
         }
     }
@@ -197,16 +162,27 @@ public class XTPSingleAccountSingleServiceAdapter
         }
     }
 
+    private boolean login() {
+        this.sessionId =
+            this.tradeApi.login(XTPNodeConfig.serverIp(), XTPNodeConfig.serverPort(),
+                                registeredAccount.username(), registeredAccount.password(),
+                                TransferProtocol.XTP_PROTOCOL_TCP);
+        // 0 = 失败
+        if (sessionId.equals("0")) {
+            this.sessionId = null;
+            log.warn("connected to xtp trade api failed");
+        } else {
+            log.info("connected to xtp trade api");
+            return true;
+        }
+        return false;
+    }
+
     @Override
-    public void onTradeEvent(TradeResponse tradeInfo, String sessionId) {
-        int requestId = tradeInfo.getRequestId();
-        OrderId orderId = new OrderId(registeredAccount.id(), LocalDate.now(), requestId);
-        Deal deal = new Deal(
-            Shares.valueOf(tradeInfo.getQuantity()),
-            Price.valueOf(tradeInfo.getPrice())
-        );
-        tradeService.offerDeal(orderId, deal, tradeInfo.getExecId());
-        log.info("order {} traded, detail={}", orderId, tradeInfo);
+    public void onDisconnect(String sessionId, int reason) {
+        log.warn("disconnected to xtp server");
+        this.sessionId = null;
+        login();
     }
 
     @Override
@@ -255,30 +231,75 @@ public class XTPSingleAccountSingleServiceAdapter
             case XTP_ORDER_STATUS_PARTTRADEDQUEUEING:
                 log
                     .debug("order {} is executing, xtpId={}, detail={}", orderId, xtpId, orderInfo);
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + orderInfo.getOrderStatusType());
         }
     }
 
     @Override
-    public void onDisconnect(String sessionId, int reason) {
-        log.warn("disconnected to xtp server");
-        this.sessionId = null;
-        login();
+    public void onQueryAsset(AssetResponse assetInfo, ErrorMessage errorMessage, String sessionId) {
+        if (errorMessage.getErrorId() != 0) {
+            log.error("synchronization balances failed: {}", tradeApi.getApiLastError());
+        } else {
+            int requestId = assetInfo.getRequestId();
+            assetResponseMap.put(requestId, assetInfo);
+            if (assetInfo.isLastResp()) {
+                latchMap.get(requestId).countDown();
+            }
+        }
     }
 
-    private boolean login() {
-        this.sessionId =
-            this.tradeApi.login(XTPNodeConfig.serverIp(), XTPNodeConfig.serverPort(),
-                                registeredAccount.username(), registeredAccount.password(),
-                                TransferProtocol.XTP_PROTOCOL_TCP);
-        // 0 = 失败
-        if (sessionId.equals("0")) {
-            this.sessionId = null;
-            log.warn("connected to xtp trade api failed");
+    @Override
+    public void onQueryPosition(StockPositionResponse stockPositionInfo, ErrorMessage errorMessage, String sessionId) {
+        if (errorMessage.getErrorId() != 0) {
+            log.error("synchronization positions failed: {}", tradeApi.getApiLastError());
         } else {
-            log.info("connected to xtp trade api");
-            return true;
+            int requestId = stockPositionInfo.getRequestId();
+            ConcurrentLinkedQueue<StockPositionResponse> responses = positionResponsesMap.get(requestId);
+            responses.add(stockPositionInfo);
+            if (stockPositionInfo.isLastResp()) {
+                try {
+                    latchMap.get(requestId).await();
+                    AssetResponse assetResponse = assetResponseMap.get(requestId);
+                    Money usableCash = Money.valueOf(assetResponse.getTotalAsset());
+                    Map<SecurityCode, Shares> usablePositions = new HashMap<>(responses.size());
+                    for (StockPositionResponse response : responses) {
+                        usablePositions.put(
+                            SecurityCode.valueOf(response.getTicker() + "." + t(response.getMarketType())),
+                            Shares.valueOf(response.getTotalQty())
+                        );
+                    }
+                    AssetInfo assetInfo = new AssetInfo(usablePositions, usableCash);
+                    syncService.syncAsset(supportedAccount, assetInfo);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
-        return false;
+    }
+
+    private String t(MarketType marketType) {
+        switch (marketType) {
+            case XTP_MKT_SH_A:
+                return Market.SH.name();
+            case XTP_MKT_SZ_A:
+                return Market.SZ.name();
+        }
+        return null;
+    }
+
+    @Override
+    public void onTradeEvent(TradeResponse tradeInfo, String sessionId) {
+        log.info("{}, {}", tradeInfo, sessionId);
+        int requestId = tradeInfo.getRequestId();
+        OrderId orderId = new OrderId(registeredAccount.id(), LocalDate.now(), requestId);
+        Deal deal = new Deal(
+            Shares.valueOf(tradeInfo.getQuantity()),
+            Price.valueOf(tradeInfo.getPrice())
+        );
+        tradeService.offerDeal(orderId, deal, tradeInfo.getExecId());
+        log.info("order {} traded, detail={}", orderId, tradeInfo);
     }
 
 }

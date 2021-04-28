@@ -94,8 +94,13 @@ public class AccountService implements org.example.trade.interfaces.AccountServi
     }
 
     @Override
-    public Collection<Account> getAll() {
+    public Collection<Account> get() {
         return accountRepository.findAll();
+    }
+
+    @Override
+    public Account describe(AccountId accountId) {
+        return accountRepository.findById(accountId);
     }
 
 }
