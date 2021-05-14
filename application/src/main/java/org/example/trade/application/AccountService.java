@@ -4,7 +4,6 @@ import org.example.trade.adapter.broker.SingleAccountBrokerService;
 import org.example.trade.domain.account.Account;
 import org.example.trade.domain.account.AccountId;
 import org.example.trade.domain.account.AccountRepository;
-import org.example.trade.domain.queue.OrderQueue;
 import org.example.trade.domain.queue.OrderQueueRepository;
 import org.example.trade.interfaces.AssetService;
 import org.slf4j.Logger;
@@ -82,15 +81,6 @@ public class AccountService implements org.example.trade.interfaces.AccountServi
         Account account = accountRepository.findById(accountId);
         account.changeConfig(config);
         accountRepository.save(account);
-    }
-
-    public void registerAccount(AccountId supportedAccount) {
-        Account account = new Account(supportedAccount, "");
-        accountRepository.save(account);
-        OrderQueue orderQueue = new OrderQueue(account.id());
-        orderQueueRepository.add(orderQueue);
-        logger.info("{} 已经注册", account);
-        // 向service register注册自己
     }
 
     @Override
