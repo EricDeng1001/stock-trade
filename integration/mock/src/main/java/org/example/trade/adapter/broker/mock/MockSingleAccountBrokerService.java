@@ -23,7 +23,7 @@ import java.util.concurrent.*;
 
 public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
 
-    private static final int simTradingWaitTime = 10;
+    private static final int simTradingWaitTime = 1;
 
     private static final String[] mockStocks = new String[]{
         "000001.SZ",
@@ -80,11 +80,11 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
         TradeRequest requirement = order.requirement();
         tradeService.startTradingOrder(order.id(), UUID.randomUUID().toString());
         // broker income message
-        int simTradeCount = ThreadLocalRandom.current().nextInt(2, 5);
+        int simTradeCount = 2;
         Shares[] sims = requirement.shares().allocate(simTradeCount);
         Semaphore semaphore = new Semaphore(-simTradeCount + 1);
-        for (int i = 0; i < simTradeCount; i++) {
-            Shares t = sims[i];
+        for (int i = 1; i <= simTradeCount; i++) {
+            Shares t = sims[i - 1];
             int k = i;
             scheduledExecutorService.schedule(
                 () -> {
@@ -99,13 +99,13 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
                             UUID.randomUUID().toString());
                         semaphore.release(1);
                         // all deal offered, then close the order, as promised
-                        if (k == simTradeCount - 1) {
+                        if (k == simTradeCount) {
                             semaphore.acquireUninterruptibly(1);
                             tradeService.closeOrder(order.id());
                         }
                     }
                 },
-                (long) simTradingWaitTime * (i + 1),
+                (long) simTradingWaitTime * i,
                 TimeUnit.MILLISECONDS
             );
         }

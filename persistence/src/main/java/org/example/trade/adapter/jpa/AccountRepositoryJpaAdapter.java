@@ -29,7 +29,7 @@ public class AccountRepositoryJpaAdapter implements AccountRepository {
 
     @Override
     public void save(org.example.trade.domain.account.Account account) {
-        JPAAccountRepository.save(AccountTranslator.from(account));
+        JPAAccountRepository.saveAndFlush(AccountTranslator.from(account));
     }
 
     @Override

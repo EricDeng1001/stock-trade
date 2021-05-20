@@ -59,7 +59,6 @@ public class AssetService implements org.example.trade.interfaces.AssetService {
     private void handleOrderTraded(OrderTraded orderEvent) {
         OrderId orderId = orderEvent.orderId();
         Asset asset = assetRepository.findById(orderId.accountId());
-        logger.info("资产更新: {}", orderId);
         boolean overDealt = !asset.consume(orderId, orderEvent.deal());
         assetRepository.save(asset);
         logger.info("资产更新: {}", orderId);

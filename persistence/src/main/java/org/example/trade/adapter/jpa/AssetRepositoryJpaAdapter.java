@@ -27,7 +27,7 @@ public class AssetRepositoryJpaAdapter implements AssetRepository {
 
     @Override
     public void save(org.example.trade.domain.account.asset.Asset asset) {
-        assetRepository.save(AssetTranslator.from(asset));
+        assetRepository.saveAndFlush(AssetTranslator.from(asset));
     }
 
     @Override

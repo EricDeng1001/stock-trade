@@ -33,11 +33,7 @@ public class OrderRepositoryJpaAdapter implements OrderRepository {
 
     @Override
     public void save(org.example.trade.domain.order.Order order) {
-        try {
-            orderRepository.save(OrderTranslator.from(order));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        orderRepository.saveAndFlush(OrderTranslator.from(order));
     }
 
     @Override
