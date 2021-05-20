@@ -1,5 +1,5 @@
 mock:
-  core-size: 4
+  core-size: 16
   users:
     - username: mock user
     - username: mock user2

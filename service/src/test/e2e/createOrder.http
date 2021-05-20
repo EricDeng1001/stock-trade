@@ -1,12 +1,12 @@
-#xtp 测试盘
+###
 POST localhost:80/orders/
 Content-Type: application/json
-account: 15011348@xtp
+account: mock user@mock broker
 
 {
-  "stockCode": "000002.SZ",
-  "shares": -400,
-  "price": "27.68"
+  "stockCode": "000001.SZ",
+  "shares": 10,
+  "price": "2.000"
 }
 
 ###
@@ -15,7 +15,7 @@ Content-Type: application/json
 account: mock user@mock broker
 
 {
-  "stockCode": "stock 1",
+  "stockCode": "000001.SZ",
   "shares": -10,
   "price": "2.000"
 }
@@ -23,13 +23,13 @@ account: mock user@mock broker
 ###
 POST localhost:80/orders/
 Content-Type: application/json
-account: mock user2@mock broker
+account: mock user@mock broker
 
 {
-"stockCode": "stock 1",
-"shares": -10,
-"price": "2.000",
-"accountId": "mock user2@mock broker"
+  "stockCode": "000001.SZ",
+  "shares": -10,
+  "price": "2.000",
+  "accountId": "mock user2@mock broker"
 }
 
 ####
@@ -38,7 +38,7 @@ Content-Type: application/json
 account: mock user@mock broker
 
 {
-  "stockCode": "stock 1",
+  "stockCode": "000001.SZ",
   "shares": 10,
   "price": "2.000",
   "accountId": "mock user@mock broker"
@@ -50,7 +50,7 @@ Content-Type: application/json
 account: mock user@mock broker
 
 {
-  "stockCode": "stock 2",
+  "stockCode": "000002.SZ",
   "shares": -10,
   "price": "2.000",
   "accountId": "mock user@mock broker"
@@ -62,7 +62,7 @@ Content-Type: application/json
 account: mock user@mock broker
 
 {
-  "stockCode": "stock 2",
+  "stockCode": "000002.SZ",
   "shares": 10,
   "price": "2.000",
   "accountId": "mock user@mock broker"
@@ -74,7 +74,7 @@ Content-Type: application/json
 account: mock user@mock broker
 
 {
-  "stockCode": "stock 3",
+  "stockCode": "000003.SZ",
   "shares": -10,
   "price": "2.000",
   "accountId": "mock user@mock broker"
@@ -86,30 +86,7 @@ Content-Type: application/json
 account: mock user@mock broker
 
 {
-  "stockCode": "stock 3",
-  "shares": 10,
-  "price": "2.000",
-  "accountId": "mock user@mock broker"
-}
-###
-POST localhost:80/orders/
-Content-Type: application/json
-account: mock user@mock broker
-
-{
-  "stockCode": "stock 4",
-  "shares": -10,
-  "price": "2.000",
-  "accountId": "mock user@mock broker"
-}
-
-####
-POST localhost:80/orders/
-Content-Type: application/json
-account: mock user@mock broker
-
-{
-  "stockCode": "stock 4",
+  "stockCode": "000003.SZ",
   "shares": 10,
   "price": "2.000",
   "accountId": "mock user@mock broker"
@@ -120,7 +97,7 @@ Content-Type: application/json
 account: mock user@mock broker
 
 {
-  "stockCode": "stock 5",
+  "stockCode": "000004.SZ",
   "shares": -10,
   "price": "2.000",
   "accountId": "mock user@mock broker"
@@ -132,7 +109,7 @@ Content-Type: application/json
 account: mock user@mock broker
 
 {
-  "stockCode": "stock 5",
+  "stockCode": "000004.SZ",
   "shares": 10,
   "price": "2.000",
   "accountId": "mock user@mock broker"
@@ -143,7 +120,7 @@ Content-Type: application/json
 account: mock user@mock broker
 
 {
-  "stockCode": "stock 6",
+  "stockCode": "000005.SZ",
   "shares": -10,
   "price": "2.000",
   "accountId": "mock user@mock broker"
@@ -155,7 +132,30 @@ Content-Type: application/json
 account: mock user@mock broker
 
 {
-  "stockCode": "stock 6",
+  "stockCode": "000005.SZ",
+  "shares": 10,
+  "price": "2.000",
+  "accountId": "mock user@mock broker"
+}
+###
+POST localhost:80/orders/
+Content-Type: application/json
+account: mock user@mock broker
+
+{
+  "stockCode": "000006.SZ",
+  "shares": -10,
+  "price": "2.000",
+  "accountId": "mock user@mock broker"
+}
+
+####
+POST localhost:80/orders/
+Content-Type: application/json
+account: mock user@mock broker
+
+{
+  "stockCode": "000006.SZ",
   "shares": 10,
   "price": "2.000",
   "accountId": "mock user@mock broker"

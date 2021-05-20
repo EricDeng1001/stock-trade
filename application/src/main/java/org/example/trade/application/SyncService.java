@@ -8,6 +8,7 @@ import org.example.trade.domain.account.asset.AssetRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -22,7 +23,7 @@ public class SyncService implements org.example.trade.interfaces.SyncService {
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void syncAsset(AccountId accountId, AssetInfo brokerAssetInfo) {
         Asset asset = assetRepository.findById(accountId);
         if (asset == null) {

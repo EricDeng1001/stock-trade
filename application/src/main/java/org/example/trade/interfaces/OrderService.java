@@ -11,7 +11,7 @@ public interface OrderService {
 
     OrderId createOrder(TradeRequest tradeRequest, AccountId account);
 
-    Order describeAll(OrderId id);
+    Order describe(OrderId id);
 
     List<Order> describeAll(AccountId accountId);
 

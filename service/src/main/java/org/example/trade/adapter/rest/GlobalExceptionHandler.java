@@ -1,7 +1,7 @@
 package org.example.trade.adapter.rest;
 
-import org.example.trade.adapter.broker.AccountNotSupportedException;
 import org.example.trade.adapter.rest.translator.AccountIdTranslator;
+import org.example.trade.port.broker.AccountNotSupportedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;

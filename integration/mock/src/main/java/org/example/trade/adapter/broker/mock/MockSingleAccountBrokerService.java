@@ -2,7 +2,6 @@ package org.example.trade.adapter.broker.mock;
 
 import org.example.finance.domain.Money;
 import org.example.finance.domain.Price;
-import org.example.trade.adapter.broker.SingleAccountBrokerService;
 import org.example.trade.application.TradeService;
 import org.example.trade.domain.account.AccountId;
 import org.example.trade.domain.account.asset.AssetInfo;
@@ -16,25 +15,23 @@ import org.example.trade.domain.order.PriceType;
 import org.example.trade.domain.order.request.LimitedPriceTradeRequest;
 import org.example.trade.domain.order.request.TradeRequest;
 import org.example.trade.interfaces.SyncService;
+import org.example.trade.port.broker.SingleAccountBrokerService;
 
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
 
-    private static final int simTradingWaitTime = 2000;
+    private static final int simTradingWaitTime = 10;
 
     private static final String[] mockStocks = new String[]{
-        "stock 1",
-        "stock 2",
-        "stock 3",
-        "stock 4",
-        "stock 5",
-        "stock 6"
+        "000001.SZ",
+        "000002.SZ",
+        "000003.SZ",
+        "000004.SZ",
+        "000005.SZ",
+        "000006.SZ"
     };
 
     private static final Broker broker = Broker.valueOf("mock broker");
@@ -53,13 +50,28 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
     }
 
     @Override
-    public boolean activate(String config) {
+    public boolean connect(String config) {
         return true;
     }
 
     @Override
-    public boolean deactivate() {
+    public boolean disconnect() {
         return true;
+    }
+
+    @Override
+    public void queryAsset() {
+        ConcurrentHashMap<SecurityCode, Shares> usablePositions = new ConcurrentHashMap<>();
+        for (String s : mockStocks) {
+            if (ThreadLocalRandom.current().nextBoolean()) {
+                usablePositions.put(SecurityCode.valueOf(s),
+                                    Shares.valueOf(ThreadLocalRandom.current().nextInt(0, 5)));
+            }
+        }
+        usablePositions.put(SecurityCode.valueOf("000001.SZ"),
+                            Shares.valueOf(ThreadLocalRandom.current().nextInt(10, 20)));
+        Money usableCash = Money.valueOf(ThreadLocalRandom.current().nextInt(200, 400));
+        syncService.syncAsset(supportedAccount, new AssetInfo(usablePositions, usableCash));
     }
 
     @Override
@@ -68,8 +80,9 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
         TradeRequest requirement = order.requirement();
         tradeService.startTradingOrder(order.id(), UUID.randomUUID().toString());
         // broker income message
-        int simTradeCount = ThreadLocalRandom.current().nextInt(4, 10);
+        int simTradeCount = ThreadLocalRandom.current().nextInt(2, 5);
         Shares[] sims = requirement.shares().allocate(simTradeCount);
+        Semaphore semaphore = new Semaphore(-simTradeCount + 1);
         for (int i = 0; i < simTradeCount; i++) {
             Shares t = sims[i];
             int k = i;
@@ -84,8 +97,10 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
                                     : ((LimitedPriceTradeRequest) requirement).targetPrice()
                             ),
                             UUID.randomUUID().toString());
+                        semaphore.release(1);
                         // all deal offered, then close the order, as promised
                         if (k == simTradeCount - 1) {
+                            semaphore.acquireUninterruptibly(1);
                             tradeService.closeOrder(order.id());
                         }
                     }
@@ -101,24 +116,13 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
     public void withdraw(OrderId order) {
         cancels.put(order, false);
         scheduledExecutorService.schedule(
-            () -> tradeService.closeOrder(order),
+            () -> {
+                synchronized (order) {
+                    tradeService.closeOrder(order);
+                }
+            },
             1,
             TimeUnit.MILLISECONDS);
-    }
-
-    @Override
-    public void queryAsset() {
-        ConcurrentHashMap<SecurityCode, Shares> usablePositions = new ConcurrentHashMap<>();
-        for (String s : mockStocks) {
-            if (ThreadLocalRandom.current().nextBoolean()) {
-                usablePositions.put(SecurityCode.valueOf(s),
-                                    Shares.valueOf(ThreadLocalRandom.current().nextInt(0, 5)));
-            }
-        }
-        usablePositions.put(SecurityCode.valueOf("stock 2"),
-                            Shares.valueOf(ThreadLocalRandom.current().nextInt(10, 20)));
-        Money usableCash = Money.valueOf(ThreadLocalRandom.current().nextInt(200, 400));
-        syncService.syncAsset(supportedAccount, new AssetInfo(usablePositions, usableCash));
     }
 
     private boolean notCancel(OrderId id) {

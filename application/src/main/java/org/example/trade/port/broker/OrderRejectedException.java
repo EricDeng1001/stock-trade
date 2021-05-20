@@ -1,4 +1,4 @@
-package org.example.trade.adapter.broker;
+package org.example.trade.port.broker;
 
 public class OrderRejectedException extends Exception {
 }

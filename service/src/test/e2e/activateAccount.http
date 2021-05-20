@@ -4,3 +4,8 @@ Content-Type: text/plain
 account: 15011348@xtp
 
 eNbiQuxn/b8aa7173bba3470e390d787219b2112e
+
+###
+POST localhost:80/accounts/activate
+Content-Type: text/plain
+account: mock user@mock broker

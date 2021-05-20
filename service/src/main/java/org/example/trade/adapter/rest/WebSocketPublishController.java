@@ -1,11 +1,11 @@
 package org.example.trade.adapter.rest;
 
-import org.example.trade.adapter.messaging.WebSocketNotificationService;
 import org.example.trade.adapter.rest.boundary.OrderClosedMessage;
 import org.example.trade.adapter.rest.boundary.OrderTradedMessage;
 import org.example.trade.adapter.rest.translator.OrderIdTranslator;
 import org.example.trade.domain.order.OrderClosed;
 import org.example.trade.domain.order.OrderTraded;
+import org.example.trade.port.messaging.WebSocketNotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;

@@ -1,6 +1,6 @@
 package trade.launch;
 
-import org.example.trade.adapter.broker.SingleAccountBrokerService;
+import org.example.trade.port.broker.SingleAccountBrokerService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

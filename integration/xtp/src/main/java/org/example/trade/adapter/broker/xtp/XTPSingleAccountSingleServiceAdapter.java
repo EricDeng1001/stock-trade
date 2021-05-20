@@ -12,7 +12,6 @@ import com.zts.xtp.trade.model.response.TradeResponse;
 import com.zts.xtp.trade.spi.TradeSpi;
 import org.example.finance.domain.Money;
 import org.example.finance.domain.Price;
-import org.example.trade.adapter.broker.SingleAccountBrokerService;
 import org.example.trade.application.TradeService;
 import org.example.trade.domain.account.AccountId;
 import org.example.trade.domain.account.XTPAccount;
@@ -25,6 +24,7 @@ import org.example.trade.domain.order.PriceType;
 import org.example.trade.domain.order.*;
 import org.example.trade.domain.order.request.TradeRequest;
 import org.example.trade.interfaces.SyncService;
+import org.example.trade.port.broker.SingleAccountBrokerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +82,7 @@ public class XTPSingleAccountSingleServiceAdapter
     }
 
     @Override
-    public boolean activate(String config) {
+    public boolean connect(String config) {
         if (!this.sessionId.equals("0")) { return true; }
         this.registeredAccount = new XTPAccount(supportedAccount, config);
         tradeApi.init(XTPNodeConfig.clientId(), registeredAccount.tradeKey(),
@@ -97,7 +97,7 @@ public class XTPSingleAccountSingleServiceAdapter
     }
 
     @Override
-    public boolean deactivate() {
+    public boolean disconnect() {
         if (this.sessionId.equals("0")) { return true; }
         int logout = tradeApi.logout(sessionId);
         if (logout == 0) {

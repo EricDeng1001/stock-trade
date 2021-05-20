@@ -51,7 +51,7 @@ public class OrderService implements org.example.trade.interfaces.OrderService {
     }
 
     @Override
-    public Order describeAll(OrderId id) {
+    public Order describe(OrderId id) {
         return orderRepository.findById(id);
     }
 

@@ -43,7 +43,6 @@ public class TradeService {
     @Retryable(interceptor = "orderConcurrentModificationRetry")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void startTradingOrder(OrderId orderId, String brokerId) {
-
         Order order = orderRepository.findById(orderId);
         order.startTrading(brokerId);
         orderRepository.save(order);

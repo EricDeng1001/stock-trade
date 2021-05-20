@@ -1,13 +1,13 @@
 package org.example.trade.application;
 
 import engineering.ericdeng.architecture.domain.model.DomainEventBus;
-import org.example.trade.adapter.broker.SingleAccountBrokerService;
 import org.example.trade.domain.account.AccountId;
 import org.example.trade.domain.account.asset.Asset;
 import org.example.trade.domain.account.asset.AssetRepository;
 import org.example.trade.domain.order.OrderClosed;
 import org.example.trade.domain.order.OrderId;
 import org.example.trade.domain.order.OrderTraded;
+import org.example.trade.port.broker.SingleAccountBrokerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +59,7 @@ public class AssetService implements org.example.trade.interfaces.AssetService {
     private void handleOrderTraded(OrderTraded orderEvent) {
         OrderId orderId = orderEvent.orderId();
         Asset asset = assetRepository.findById(orderId.accountId());
+        logger.info("资产更新: {}", orderId);
         boolean overDealt = !asset.consume(orderId, orderEvent.deal());
         assetRepository.save(asset);
         logger.info("资产更新: {}", orderId);

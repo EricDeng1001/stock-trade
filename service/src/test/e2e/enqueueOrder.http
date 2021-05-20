@@ -1,5 +1,3 @@
 POST http://localhost:80/orders/enqueue/all
 Content-Type: text/plain
-account: 15011348@xtp
-
-15011348@xtp
+account: mock user@mock broker

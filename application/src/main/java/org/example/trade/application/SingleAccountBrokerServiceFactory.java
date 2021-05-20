@@ -1,8 +1,8 @@
 package org.example.trade.application;
 
-import org.example.trade.adapter.broker.AccountNotSupportedException;
-import org.example.trade.adapter.broker.SingleAccountBrokerService;
 import org.example.trade.domain.account.AccountId;
+import org.example.trade.port.broker.AccountNotSupportedException;
+import org.example.trade.port.broker.SingleAccountBrokerService;
 
 public interface SingleAccountBrokerServiceFactory {
 

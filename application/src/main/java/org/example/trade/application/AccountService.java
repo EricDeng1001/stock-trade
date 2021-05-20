@@ -1,15 +1,16 @@
 package org.example.trade.application;
 
-import org.example.trade.adapter.broker.SingleAccountBrokerService;
 import org.example.trade.domain.account.Account;
 import org.example.trade.domain.account.AccountId;
 import org.example.trade.domain.account.AccountRepository;
 import org.example.trade.domain.queue.OrderQueueRepository;
 import org.example.trade.interfaces.AssetService;
+import org.example.trade.port.broker.SingleAccountBrokerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
@@ -19,8 +20,6 @@ import java.util.NoSuchElementException;
 public class AccountService implements org.example.trade.interfaces.AccountService {
 
     private static final Logger logger = LoggerFactory.getLogger(AccountService.class);
-
-    private final OrderQueueRepository orderQueueRepository;
 
     private final AccountRepository accountRepository;
 
@@ -33,14 +32,13 @@ public class AccountService implements org.example.trade.interfaces.AccountServi
                           AccountRepository accountRepository,
                           SingleAccountBrokerServiceFactory factory,
                           org.example.trade.interfaces.AssetService assetService) {
-        this.orderQueueRepository = orderQueueRepository;
         this.accountRepository = accountRepository;
         this.factory = factory;
         this.assetService = assetService;
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public boolean activateAccount(AccountId accountId, String config) {
         Account account = accountRepository.findById(accountId);
         if (account == null) {
@@ -48,7 +46,7 @@ public class AccountService implements org.example.trade.interfaces.AccountServi
         }
         SingleAccountBrokerService service = factory.getOrNew(accountId);
         account.changeConfig(config);
-        if (service.activate(config)) {
+        if (service.connect(config)) {
             if (!account.isActivated()) {
                 assetService.syncAssetFromBroker(accountId);
                 account.activate();
@@ -59,7 +57,7 @@ public class AccountService implements org.example.trade.interfaces.AccountServi
         return false;
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public boolean deactivate(AccountId accountId) {
         SingleAccountBrokerService service = factory.getOrNew(accountId);
         Account account = accountRepository.findById(accountId);
@@ -67,7 +65,7 @@ public class AccountService implements org.example.trade.interfaces.AccountServi
             throw new NoSuchElementException("所指定的账户不存在");
         }
         if (!account.isActivated()) { throw new IllegalArgumentException("所选账户未激活"); }
-        if (service.deactivate()) {
+        if (service.disconnect()) {
             account.deactivate();
             accountRepository.save(account);
             return true;

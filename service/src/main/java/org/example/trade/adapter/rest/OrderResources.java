@@ -46,7 +46,7 @@ public class OrderResources {
     @GetMapping("/{id}")
     public OrderDTO get(@PathVariable String id) {
         OrderId orderId = OrderIdTranslator.from(id);
-        return OrderTranslator.from(orderService.describeAll(orderId));
+        return OrderTranslator.from(orderService.describe(orderId));
     }
 
     @GetMapping("/trades")

@@ -1,4 +1,4 @@
-package org.example.trade.adapter.broker;
+package org.example.trade.port.broker;
 
 import org.example.trade.domain.account.AccountId;
 

@@ -22,7 +22,7 @@ public class AccountResources {
     @PostMapping("/activate")
     public boolean activateAccount(
         @RequestHeader String account,
-        @RequestBody String config
+        @RequestBody(required = false) String config
     ) {
         return accountService.activateAccount(
             AccountIdTranslator.from(account),

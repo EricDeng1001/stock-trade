@@ -1,4 +1,4 @@
-package org.example.trade.adapter.broker;
+package org.example.trade.port.broker;
 
 import org.example.trade.application.TradeService;
 import org.example.trade.domain.account.AccountId;
@@ -26,9 +26,9 @@ public abstract class SingleAccountBrokerService {
         return supportedAccount;
     }
 
-    public abstract boolean activate(String config);
+    public abstract boolean connect(String config);
 
-    public abstract boolean deactivate();
+    public abstract boolean disconnect();
 
     public abstract void queryAsset();
 

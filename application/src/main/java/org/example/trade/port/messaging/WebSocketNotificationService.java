@@ -1,4 +1,4 @@
-package org.example.trade.adapter.messaging;
+package org.example.trade.port.messaging;
 
 import org.example.trade.domain.order.OrderClosed;
 import org.example.trade.domain.order.OrderTraded;
