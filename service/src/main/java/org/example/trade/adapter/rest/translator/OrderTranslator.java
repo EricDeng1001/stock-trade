@@ -28,7 +28,8 @@ public class OrderTranslator {
             requirement.priceType() == PriceType.LIMITED ? ((LimitedPriceTradeRequest) requirement).targetPrice()
                 .unitValue().toString() : null
             ,
-            order.trades().stream().map(OrderTranslator::from).collect(Collectors.toList())
+            order.trades().stream().map(OrderTranslator::from).collect(Collectors.toList()),
+            order.status().toString()
         );
     }
 

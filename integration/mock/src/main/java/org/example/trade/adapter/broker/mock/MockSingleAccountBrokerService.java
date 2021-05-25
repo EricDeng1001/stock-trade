@@ -23,8 +23,6 @@ import java.util.concurrent.*;
 
 public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
 
-    private static final int simTradingWaitTime = 1;
-
     private static final String[] mockStocks = new String[]{
         "000001.SZ",
         "000002.SZ",
@@ -69,7 +67,7 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
             }
         }
         usablePositions.put(SecurityCode.valueOf("000001.SZ"),
-                            Shares.valueOf(ThreadLocalRandom.current().nextInt(10, 20)));
+                            Shares.valueOf(20));
         Money usableCash = Money.valueOf(ThreadLocalRandom.current().nextInt(200, 400));
         syncService.syncAsset(supportedAccount, new AssetInfo(usablePositions, usableCash));
     }
@@ -80,10 +78,12 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
         TradeRequest requirement = order.requirement();
         tradeService.startTradingOrder(order.id(), UUID.randomUUID().toString());
         // broker income message
-        int simTradeCount = 2;
+        int simTradeCount = ThreadLocalRandom.current().nextInt(2, 5);
         Shares[] sims = requirement.shares().allocate(simTradeCount);
         Semaphore semaphore = new Semaphore(-simTradeCount + 1);
+        int delay = 0;
         for (int i = 1; i <= simTradeCount; i++) {
+            delay = delay + ThreadLocalRandom.current().nextInt(100, 1000);
             Shares t = sims[i - 1];
             int k = i;
             scheduledExecutorService.schedule(
@@ -105,7 +105,7 @@ public class MockSingleAccountBrokerService extends SingleAccountBrokerService {
                         }
                     }
                 },
-                (long) simTradingWaitTime * i,
+                delay,
                 TimeUnit.MILLISECONDS
             );
         }

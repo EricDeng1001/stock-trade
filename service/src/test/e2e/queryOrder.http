@@ -1,2 +1,5 @@
 GET http://localhost:80/orders/account
-account: 15011348@xtp
+account: mock user@mock broker
+
+###
+GET http://localhost:80/orders/orderId

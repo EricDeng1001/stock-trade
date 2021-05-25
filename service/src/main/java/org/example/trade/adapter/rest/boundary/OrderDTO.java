@@ -14,23 +14,34 @@ public class OrderDTO {
 
     private List<TradeDTO> trades;
 
+    private String status;
+
+    public OrderDTO() {
+    }
+
+    public OrderDTO(String orderId, String stockCode, String shares, String price, List<TradeDTO> dtos, String status) {
+        this.orderId = orderId;
+        this.stockCode = stockCode;
+        this.shares = shares;
+        this.price = price;
+        this.trades = dtos;
+        this.status = status;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     public List<TradeDTO> getTrades() {
         return trades;
     }
 
     public void setTrades(List<TradeDTO> trades) {
         this.trades = trades;
-    }
-
-    public OrderDTO() {
-    }
-
-    public OrderDTO(String orderId, String stockCode, String shares, String price, List<TradeDTO> dtos) {
-        this.orderId = orderId;
-        this.stockCode = stockCode;
-        this.shares = shares;
-        this.price = price;
-        this.trades = dtos;
     }
 
     public String getOrderId() {

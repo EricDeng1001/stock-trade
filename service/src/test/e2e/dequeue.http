@@ -1,0 +1,5 @@
+POST http://localhost:80/orders/dequeue
+Content-Type: text/plain
+account: mock user@mock broker
+
+MjAyMS0wNS0yNS8vbW9jayB1c2VyQG1vY2sgYnJva2VyLy8zNw==
